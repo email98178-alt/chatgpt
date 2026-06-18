@@ -344,14 +344,19 @@ const openai = new OpenAI({
 
 // --- Rotas HTTP (ChatGPT) ---
 app.post("/api/chat", async (req, res) => {
-  const { message } = req.body;
+  const { message, context } = req.body; // Agora espera 'context' também
   try {
+    const messagesForOpenAI = [];
+    if (context) {
+      messagesForOpenAI.push({ role: "system", content: context });
+    }
+    messagesForOpenAI.push({ role: "user", content: message });
+
     const completion = await openai.chat.completions.create({
-      model: "gpt-3.5-turbo", // Or another suitable model
-      messages: [{
-        role: "user",
-        content: message
-      }],
+      model: "gpt-3.5-turbo", // Ou outro modelo adequado
+      messages: messagesForOpenAI,
+      max_tokens: 150, // Adicionei max_tokens e temperature para consistência com o frontend original
+      temperature: 0.7
     });
     res.json({ reply: completion.choices[0].message.content });
   } catch (error) {
@@ -359,6 +364,7 @@ app.post("/api/chat", async (req, res) => {
     res.status(500).json({ error: "Erro ao processar sua solicitação com a IA." });
   }
 });
+
 
 // --- Rotas HTTP (Checkout) ---
 
