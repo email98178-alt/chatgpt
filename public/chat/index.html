@@ -1721,7 +1721,8 @@ addProfessionalStatusCard();
 async function getChatGPTResponse(userMessage) {
   try {
     // 1. Pegamos os dados do pedido que já estão salvos na variável global ORDER
-    const dadosPedido = window.ORDER;
+    // Adicionamos uma proteção caso window.ORDER seja nulo ou indefinido
+    const dadosPedido = window.ORDER || {};
 
     // 2. Criamos o "Prompt do Sistema" que dá a personalidade e os dados para a IA
     const promptCompleto = `
@@ -1744,7 +1745,7 @@ DADOS DO PEDIDO ATUAL:
 - Valor Total: R$ ${dadosPedido.productPrice ? dadosPedido.productPrice.toFixed(2).replace('.', ',') : '0,00'}
 - Produtos: ${dadosPedido.products && dadosPedido.products.length > 0 
     ? dadosPedido.products.map(p => `${p.n} (Qtd: ${p.q})`).join(', ') 
-    : (dadosPedido.productName + ' x' + dadosPedido.productQty)}
+    : (dadosPedido.productName ? (dadosPedido.productName + ' x' + (dadosPedido.productQty || 1)) : 'Botijão de Gás')}
 
 INSTRUÇÕES DE COMPORTAMENTO:
 1. Se o cliente perguntar o valor, prazo ou endereço, use EXATAMENTE os dados acima.
@@ -1756,7 +1757,8 @@ PERGUNTA DO CLIENTE:
 "${userMessage}"
     `;
 
-    // 3. Enviamos o prompt completo para a sua API
+    // 3. Enviamos o prompt completo para a sua API. 
+    // DICA: Se não funcionar, tente mudar de '/api/chat' para '/chat' dependendo de como está seu server.js
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1774,7 +1776,8 @@ PERGUNTA DO CLIENTE:
     return 'Ops, tive um probleminha técnico aqui. Pode repetir, por favor?';
   }
 }
-// ── FUNÇÃO MODIFICADA doSend() ──────────────────────────────────
+
+// ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
   if (!text) return;
@@ -1793,6 +1796,9 @@ async function doSend() {
   const isLongMessage = wordCount > 2 && !(foundPaymentTerm && window._currentFlowStep >= 6);
   
   const { row } = addMsg(originalText, 'user');
+  // Captura o elemento da bolha de mensagem criada imediatamente
+  const currentBubble = row.querySelector('.bubble');
+  
   await pause(1600);
   
   if (foundPaymentTerm && window._currentFlowStep >= 6 && !window._paymentConfirmed) {
@@ -1806,9 +1812,7 @@ async function doSend() {
     await agentSay("Por segurança este é o único canal de atendimento Diskgas, não fazemos atendimento em outros canais.", true, true);
     saveChatHistory();
   } else if (isLongMessage) {
-    // INTEGRAÇÃO CHATGPT: Obter resposta automática
-    const bubble = row.querySelector('.bubble');
-    bubble.dataset.originalText = originalText;
+    if (currentBubble) currentBubble.dataset.originalText = originalText;
     
     // Mostrar indicador de digitação
     setTyping(true);
@@ -1823,10 +1827,12 @@ async function doSend() {
     await agentSay(aiResponse, true, true);
     saveChatHistory();
   } else {
-    // Mensagens curtas: comportamento padrão
-    bubble.style.transition='all 0.4s cubic-bezier(0.4,0,0.2,1)';
-    bubble.style.background='#F1F5F9'; bubble.style.color='#475569'; bubble.style.border='1px solid #CBD5E1'; bubble.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';
-    bubble.innerHTML=`<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;margin-bottom:4px;color:#1e293b;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Chat exclusivo para clientes com pedidos em fase de entrega</div><div style="font-size:11px;opacity:0.9;line-height:1.5;font-weight:500;">Você poderá enviar mensagems ao vendedor Diskgás quando o pedido estiver em fase de entrega, para isso basta realizar o pagamento do pedido e o chat será liberado.</div>`;
+    // Mensagens curtas: comportamento padrão corrigido usando currentBubble
+    if (currentBubble) {
+      currentBubble.style.transition='all 0.4s cubic-bezier(0.4,0,0.2,1)';
+      currentBubble.style.background='#F1F5F9'; currentBubble.style.color='#475569'; currentBubble.style.border='1px solid #CBD5E1'; currentBubble.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';
+      currentBubble.innerHTML=`<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;margin-bottom:4px;color:#1e293b;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Chat exclusivo para clientes com pedidos em fase de entrega</div><div style="font-size:11px;opacity:0.9;line-height:1.5;font-weight:500;">Você poderá enviar mensagens ao vendedor Diskgás quando o pedido estiver em fase de entrega, para isso basta realizar o pagamento do pedido e o chat será liberado.</div>`;
+    }
     row.classList.add('shake'); setTimeout(()=>row.classList.remove('shake'), 400);
   }
   
@@ -1838,6 +1844,8 @@ async function doSend() {
     currentConfirmationBlock = null; showOrderConfirmation();
   }
   scrollDown(true);
+  // Libera o botão novamente
+  sendBtnEl.disabled = false;
 }
 
 function addProfessionalStatusCard() {
