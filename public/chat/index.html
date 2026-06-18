@@ -1720,11 +1720,10 @@ addProfessionalStatusCard();
 
 async function getChatGPTResponse(userMessage) {
   try {
-    // 1. Pegamos os dados do pedido que já estão salvos na variável global ORDER
-    // Adicionamos uma proteção caso window.ORDER seja nulo ou indefinido
+    // Captura os dados do pedido. Certifique-se de que os nomes batem com o seu objeto ORDER
     const dadosPedido = window.ORDER || {};
 
-    // 2. Criamos o "Prompt do Sistema" que dá a personalidade e os dados para a IA
+    // Criamos o Prompt do Sistema com uma ordem estrita sobre a formatação
     const promptCompleto = `
 Aja estritamente sob as seguintes diretrizes de personalidade e comportamento:
 
@@ -1732,19 +1731,20 @@ Aja estritamente sob as seguintes diretrizes de personalidade e comportamento:
 - Tom de voz: Amigável, prestativo, profissional e informal (estilo conversa de WhatsApp).
 - Uso de Emojis: Use de forma moderada para humanizar o atendimento (ex: 😃, 👍, 🚚, 🛡️).
 - Estilo de resposta: Sempre curto, direto e objetivo. Evite blocos longos de texto para manter a dinâmica do chat.
+- Formatação Estrita: Comece a responder diretamente a mensagem do cliente. NUNCA coloque títulos ou rótulos como "Resposta:", "Thiago:", "Vendedor:" ou qualquer marcação antes da sua fala. Apenas mande o texto puro da mensagem.
 - Gestão de conflitos: Caso o cliente seja grosso, ríspido ou impaciente, mantenha sempre a educação, a calma e o foco na solução.
 - Objetivo Principal: Sua prioridade máxima é confirmar se as informações do pedido do cliente estão corretas e auxiliá-lo de forma rápida a concluir o pagamento via Pix.
 - Segurança e Garantia: Transmita total confiança no atendimento. Reforce que nossos botijões são 100% seguros e certificados pela ANP. Garanta que a entrega é garantida ou o dinheiro dele é devolvido na hora.
 - Regra de Pagamento e Taxa (Cartão/Entrega): O preço padrão informado é exclusivo para Pix. Se o cliente solicitar o pagamento no cartão ou direto na entrega, aplique um acréscimo de 30% sobre o valor original. (Exemplo: R$ 89,90 vira R$ 116,87). Informe o valor final recalculado com educação, destacando que o Pix tem o melhor desconto.
 - Endereço da Distribuidora / Loja Física: Se o cliente perguntar onde fica a nossa loja, depósito ou distribuidora, você deve olhar o endereço/bairro que ele informou nos dados do pedido. Responda dizendo que a nossa base de estoque/venda mais próxima fica instalada em um bairro vizinho ao dele. Explique de forma amigável que não fazemos atendimento de balcão nessa filial (apenas estoque e logística), mas que a entrega sai direto de lá e chega rapidinho na casa dele, com frete seguro.
 
-DADOS DO PEDIDO ATUAL:
-- Cliente: ${dadosPedido.nome || 'Não identificado'}
-- Endereço: ${dadosPedido.address || 'Não informado'}
-- Prazo de Entrega: ${dadosPedido.deliveryTime || '20-30 minutos'}
-- Valor Total: R$ ${dadosPedido.productPrice ? dadosPedido.productPrice.toFixed(2).replace('.', ',') : '0,00'}
+DADOS DO PEDIDO ATUAL (Use essas informações reais para responder o cliente):
+- Cliente: ${dadosPedido.nome || dadosPedido.clientName || dadosPedido.customerName || 'Não identificado'}
+- Endereço: ${dadosPedido.address || dadosPedido.endereco || 'Não informado'}
+- Prazo de Entrega: ${dadosPedido.deliveryTime || dadosPedido.prazo || '20-30 minutos'}
+- Valor Total: R$ ${dadosPedido.productPrice ? dadosPedido.productPrice.toFixed(2).replace('.', ',') : (dadosPedido.total ? dadosPedido.total : '0,00')}
 - Produtos: ${dadosPedido.products && dadosPedido.products.length > 0 
-    ? dadosPedido.products.map(p => `${p.n} (Qtd: ${p.q})`).join(', ') 
+    ? dadosPedido.products.map(p => `${p.n || p.name} (Qtd: ${p.q || p.qty})`).join(', ') 
     : (dadosPedido.productName ? (dadosPedido.productName + ' x' + (dadosPedido.productQty || 1)) : 'Botijão de Gás')}
 
 INSTRUÇÕES DE COMPORTAMENTO:
@@ -1757,8 +1757,6 @@ PERGUNTA DO CLIENTE:
 "${userMessage}"
     `;
 
-    // 3. Enviamos o prompt completo para a sua API. 
-    // DICA: Se não funcionar, tente mudar de '/api/chat' para '/chat' dependendo de como está seu server.js
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -1770,13 +1768,17 @@ PERGUNTA DO CLIENTE:
     }
     
     const data = await response.json();
-    return data.reply;
+    let reply = data.reply || "";
+
+    // Medida de segurança extra no frontend: remove termos indesejados caso retornem da API
+    reply = reply.replace(/^(resposta|resposta:|thiago|thiago:|vendedor|vendedor:)\s*/i, "");
+    
+    return reply;
   } catch (error) {
     console.error('Erro ao chamar ChatGPT:', error);
     return 'Ops, tive um probleminha técnico aqui. Pode repetir, por favor?';
   }
 }
-
 // ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
