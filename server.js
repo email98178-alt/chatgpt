@@ -363,8 +363,9 @@ app.post("/api/chat", async (req, res) => {
 // --- Rotas HTTP (Checkout) ---
 
 // Rota principal para carregar o seu checkout
-app.get('/', (req, res) => {
-res.sendFile(path.join(__dirname, 'public', 'chat', 'index.html'));
+app.get('*', (req, res) => {
+    res.sendFile(path.join(__dirname, 'public', 'chat', 'index.html'));
+}); // <-- Veja se esse }); não foi apagado por engano!
 
 // Rota para gerar o Pix
 app.post('/api/pix', async (req, res) => {
