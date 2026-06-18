@@ -1719,66 +1719,44 @@ addProfessionalStatusCard();
 }
 
 async function getChatGPTResponse(userMessage) {
+  // Criamos um contexto rico, mas instruímos a IA a ser seletiva
+  const context = `
+    Você é Thiago Callegari, vendedor autorizado Diskgas.
+    DADOS DO PEDIDO ATUAL (Use apenas se o cliente perguntar sobre isso):
+    - Cliente: ${ORDER.nome || 'Não informado'}
+    - Produto: ${ORDER.productName}
+    - Valor: R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}
+    - Endereço: ${ORDER.address}
+    - Entrega: ${ORDER.deliveryTime}
+    - Localidade: ${ORDER.location}
+
+    REGRAS DE RESPOSTA:
+    1. Se o cliente perguntar sobre o pedido, preço, entrega ou endereço, use os dados acima.
+    2. Se for uma conversa genérica, responda de forma amigável como Thiago, sem precisar citar os dados do pedido.
+    3. Seja breve, humano e use um tom de vendedor prestativo.
+  `;
+  
   try {
-    // Captura os dados do pedido. Certifique-se de que os nomes batem com o seu objeto ORDER
-    const dadosPedido = window.ORDER || {};
-
-    // Criamos o Prompt do Sistema com uma ordem estrita sobre a formatação
-    const promptCompleto = `
-Aja estritamente sob as seguintes diretrizes de personalidade e comportamento:
-
-- Identidade: Seu nome é Thiago Callegari, você é o vendedor oficial da Diskgas. NUNCA diga ou dê a entender que você é uma inteligência artificial ou um robô. Você é o Thiago atendendo pelo computador.
-- Tom de voz: Amigável, prestativo, profissional e informal (estilo conversa de WhatsApp).
-- Uso de Emojis: Use de forma moderada para humanizar o atendimento (ex: 😃, 👍, 🚚, 🛡️).
-- Estilo de resposta: Sempre curto, direto e objetivo. Evite blocos longos de texto para manter a dinâmica do chat.
-- Formatação Estrita: Comece a responder diretamente a mensagem do cliente. NUNCA coloque títulos ou rótulos como "Resposta:", "Thiago:", "Vendedor:" ou qualquer marcação antes da sua fala. Apenas mande o texto puro da mensagem.
-- Gestão de conflitos: Caso o cliente seja grosso, ríspido ou impaciente, mantenha sempre a educação, a calma e o foco na solução.
-- Objetivo Principal: Sua prioridade máxima é confirmar se as informações do pedido do cliente estão corretas e auxiliá-lo de forma rápida a concluir o pagamento via Pix.
-- Segurança e Garantia: Transmita total confiança no atendimento. Reforce que nossos botijões são 100% seguros e certificados pela ANP. Garanta que a entrega é garantida ou o dinheiro dele é devolvido na hora.
-- Regra de Pagamento e Taxa (Cartão/Entrega): O preço padrão informado é exclusivo para Pix. Se o cliente solicitar o pagamento no cartão ou direto na entrega, aplique um acréscimo de 30% sobre o valor original. (Exemplo: R$ 89,90 vira R$ 116,87). Informe o valor final recalculado com educação, destacando que o Pix tem o melhor desconto.
-- Endereço da Distribuidora / Loja Física: Se o cliente perguntar onde fica a nossa loja, depósito ou distribuidora, você deve olhar o endereço/bairro que ele informou nos dados do pedido. Responda dizendo que a nossa base de estoque/venda mais próxima fica instalada em um bairro vizinho ao dele. Explique de forma amigável que não fazemos atendimento de balcão nessa filial (apenas estoque e logística), mas que a entrega sai direto de lá e chega rapidinho na casa dele, com frete seguro.
-
-DADOS DO PEDIDO ATUAL (Use essas informações reais para responder o cliente):
-- Cliente: ${dadosPedido.nome || dadosPedido.clientName || dadosPedido.customerName || 'Não identificado'}
-- Endereço: ${dadosPedido.address || dadosPedido.endereco || 'Não informado'}
-- Prazo de Entrega: ${dadosPedido.deliveryTime || dadosPedido.prazo || '20-30 minutos'}
-- Valor Total: R$ ${dadosPedido.productPrice ? dadosPedido.productPrice.toFixed(2).replace('.', ',') : (dadosPedido.total ? dadosPedido.total : '0,00')}
-- Produtos: ${dadosPedido.products && dadosPedido.products.length > 0 
-    ? dadosPedido.products.map(p => `${p.n || p.name} (Qtd: ${p.q || p.qty})`).join(', ') 
-    : (dadosPedido.productName ? (dadosPedido.productName + ' x' + (dadosPedido.productQty || 1)) : 'Botijão de Gás')}
-
-INSTRUÇÕES DE COMPORTAMENTO:
-1. Se o cliente perguntar o valor, prazo ou endereço, use EXATAMENTE os dados acima.
-2. Seja amigável e use emojis ocasionalmente (como 😃, 👍, 🔥).
-3. Se o cliente perguntar algo que não está nos dados acima, diga que você está verificando ou peça para ele aguardar um momento.
-4. Mantenha as respostas curtas e objetivas, como em um chat de WhatsApp.
-
-PERGUNTA DO CLIENTE:
-"${userMessage}"
-    `;
-
-    const response = await fetch('/api/chat', {
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
       method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: promptCompleto })
+      headers: { 'Content-Type': 'application/json', 'Authorization': `Bearer ${window.OPENAI_API_KEY || ''}` },
+      body: JSON.stringify({
+        model: 'gpt-3.5-turbo',
+        messages: [
+          { role: 'system', content: context },
+          { role: 'user', content: userMessage }
+        ],
+        max_tokens: 150,
+        temperature: 0.7
+      } )
     });
-    
-    if (!response.ok) {
-      throw new Error('Erro ao obter resposta da IA');
-    }
-    
     const data = await response.json();
-    let reply = data.reply || "";
-
-    // Medida de segurança extra no frontend: remove termos indesejados caso retornem da API
-    reply = reply.replace(/^(resposta|resposta:|thiago|thiago:|vendedor|vendedor:)\s*/i, "");
-    
-    return reply;
-  } catch (error) {
-    console.error('Erro ao chamar ChatGPT:', error);
-    return 'Ops, tive um probleminha técnico aqui. Pode repetir, por favor?';
+    return data.choices?.[0]?.message?.content || 'Pode me dar mais detalhes? Estou aqui para ajudar.';
+  } catch(e) {
+    return 'Estou com uma instabilidade no sistema, mas pode falar, como posso te ajudar com seu gás?';
   }
 }
+
 // ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
@@ -1813,7 +1791,10 @@ async function doSend() {
     window._contactMsgSent = true; saveChatHistory();
     await agentSay("Por segurança este é o único canal de atendimento Diskgas, não fazemos atendimento em outros canais.", true, true);
     saveChatHistory();
-  } else if (isLongMessage) {
+  // Detecta se a mensagem parece uma pergunta ou dúvida sobre o pedido
+const isQuestion = text.includes('?') || /onde|valor|preço|quanto|entrega|demora|endereço|confirm|certeza/i.test(text);
+
+} else if (isLongMessage || isQuestion) {
     if (currentBubble) currentBubble.dataset.originalText = originalText;
     
     // Mostrar indicador de digitação
