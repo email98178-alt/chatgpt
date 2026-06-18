@@ -364,7 +364,7 @@ app.post("/api/chat", async (req, res) => {
 
 // Rota principal para carregar o seu checkout
 app.get('/', (req, res) => {
-  res.sendFile(path.join(__dirname, 'index.html'));
+  res.sendFile(path.join(__dirname, 'public', 'index.html'));
 });
 
 // Rota para gerar o Pix
