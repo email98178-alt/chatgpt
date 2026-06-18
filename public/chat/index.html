@@ -1720,10 +1720,38 @@ addProfessionalStatusCard();
 
 async function getChatGPTResponse(userMessage) {
   try {
+    // 1. Pegamos os dados do pedido que já estão salvos na variável global ORDER
+    const dadosPedido = window.ORDER;
+
+    // 2. Criamos o "Prompt do Sistema" que dá a personalidade e os dados para a IA
+    const promptCompleto = `
+Você é Thiago, o vendedor oficial da Diskgas. Seu objetivo é atender o cliente de forma educada, rápida e eficiente.
+Abaixo estão os dados reais do pedido que o cliente está visualizando agora. Use-os para responder qualquer dúvida.
+
+DADOS DO PEDIDO ATUAL:
+- Cliente: ${dadosPedido.nome || 'Não identificado'}
+- Endereço: ${dadosPedido.address || 'Não informado'}
+- Prazo de Entrega: ${dadosPedido.deliveryTime || '20-30 minutos'}
+- Valor Total: R$ ${dadosPedido.productPrice ? dadosPedido.productPrice.toFixed(2).replace('.', ',') : '0,00'}
+- Produtos: ${dadosPedido.products && dadosPedido.products.length > 0 
+    ? dadosPedido.products.map(p => `${p.n} (Qtd: ${p.q})`).join(', ') 
+    : (dadosPedido.productName + ' x' + dadosPedido.productQty)}
+
+INSTRUÇÕES DE COMPORTAMENTO:
+1. Se o cliente perguntar o valor, prazo ou endereço, use EXATAMENTE os dados acima.
+2. Seja amigável e use emojis ocasionalmente (como 😃, 👍, 🔥).
+3. Se o cliente perguntar algo que não está nos dados acima, diga que você está verificando ou peça para ele aguardar um momento.
+4. Mantenha as respostas curtas e objetivas, como em um chat de WhatsApp.
+
+PERGUNTA DO CLIENTE:
+"${userMessage}"
+    `;
+
+    // 3. Enviamos o prompt completo para a sua API
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: userMessage })
+      body: JSON.stringify({ message: promptCompleto })
     });
     
     if (!response.ok) {
@@ -1734,10 +1762,9 @@ async function getChatGPTResponse(userMessage) {
     return data.reply;
   } catch (error) {
     console.error('Erro ao chamar ChatGPT:', error);
-    return 'Desculpe, ocorreu um erro ao processar sua pergunta. Tente novamente.';
+    return 'Ops, tive um probleminha técnico aqui. Pode repetir, por favor?';
   }
 }
-
 // ── FUNÇÃO MODIFICADA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
