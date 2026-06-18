@@ -1,7 +1,7 @@
 {
   "name": "woovipix-chat-server",
   "version": "1.0.0",
-  "description": "Servidor unificado para Checkout Pix e Chat Real-time",
+  "description": "Servidor unificado para Checkout Pix e Chat Real-time com ChatGPT",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
@@ -14,6 +14,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.3.1",
     "express": "^4.19.2",
+    "openai": "^4.52.1",
     "socket.io": "^4.7.5"
   }
 }
