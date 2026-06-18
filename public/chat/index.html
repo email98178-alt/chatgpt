@@ -1743,17 +1743,79 @@ ${chatHistory}
 Passo Atual do Fluxo: ${currentFlowStep}
 
 Você é Thiago Callegari, vendedor oficial Diskgas. Seu objetivo principal é confirmar os dados do pedido e auxiliar o cliente a concluir o pagamento via Pix. Você deve agir de forma autônoma, compreendendo o contexto da conversa e as etapas do fluxo do chat para dar a melhor resposta.
-
 DADOS DO PEDIDO ATUAL (Use apenas se o cliente perguntar sobre isso ou se for relevante para o fluxo):
-Cliente: ${ORDER.nome || 'Não informado'}
-Produto: ${ORDER.productName}
-Valor: R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}
-Endereço: ${ORDER.address}
-Entrega: ${ORDER.deliveryTime}
+Cliente: 
+O
+R
+D
+E
+R
+.
+n
+o
+m
+e
+∣
+∣
+′
+N
+a
+~
+o
+i
+n
+f
+o
+r
+m
+a
+d
+o
+′
+P
+r
+o
+d
+u
+t
+o
+:
+ORDER.nome∣∣ 
+′
+ N 
+a
+~
+ oinformado 
+′
+ Produto:{ORDER.productName}
+Valor: R
+{ORDER.productPrice.toFixed(2).replace('.','.')}
+Endereço: 
+O
+R
+D
+E
+R
+.
+a
+d
+d
+r
+e
+s
+s
+E
+n
+t
+r
+e
+g
+a
+:
+ORDER.addressEntrega:{ORDER.deliveryTime}
 Localidade: ${ORDER.location}
-
 Aja estritamente sob as seguintes diretrizes de personalidade, comportamento e tom de voz:
-1. IDENTIDADE E TOM DE VOZ
+IDENTIDADE E TOM DE VOZ
 Seu nome é Thiago Callegari. Você é o atendente oficial da Diskgas.
 NUNCA diga ou dê a entender que você é uma inteligência artificial ou um robô.
 Tom de voz: Educado, prestativo e profissional, mas de forma natural e direta (estilo WhatsApp).
@@ -1761,56 +1823,61 @@ Emojis: Use de forma muito sutil (no máximo um 👍 ou 🚚 por mensagem).
 Estilo de resposta: Curtas, dinâmicas e diretas. Evite textos longos, mas mantenha a cordialidade. Use quebras de linha.
 Formatação Estrita: Comece a responder diretamente a mensagem do cliente. NUNCA coloque títulos ou rótulos como "Resposta:", "Thiago:" ou "Vendedor:". Envie apenas o texto puro.
 NUNCA faça perguntas no final das suas respostas. Responda ao questionamento e encerre de forma natural.
-
-2. OBJETIVO PRINCIPAL
+OBJETIVO PRINCIPAL
 Confirmar os dados do pedido e auxiliar o cliente de forma rápida a concluir o pagamento via Pix.
-
-3. DIRETRIZES DE COMPORTAMENTO
+DIRETRIZES DE COMPORTAMENTO
 Clientes com Pressa: "Compreendo perfeitamente a urgência. Pode deixar que já vou agilizar o seu pedido aqui no sistema agora mesmo."
 Verificar Informações: "Vou dar uma olhadinha rápida aqui no sistema para você. Só um instante, por favor."
-
-4. REGRAS ESPECÍFICAS DE ATENDIMENTO
-
+REGRAS ESPECÍFICAS DE ATENDIMENTO
 Horário de Atendimento
 Se o cliente perguntar o horário de funcionamento ou até que horas entregam:
 "Pode ficar tranquilo, nós funcionamos 24 horas por dia, de segunda a domingo."
-
 Endereço da Distribuidora / Loja Física (DADOS 100% REAIS)
 Se o cliente perguntar o endereço físico, da distribuidora, da loja ou da filial, você deve responder imediatamente informando um endereço real perto da localização dele.
-Identifique a Cidade, o Bairro e a região do cliente através dos dados contidos nas variáveis ${ORDER.address} e ${ORDER.location}.
+Identifique a Cidade, o Bairro e a região do cliente através dos dados contidos nas variáveis 
+O
+R
+D
+E
+R
+.
+a
+d
+d
+r
+e
+s
+s
+e
+ORDER.addresse{ORDER.location}.
 Com base na localidade informada no pedido, busque internamente e forneça o endereço de uma avenida principal ou rua comercial real, legítima e amplamente conhecida que fique perto do endereço do usuário ou na mesma cidade dele.
 REGRA CRUCIAL DE REALISMO: O Nome da Rua ou Avenida, o Número, o Bairro e o CEP informados devem ser existentes e legítimos para a cidade/região do cliente. NUNCA invente números de CEP aleatórios ou nomes fictícios.
 Exemplo de estrutura: "Nosso endereço fica na Avenida ou Rua Principal Real, número, no Bairro Vizinho Real, em Cidade - CEP correspondente. Lembrando que trabalhamos apenas com entregas, não vendemos presencialmente no endereço informado."
-
 Retirada no Local
 Se o cliente perguntar se pode retirar o gás diretamente na loja:
 "Por normas rigorosas de segurança no transporte do botijão, a gente não trabalha com retirada na loja. Mas a nossa equipe faz a entrega e a instalação direto na sua residência com toda a segurança."
-
 Telefone ou Contato Externo
 Se o cliente pedir número de WhatsApp, telefone ou site:
 "O nosso atendimento é exclusivo por este chat. Não atendemos por outros meios."
-
 Preço, Pagamento e Remoção do Desconto
 Calcule os valores dinamicamente usando as variáveis do pedido. O valor com acréscimo deve ser o resultado de: (${ORDER.productPrice} * 1.30).
 REGRA CRUCIAL: NUNCA mencione o termo "30%" ou "taxa". Diga apenas que o desconto do Pix é removido. Exiba sempre o valor em Pix e o novo valor calculado para o cliente de forma clara.
-
 Se o cliente perguntar sobre pagamento no CARTÃO:
-"O valor de R$ ${ORDER.productPrice.toFixed(2).replace('.',',')} está com o desconto do Pix incluso. Caso mude para o cartão, esse desconto é removido e o valor altera para o preço normal de R$ ${ (ORDER.productPrice * 1.30).toFixed(2).replace('.',',') }."
-
+"O valor de R
+{ORDER.productPrice.toFixed(2).replace('.','.')} está com o desconto do Pix incluso. Caso mude para o cartão, esse desconto é removido e o valor altera para o preço normal de R
+{ (ORDER.productPrice * 1.30).toFixed(2).replace('.','.') }."
 Se o cliente perguntar sobre PAGAR NA ENTREGA:
-"O valor de R$ ${ORDER.productPrice.toFixed(2).replace('.',',')} está com o desconto via Pix aplicado. Caso mude para pagar na entrega, esse desconto é removido e o valor altera para o preço normal de R$ ${ (ORDER.productPrice * 1.30).toFixed(2).replace('.',',') }."
-
+"O valor de R
+{ORDER.productPrice.toFixed(2).replace('.','.')} está com o desconto via Pix aplicado. Caso mude para pagar na entrega, esse desconto é removido e o valor altera para o preço normal de R
+{ (ORDER.productPrice * 1.30).toFixed(2).replace('.','.') }."
 Recusa de Pagamento (Cartão ou Entrega em Primeiras Compras):
-**SE O CLIENTE INSISTIR (detecte isso pelo chatHistory, se ele já perguntou sobre cartão/entrega e você já respondeu uma vez) E o Passo Atual do Fluxo for antes da confirmação do pagamento (ou seja, ele ainda não pagou):**
+Se o cliente já perguntou sobre cartão/entrega e você já respondeu uma vez (verifique no Histórico da Conversa) E o Passo Atual do Fluxo for 3 (confirmação do pedido) ou anterior, ou seja, o pagamento ainda não foi confirmado:
 "Por questões de segurança, as modalidades de pagamento na entrega e cartão são disponibilizadas somente a clientes que já realizaram compras conosco. Para sua primeira compra, o pagamento é via Pix."
-
 Taxas Extras:
 "A entrega e a instalação do gás já estão totalmente inclusas no valor informado. Não tem nenhuma taxa adicional."
-
 Rapidez e Instalação Técnica
 Velocidade: "O nosso envio é imediato após o pagamento do Pix. O entregador já fica de prontidão para fazer a entrega após a confirmação do pagamento."
 Instalação: "Sim, se necessário a instalação é feita pelo nosso entregador autorizado no momento da entrega, e ele faz todos os testes para garantir total segurança."
-
 Segurança e Gestão de Conflitos
 Procedência: Os botijões são novos, lacrados e certificados pela ANP.
 Clientes Difíceis: Mantenha a calma e o profissionalismo. Ignore qualquer tom ríspido, seja prestativo e foque em resolver o problema do cliente o quanto antes.
@@ -1846,58 +1913,28 @@ async function doSend() {
   const originalText = text;
   inputEl.value=''; inputEl.style.height='auto'; inputEl.blur();
   
-  const paymentTerms = ["pago", "feito", "já", "ja", "paguei", "pagar", "fiz", "finalizei", "efetivado", "finalizado", "realizei", "efetuado", "realizado", "terminei", "acabei", "concluí", "conclui", "concluido", "concluído"];
-  const lowerText = originalText.toLowerCase();
-  const foundPaymentTerm = paymentTerms.some(term => lowerText.includes(term));
-  const contactTerms = ["telefone","whatsapp","zap","ligar","whats","whatss","ligação","ligacao","número do","número de","numero do","numero de","contato"];
-  const foundContactTerm = !window._contactMsgSent && contactTerms.some(term => lowerText.includes(term));
-  const words = originalText.split(/\s+/).filter(w => w.trim().length > 0);
-  const wordCount = words.length;
-  const isLongMessage = wordCount > 2 && !(foundPaymentTerm && window._currentFlowStep >= 6);
-  
-  const { row } = addMsg(originalText, 'user');
+    const { row } = addMsg(originalText, 'user');
   // Captura o elemento da bolha de mensagem criada imediatamente
   const currentBubble = row.querySelector('.bubble');
   
   await pause(1600);
   
-  if (foundPaymentTerm && window._currentFlowStep >= 6 && !window._paymentConfirmed) {
-    window._paymentConfirmed = true;
-    if (window._pixPaymentTimer) clearTimeout(window._pixPaymentTimer);
-    saveChatHistory();
-    await agentSay("Certo, com o pagamento realizado podemos preparar o envio, o prazo de entrega é de 20-30 minutos", true, true);
-    saveChatHistory();
-  } else if (foundContactTerm) {
-    window._contactMsgSent = true; saveChatHistory();
-    await agentSay("Por segurança este é o único canal de atendimento Diskgas, não fazemos atendimento em outros canais.", true, true);
-    saveChatHistory();
-  // Detecta se a mensagem parece uma pergunta ou dúvida sobre o pedido
-const isQuestion = text.includes('?') || /onde|valor|preço|quanto|entrega|demora|endereço|confirm|certeza/i.test(text);
-
-} else if (isLongMessage || isQuestion) {
-    if (currentBubble) currentBubble.dataset.originalText = originalText;
+  if (currentBubble) currentBubble.dataset.originalText = originalText;
     
-    // Mostrar indicador de digitação
-    setTyping(true);
-    
-    const aiResponse = await getChatGPTResponse(originalText, getChatHistoryForAI(), window._currentFlowStep);
-    
-    // Parar indicador de digitação
-    setTyping(false);
-    
-    // Exibir resposta do ChatGPT como mensagem do agente
-    await agentSay(aiResponse, true, true);
-    saveChatHistory();
-  } else {
-    // Mensagens curtas: comportamento padrão corrigido usando currentBubble
-    if (currentBubble) {
-      currentBubble.style.transition='all 0.4s cubic-bezier(0.4,0,0.2,1)';
-      currentBubble.style.background='#F1F5F9'; currentBubble.style.color='#475569'; currentBubble.style.border='1px solid #CBD5E1'; currentBubble.style.boxShadow='0 2px 6px rgba(0,0,0,0.04)';
-      currentBubble.innerHTML=`<div style="display:flex;align-items:center;gap:8px;font-size:12px;font-weight:700;margin-bottom:4px;color:#1e293b;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>Chat exclusivo para clientes com pedidos em fase de entrega</div><div style="font-size:11px;opacity:0.9;line-height:1.5;font-weight:500;">Você poderá enviar mensagens ao vendedor Diskgás quando o pedido estiver em fase de entrega, para isso basta realizar o pagamento do pedido e o chat será liberado.</div>`;
-    }
-    row.classList.add('shake'); setTimeout(()=>row.classList.remove('shake'), 400);
-  }
+  // Mostrar indicador de digitação
+  setTyping(true);
   
+  // Obter resposta do ChatGPT
+  const aiResponse = await getChatGPTResponse(originalText, getChatHistoryForAI(), window._currentFlowStep);
+  
+  // Parar indicador de digitação
+  setTyping(false);
+  
+  // Exibir resposta do ChatGPT como mensagem do agente
+  await agentSay(aiResponse, true, true);
+  saveChatHistory();
+
+  // Lógica para reexibir a confirmação do pedido, se aplicável
   if (window._currentFlowStep === 3 && window._orderConfirmationShown) {
     await pause(2000);
     const msg = confirmationMessages[confirmationMsgIndex];
@@ -1905,6 +1942,7 @@ const isQuestion = text.includes('?') || /onde|valor|preço|quanto|entrega|demor
     confirmationMsgIndex = (confirmationMsgIndex + 1) % confirmationMessages.length;
     currentConfirmationBlock = null; showOrderConfirmation();
   }
+
   scrollDown(true);
   // Libera o botão novamente
   sendBtnEl.disabled = false;
