@@ -1779,9 +1779,15 @@ async function doSend() {
   // Captura o elemento da bolha de mensagem criada imediatamente
   const currentBubble = row.querySelector('.bubble');
   
-  await pause(1600);
+    await pause(1600);
   
   if (currentBubble) currentBubble.dataset.originalText = originalText;
+
+  // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
+  if (!window._orderConfirmationShown) {
+    sendBtnEl.disabled = false;
+    return; 
+  }
     
   // Mostrar indicador de digitação
   setTyping(true);
@@ -1794,6 +1800,7 @@ async function doSend() {
   
   // Exibir resposta do ChatGPT como mensagem do agente
   await agentSay(aiResponse, true, true);
+
   saveChatHistory();
 
   // Lógica para reexibir a confirmação do pedido, se aplicável
