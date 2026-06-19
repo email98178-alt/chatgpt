@@ -1738,10 +1738,7 @@ addProfessionalStatusCard();
 async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorPix = ORDER.productPrice.toFixed(2).replace('.', ',');
   const valorSemDesconto = (ORDER.productPrice * 1.30).toFixed(2).replace('.', ',');
-  const localidade = ORDER.location || 'região'; // Bairro do cliente
-  // Se você tiver a propriedade da Cidade no seu objeto ORDER (ex: ORDER.city), use aqui. 
-  // Se não tiver, comente a linha abaixo e deixe apenas o estado/bairro.
-  const cidadeCliente = ORDER.city || 'São Paulo'; 
+  const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
 
   const context = `
@@ -1752,7 +1749,6 @@ DIRETRIZES DE ESTILO E CREDIBILIDADE:
 - Tom de Voz: Cordial, seguro e prestativo. Use um português claro e bem pontuado, mas sem formalidade excessiva.
 - Humanidade: Use expressões como "Com certeza", "Fique tranquilo", "Por gentileza" e "Perfeito".
 - Concisão: Responda em no máximo 2 ou 3 frases curtas.
-- SEM PERGUNTAS NO FINAL: Responda diretamente e de forma natural. Não faça perguntas após responder.
 
 ISOLAMENTO E INDEPENDÊNCIA DE ASSUNTO:
 - Trate "Cartão" e "Entrega" de maneira 100% independente no histórico.
@@ -1767,25 +1763,22 @@ LÓGICA DE ATENDIMENTO:
 
 --- FLUXO CARTÃO ---
 - ETAPA 1 (Primeira vez que cita Cartão):
-  "O valor promocional de R$ ${valorPix} é exclusive para pagamento via Pix. Para cartão, o valor retorna ao padrão de R$ ${valorSemDesconto} devido a remoção do desconto."
+  "O valor promocional de R$ ${valorPix} é exclusivo para pagamento via Pix. Para cartão, o valor retorna ao padrão de R$ ${valorSemDesconto} devido a remoção do desconto."
 
 - ETAPA 2 (Insistiu ou aceitou o valor do Cartão após a Etapa 1):
-  "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o cartão já estará liberado automaticamente para você."
+  "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o cartão já estará liberado automaticamente para você, tudo bem?"
 
 --- FLUXO PAGAMENTO NA ENTREGA ---
 - ETAPA 1 (Primeira vez que cita Entrega):
   "O valor promocional de R$ ${valorPix} é exclusivo para pagamentos via pix online. Para pagamento na entrega, o valor retorna ao padrão de R$ ${valorSemDesconto} devido a remoção da promoção."
 
 - ETAPA 2 (Insistiu ou aceitou o valor na Entrega após a Etapa 1):
-  "Ao validar seu pedido agora, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você."
+  "Ao validar seu pedido agora, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você, tudo bem?"
 
 REGRAS GERAIS:
-- LOCALIZAÇÃO DO CLIENTE: O cliente está na cidade de "${cidadeCliente}" no bairro "${localidade}".
-- ENDEREÇO DA DISTRIBUIDORA: Se o cliente perguntar o endereço da nossa loja, depósito ou filial, use o seu conhecimento geográfico real sobre a cidade de "${cidadeCliente}" para IDENTIFICAR um bairro que faça divisa ou seja vizinho ao bairro "${localidade}". 
-  Gere e exiba um endereço real e completo desse bairro vizinho seguindo estritamente este formato padrão (com nome de rua/avenida real daquela região, número comum, nome do bairro vizinho identificado e um CEP válido correspondente àquela rua). 
-  Exemplo de resposta: "A nossa unidade de logística mais próxima fica na Rua [Nome da Rua Real], [Número] - [Nome do Bairro Vizinho Real], CEP [00000-000]. Mas como funciona apenas nossa distribuição e estoque de produtos inflamáveis, não fazemos venda de balcão ou retirada no local, as entregas saem direto de lá."
-- RETIRADA: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
-- HORÁRIO: Operação 24h com pronta-entrega em ${localidade}.
+- Endereço: Se pedirem a loja, informe um endereço completo em um bairro vizinho a ${localidade}. Explique que é nossa unidade de logística e distribuição.
+- Retirada: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
+- Horário: Operação 24h com pronta-entrega em ${localidade}.
 
 HISTÓRICO:
 ${chatHistory}
@@ -1797,18 +1790,17 @@ PASSO ATUAL: ${currentFlowStep}
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ message: context })
+      body: JSON.stringify({
+        message: userMessage,
+        context: context,
+        currentFlowStep: currentFlowStep
+      })
     });
-    
-    if (!response.ok) throw new Error('Erro na resposta do servidor');
-    
     const data = await response.json();
-    let reply = data.reply || "";
-    reply = reply.replace(/^(resposta|resposta:|thiago|thiago:|vendedor|vendedor:)\s*/i, "");
-    return reply.trim();
-  } catch (error) {
-    console.error('Erro ao chamar o ChatGPT:', error);
-    return 'Ops, tive um probleminha técnico aqui no sistema. Pode repetir por favor? 😃';
+    return data.reply || 'Estou à disposição. Como prefere prosseguir?';
+  } catch(e) {
+    console.error("Erro na IA:", e);
+    return 'Tive uma pequena instabilidade no sistema, mas sigo por aqui. Como posso te ajudar com seu pedido?';
   }
 }
   
