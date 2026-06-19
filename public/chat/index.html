@@ -1369,28 +1369,19 @@ function loadChatHistory() { return localStorage.getItem(LOCAL_STORAGE_KEY); }
 
 // Função para coletar o histórico de chat para a IA
 function getChatHistoryForAI() {
-  const messages = document.querySelectorAll('.msgs .row, .msgs .sys');
-  let history = "";
-  
-  // Pegar apenas as últimas 10 mensagens para não estourar o limite de tokens e manter o foco no contexto atual
-  const recentMessages = Array.from(messages).slice(-10);
-  
-  recentMessages.forEach(el => {
-    if (el.classList.contains('row')) {
-      const isAgent = el.classList.contains('agent');
-      const sender = isAgent ? "Thiago" : "Cliente";
-      const bubble = el.querySelector('.bubble');
-      if (bubble) {
-        const text = (bubble.dataset.originalText || bubble.innerText).replace(/\n/g, ' ').trim();
-        history += `[${sender}]: ${text}\n`;
-      }
-    } else if (el.classList.contains('sys')) {
-      const sysText = el.innerText.trim();
-      history += `[SISTEMA]: ${sysText}\n`;
+  const messages = document.querySelectorAll('.msgs .row');
+  let history = [];
+  messages.forEach(el => {
+    const isAgent = el.classList.contains('agent');
+    const sender = isAgent ? "Thiago" : "Cliente";
+    const bubble = el.querySelector('.bubble');
+    if (bubble) {
+      const text = (bubble.dataset.originalText || bubble.innerText).replace(/\n/g, ' ').trim();
+      history.push(`${sender}: ${text}`);
     }
   });
-  
-  return history || "Nenhuma mensagem anterior.";
+  // Limita o histórico para as últimas N mensagens para não exceder o limite de tokens
+  return history.slice(-10).join('\n'); 
 }
 
 function addSys(html, variant='') {
@@ -1644,12 +1635,9 @@ async function runConversation(startStep = 0) {
     action = await showOrderConfirmation();
     if (action === 'correct') {
       window._currentFlowStep = 4; saveChatHistory();
-        } else if (action === 'change') {
+    } else if (action === 'change') {
       await agentSay(`Sem problemas! Pode me falar o que deseja alterar ou clique no ícone do carrinho no topo para ajustar seu pedido.`);
-      window._currentFlowStep = 99; 
-      saveChatHistory(); 
-      // Não damos 'return' aqui se quisermos que a IA assuma a conversa a partir de agora
-      return;
+      window._currentFlowStep = 99; saveChatHistory(); return;
     }
   }
   if (window._currentFlowStep === 4) {
@@ -1748,53 +1736,53 @@ addProfessionalStatusCard();
 }
 
 async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
-  const context = `
-Você é Thiago Callegari, consultor comercial sênior e humano da Diskgas Brasil. Você é o responsável por garantir que o pedido chegue em tempo recorde.
+    const context = `
+Você é Thiago Callegari, consultor comercial humano e autônomo da Diskgas Brasil. Sua missão é prestar um atendimento consultivo e converter o pedido atual.
 
 [DADOS DO PEDIDO]
-- Cliente: ${ORDER.nome || 'Não informado'}
-- Produto: ${ORDER.productName} (Qtd: ${ORDER.productQty})
-- Valor Total: R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}
-- Endereço: ${ORDER.address}
-- Entrega Estimada: ${ORDER.deliveryTime}
-- Localidade: ${ORDER.location}
+- Cliente: ${ORDER.nome || 'Não informado'} | Produto: ${ORDER.productName} | Total: R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}
+- Endereço: ${ORDER.address} | Prazo: ${ORDER.deliveryTime} | Região: ${ORDER.location}
 
-[ESTADO DO FLUXO]
-Passo Atual: ${currentFlowStep}
+[LÓGICA DE NEGÓCIO (Sua base de conhecimento)]
+- LOGÍSTICA: Operamos com "Despacho Imediato". O caminhão só sai quando o pedido é liberado no sistema. O Pix é o único método que garante essa liberação em tempo real.
+- SEGURANÇA OPERACIONAL: Nossos entregadores não circulam com máquinas de cartão ou dinheiro físico por questões de segurança e para acelerar as rotas de entrega.
+- SUA AUTORIDADE: Você é um profissional verificado, com histórico de milhares de entregas bem-sucedidas. O Pix é feito em seu nome como representante oficial.
 
-[DIRETRIZES DE ARGUMENTAÇÃO]
-1. POR QUE SÓ PIX? Trabalhamos com logística de Fluxo Prioritário. O Pix libera o pedido instantaneamente. Isso elimina a necessidade de o entregador portar valores ou máquinas, garantindo segurança e rapidez (20-30 min).
-2. SEGURANÇA: Você é vendedor verificado Diskgas com mais de 2.500 entregas.
+[INSTRUÇÕES DE AUTONOMIA E VARIABILIDADE]
+1. NÃO COPIE TEXTOS: Use a 'Lógica de Negócio' acima para criar respostas originais. Nunca responda da mesma forma duas vezes.
+2. ADAPTE-SE AO CLIENTE: Se o cliente parecer apressado, seja direto. Se parecer inseguro, seja mais detalhista e empático sobre a segurança.
+3. CONTORNO DE OBJEÇÕES: Se questionado sobre pagamento na entrega ou cartão, varie seus argumentos:
+   - Fale sobre a "vaga na rota de entrega que é garantida pelo Pix".
+   - Mencione a "segurança do entregador em não carregar valores".
+   - Explique que "o sistema de baixa automática é exclusivo para Pix".
+4. FLUXO NATURAL: Não force o pagamento em todas as frases. Primeiro sane a dúvida, depois, de forma natural, lembre que você está com o pedido pronto para despacho assim que o sistema liberar.
 
-[GUIA DE RESPOSTAS PARA OBJEÇÕES - USE COMO BASE]
-- "Posso pagar na entrega?" -> "Para mantermos nossa entrega prioritária de 20 a 30 minutos, operamos apenas com liberação antecipada via Pix. Isso agiliza a saída do caminhão e garante sua vaga na rota atual."
-- "É seguro?" -> "Totalmente. Sou vendedor verificado Diskgas com mais de 2.500 entregas concluídas. O pagamento é direto pelo sistema oficial e sua garantia é total."
-- "Aceita cartão?" -> "No momento, para pedidos via chat com entrega rápida, estamos priorizando o Pix pela velocidade de compensação. No cartão, o processo de validação é mais lento e atrasaria seu pedido."
-
-[DIRETRIZES DE PERSONALIDADE]
-- IDENTIDADE: Humano, educado e seguro. NUNCA mencione IA.
-- TOM: Consultivo e direto. Use quebras de linha.
-- FORMATAÇÃO: Responda apenas o texto puro.
+[DIRETRIZES DE ESTILO]
+- Estilo WhatsApp: Quebras de linha, frases curtas, tom humano.
+- Proibido: "Como uma IA...", "Sou um assistente...", ou repetir frases prontas do prompt.
+- Formatação: Envie apenas a mensagem pura.
 
 [HISTÓRICO DA CONVERSA]
 ${chatHistory}
 `;
 
   try {
+    // Chame a rota /api/chat do seu próprio servidor
     const response = await fetch('/api/chat', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        message: userMessage,
-        context: context,
-        currentFlowStep: currentFlowStep
+message: userMessage, // A mensagem do usuário
+        context: context,      // O contexto para a IA
+        currentFlowStep: currentFlowStep // O passo atual do fluxo para a IA
       })
     });
     const data = await response.json();
+    // A resposta do servidor já deve conter a 'reply' da IA
     return data.reply || 'Pode me dar mais detalhes? Estou aqui para ajudar.';
   } catch(e) {
-    console.error("Erro ao obter resposta da IA:", e);
-    return 'Estou com uma pequena instabilidade, mas pode falar, como posso te ajudar?';
+    console.error("Erro ao obter resposta da IA via servidor:", e);
+    return 'Estou com uma instabilidade no sistema, mas pode falar, como posso te ajudar com seu gás?';
   }
 }
 
