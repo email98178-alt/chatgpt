@@ -984,7 +984,7 @@ html,body{
         <div class="od-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
         <div class="od-content">
           <div class="od-label">Previsão de Entrega</div>
-          <div class="od-value" id="orderTime">20–30 minutos</div>
+<div class="od-value" id="orderTime">${ORDER.deliveryTime}</div>
         </div>
       </div>
       <div class="modal-footer">
@@ -1158,7 +1158,7 @@ function parseOrderData() {
     const nome = p.get('nome') || '';
     return { products, productName, productQty, productPrice, location, address, deliveryTime, nome };
   } catch(e) {
-    return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime:'20–30 minutos', nome:'' };
+return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime: deliveryTime, nome:'' };
   }
 }
 const ORDER = parseOrderData();
@@ -1694,7 +1694,7 @@ sendTranscript();
 
 // Removida a pausa de 1000ms para o efeito de digitação começar imediatamente
 // Adicionado o parâmetro 'true' no final para pular o atraso inicial do agentSay
-await agentSay(`Após o pagamento o prazo de entrega é de 20-30 minutos. 😃`, true, true);
+await agentSay(`Após o pagamento o prazo de entrega é de ${ORDER.deliveryTime}. 😃`, true, true);
 
 
 await pause(1000); // Pequena pausa para naturalidade
