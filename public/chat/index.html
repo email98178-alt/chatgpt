@@ -1736,10 +1736,11 @@ addProfessionalStatusCard();
 }
 
 async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
-  // Pré-calculamos os valores para evitar erros de interpolação no prompt
+  // Pré-calculamos os valores para que o texto vá limpo para a IA
   const valorPix = ORDER.productPrice.toFixed(2).replace('.', ',');
   const valorSemDesconto = (ORDER.productPrice * 1.30).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
+  const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
 
   const context = `
 VOCÊ É THIAGO CALLEGARI, vendedor oficial da Diskgas. 
@@ -1758,31 +1759,31 @@ REGRAS DE ISOLAMENTO DE ASSUNTO (MUITO IMPORTANTE):
 - Se ele perguntar de ambos, você pode falar de ambos. Caso contrário, foque apenas no que ele pediu.
 
 DADOS DO PEDIDO:
-- Produto: \${ORDER.productName}
-- Valor Pix (Promocional): R$ \${valorPix}
-- Valor Cartão/Entrega (Sem Desconto): R$ \${valorSemDesconto}
-- Localidade: \${localidade}
+- Produto: ${nomeProduto}
+- Valor Pix (Promocional): R$ ${valorPix}
+- Valor Cartão/Entrega (Sem Desconto): R$ ${valorSemDesconto}
+- Localidade: ${localidade}
 
 FLUXO DE PAGAMENTO E SEGURANÇA:
 
 1. PRIMEIRA SOLICITAÇÃO DE UM MÉTODO:
    Se o cliente perguntar sobre Cartão OU Entrega e você ainda não informou o preço maior para ESSE método específico:
-   Diga apenas que para esse método o desconto do Pix é removido e o valor fica em R$ \${valorSemDesconto}.
+   Diga apenas que para esse método o desconto do Pix é removido e o valor fica em R$ ${valorSemDesconto}.
 
 2. ACEITAÇÃO OU INSISTÊNCIA (GATILHO DE SEGURANÇA):
-   Se o cliente já sabe do preço maior (está no histórico) e agora ele diz "Ok", "Vou querer assim", ou continua insistindo no método:
+   Se o cliente já sabe do preço maior (está no histórico) e agora ele diz "Ok", "Vou querer assim", "Pode ser", ou continua insistindo no método:
    Informe que, ao tentar processar o pedido no sistema, houve um alerta de "Primeira Compra". 
    Explique que, por segurança e validação de cadastro, o sistema exige que o primeiro pedido seja via Pix. Garanta que no segundo pedido as outras formas estarão liberadas.
 
 REGRAS ADICIONAIS:
-- Endereço: Se pedirem a loja, dê um endereço completo em um bairro vizinho a \${localidade}. Explique que é apenas logística (sem balcão).
+- Endereço: Se pedirem a loja, dê um endereço completo em um bairro vizinho a ${localidade}. Explique que é apenas logística (sem balcão).
 - Retirada: Não permitido por segurança (risco no transporte).
-- Horário: Atendimento 24h com entrega rápida.
+- Horário: Atendimento 24h com entrega rápida em ${localidade}.
 
 HISTÓRICO DA CONVERSA:
-\${chatHistory}
+${chatHistory}
 
-PASSO ATUAL DO FLUXO: \${currentFlowStep}
+PASSO ATUAL DO FLUXO: ${currentFlowStep}
 `;
 
   try {
@@ -1802,6 +1803,7 @@ PASSO ATUAL DO FLUXO: \${currentFlowStep}
     return 'Tive um pequeno problema no sistema, mas pode falar, como posso te ajudar?';
   }
 }
+
 
 // ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
