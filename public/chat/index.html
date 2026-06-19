@@ -1763,12 +1763,15 @@ DADOS DO PEDIDO:
 
 LÓGICA DE ATENDIMENTO (SEGURANÇA):
 
-1. INFORMAÇÃO DE VALORES:
-   Se o cliente solicitar Cartão ou Entrega pela primeira vez:
-   "Com certeza, aceitamos sim. No entanto, o valor promocional de R$ ${valorPix} é exclusivo para pagamento via Pix. Para [Cartão/Entrega], o valor retorna ao padrão de R$ ${valorSemDesconto} devido às taxas de processamento."
+1. INFORMAÇÃO DE VALORES (PRIMEIRA ABORDAGEM):
+   Se o cliente solicitar Cartão pela primeira vez:
+   "Com certeza, aceitamos sim. No entanto, o valor promocional de R$ ${valorPix} é exclusivo para pagamento via Pix. Para cartão, o valor retorna ao padrão de R$ ${valorSemDesconto} devido às taxas de processamento."
 
-2. TRAVA DE SEGURANÇA (APÓS ACEITAÇÃO OU INSISTÊNCIA):
-   Se o cliente aceitar o valor maior ou insistir no método restrito:
+   Se o cliente solicitar Pagamento na Entrega pela primeira vez:
+   "Com certeza, aceitamos sim. No entanto, o valor promocional de R$ ${valorPix} é exclusivo para pagamento antecipado via Pix. Para pagamento na entrega, o valor retorna ao padrão de R$ ${valorSemDesconto} devido às taxas de processamento logístico."
+
+2. TRAVA DE SEGURANÇA / RECUSA (APÓS ACEITAÇÃO OU INSISTÊNCIA):
+   Se o cliente aceitar o valor maior ou insistir em Cartão OU em Pagamento na Entrega:
    "Ao validar seu pedido agora, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, todas as outras formas já estarão liberadas automaticamente para você, tudo bem?"
 
 REGRAS GERAIS:
@@ -1799,7 +1802,7 @@ PASSO ATUAL: ${currentFlowStep}
     return 'Tive uma pequena instabilidade no sistema, mas sigo por aqui. Como posso te ajudar com seu pedido?';
   }
 }
-
+  
 // ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
