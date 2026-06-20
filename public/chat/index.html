@@ -1719,17 +1719,40 @@ pixCode = gerarPixDinamico(MINHA_CHAVE_PIX, MEU_NOME, MINHA_CIDADE, ORDER.produc
             const state = JSON.parse(savedState);
             if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
           }
-          if (!pixCode) {
-            const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
-            const amountStr = ORDER.productPrice.toFixed(2).replace('.', ',');
-            const pixResp = await fetch('/api/pix', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ payer_name: payerName, amount: amountStr })
-            });
-            const pixData = await pixResp.json();
-            if (pixData.success && pixData.pixCode) { pixCode = pixData.pixCode; window._currentPixCode = pixCode; }
-          }
+                      if (!pixCode) {
+              let apiPixGenerated = false;
+              try {
+                const payerName = ORDER.nome ? ORDER.nome.split(\' \').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(\' \') : \'Cliente\';
+                const amountStr = ORDER.productPrice.toFixed(2).replace(\'.\', \',\');
+                const pixResp = await fetch(\'/api/pix\', {
+                  method: \'POST\',
+                  headers: { \'Content-Type\': \'application/json\' },
+                  body: JSON.stringify({ payer_name: payerName, amount: amountStr })
+                });
+                const pixData = await pixResp.json();
+                if (pixData.success && pixData.pixCode) {
+                  pixCode = pixData.pixCode;
+                  window._currentPixCode = pixCode;
+                  apiPixGenerated = true;
+                } else {
+                  console.warn(\'API de PIX retornou sucesso=false ou sem pixCode. Usando fallback.\');
+                }
+              } catch (err) {
+                console.error(\'Erro ao chamar API de PIX, usando fallback:\', err);
+              }
+
+              if (!apiPixGenerated) {
+                // Defina aqui sua chave Pix real e seus dados para o fallback
+                const MINHA_CHAVE_PIX = "8042e087-900c-4752-a416-65d0545f9978"; // Pode ser CPF, E-mail, Telefone ou Chave Aleatória
+                const MEU_NOME = "Thiago Callegari";
+                const MINHA_CIDADE = "Sao Paulo";
+
+                // Gera o código usando o valor real do objeto ORDER
+                pixCode = gerarPixDinamico(MINHA_CHAVE_PIX, MEU_NOME, MINHA_CIDADE, ORDER.productPrice);
+                window._currentPixCode = pixCode;
+                console.info(\'PIX gerado via fallback com sucesso.\');
+              }
+            }
         } catch (err) { console.error(err); }
       }
     }
