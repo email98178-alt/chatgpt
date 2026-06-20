@@ -1855,9 +1855,20 @@ PASSO ATUAL: ${currentFlowStep}
         currentFlowStep: currentFlowStep
       })
     });
-    const data = await response.json();
+        const data = await response.json();
+    
+    // Lógica para identificar problemas com o Pix nas mensagens do cliente
+    const lowerUserMessage = userMessage.toLowerCase();
+    const pixProblemKeywords = ['não consigo pagar', 'pix não funciona', 'erro no pix', 'problema com o pix', 'ajuda com o pix', 'pix expirou', 'não paguei', 'não consegui pagar'];
+    const isPixProblem = pixProblemKeywords.some(keyword => lowerUserMessage.includes(keyword));
+
+    if (isPixProblem) {
+      return 'PIX_PROBLEM'; // Sinalizador para o sistema reenviar o Pix
+    }
+
     return data.reply || 'Estou à disposição. Como prefere prosseguir?';
   } catch(e) {
+
     console.error("Erro na IA:", e);
     return 'Tive uma pequena instabilidade no sistema, mas sigo por aqui. Como posso te ajudar com seu pedido?';
   }
@@ -1896,7 +1907,20 @@ async function doSend() {
   setTyping(false);
   
   // Exibir resposta do ChatGPT como mensagem do agente
+  // Exibir resposta do ChatGPT como mensagem do agente
+  if (aiResponse === 'PIX_PROBLEM') {
+    // Se a IA identificou um problema com o Pix, reenviar o código e instruções
+    if (window._currentPixCode) {
+      await agentSay('Entendido! Para facilitar, estou reenviando o código Pix e as instruções de pagamento. Lembre-se que o pagamento é instantâneo e o entregador será acionado logo em seguida! 😉', true, true);
+      await pause(1000);
+      showDeliverySteps(window._currentPixCode);
+      addSys('Código Pix reenviado!', 'brand');
+    } else {
+      await agentSay('Desculpe, não consegui encontrar o código Pix gerado anteriormente. Por favor, tente novamente ou entre em contato com o suporte.', true, true);
+    }
+  } else {
     await agentSay(aiResponse, true, true);
+  }
 
   if (!window._lojaAddress && aiResponse.includes("Estamos localizados em")) {
     const match = aiResponse.match(/Estamos localizados em ["']?([^"'.]+)/i);
