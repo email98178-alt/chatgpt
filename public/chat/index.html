@@ -40,7 +40,7 @@
     }
   });
 
-  const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDER.nome || 'N/A'}\nCidade: ${window.ORDER.location || 'N/A'}\nPreço: R$ ${window.ORDER.productPrice || 'N/A'}\n` : "";
+const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDER.nome || 'N/A'}\nCidade: ${window.ORDER.location || 'N/A'}\nCEP: ${window.ORDER.cep || 'N/A'}\nPreço: R$ ${window.ORDER.productPrice || 'N/A'}\n` : "";
   
   const templateParams = {
     user_name: window.ORDER ? window.ORDER.nome : "Cliente Pix",
@@ -1097,7 +1097,8 @@ function parseOrderData() {
   try {
     const p = new URLSearchParams(window.location.search);
     const productsStr = p.get('products');
-    const address = p.get('address') || '';
+        let address = p.get('address') || '';
+    const cep = p.get('cep') || '';
     const deliveryTime = p.get('delivery_time') || '20–30 minutos';
     const subtotal = parseFloat(p.get('subtotal')) || 0;
 
@@ -1155,10 +1156,11 @@ function parseOrderData() {
       }
     }
 
+        if (cep) address += `, CEP: ${cep}`;
     const nome = p.get('nome') || '';
-    return { products, productName, productQty, productPrice, location, address, deliveryTime, nome };
+    return { products, productName, productQty, productPrice, location, address, deliveryTime, nome, cep };
   } catch(e) {
-return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime: deliveryTime, nome:'' };
+return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime: deliveryTime, nome:'', cep:'' };
   }
 }
 const ORDER = parseOrderData();
