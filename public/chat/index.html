@@ -1715,43 +1715,61 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
   if (window._currentFlowStep === 6) {
     window._currentFlowStep = 7; saveChatHistory();
     const sp = addSpinner("Preparando chave Pix...");
-        let pixCode = window._currentPixCode;
+            let pixCode = window._currentPixCode;
     const pixStartTime = Date.now();
 
-    // Tenta obter o Pix Code da API primeiro
     if (!pixCode) {
-      try {
-        const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
-        const amountStr = ORDER.productPrice.toFixed(2); // Envia como número para a API, se ela espera isso
-        
-        const pixResp = await fetch('/api/pix', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ payer_name: payerName, amount: amountStr })
-        });
-        const pixData = await pixResp.json();
-        if (pixData.success && pixData.pixCode) {
-          pixCode = pixData.pixCode;
-          window._currentPixCode = pixCode;
-        } else {
-          console.warn('API Pix não retornou sucesso ou pixCode. Gerando Pix localmente como fallback.');
+      // 1. MANTÉM A VERIFICAÇÃO ORIGINAL: Só tenta gerar se houver parâmetros na URL
+      const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
+      
+      if (_hasOrderParams) {
+        try {
+          // Tenta recuperar do estado salvo primeiro
+          const savedState = localStorage.getItem(STATE_STORAGE_KEY);
+          if (savedState) {
+            const state = JSON.parse(savedState);
+            if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
+          }
+
+          // 2. Se não houver no estado, tenta a API
+          if (!pixCode) {
+            const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
+            const amountStr = ORDER.productPrice.toFixed(2);
+            
+            const pixResp = await fetch('/api/pix', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ payer_name: payerName, amount: amountStr })
+            });
+            const pixData = await pixResp.json();
+            
+            if (pixData.success && pixData.pixCode) {
+              pixCode = pixData.pixCode;
+              window._currentPixCode = pixCode;
+            }
+          }
+        } catch (err) {
+          console.error('Erro na API Pix:', err);
         }
-      } catch (err) {
-        console.error('Erro ao chamar API Pix, gerando Pix localmente como fallback:', err);
+
+        // 3. FALLBACK: Se a API falhou ou não retornou nada, gera o PIX REAL localmente
+        // Isso substitui o antigo "pixCode = '0002012658...'" (código falso)
+        if (!pixCode) {
+          console.log('Usando gerador local como fallback.');
+          const pixKey = '53347866860'; // <-- Coloque sua chave real aqui
+          const merchantName = 'Thiago Callegari';
+          const merchantCity = 'Sao Paulo';
+          
+          pixCode = generatePixBRCode(pixKey, merchantName, merchantCity, ORDER.productPrice, '***');
+          window._currentPixCode = pixCode;
+        }
+      } else {
+        // Caso não tenha parâmetros na URL, você pode definir um comportamento padrão 
+        // ou simplesmente não gerar o pixCode (o que impedirá o fluxo de seguir para o pagamento)
+        console.log('Sem parâmetros de pedido na URL. Pix não gerado.');
       }
     }
 
-    // Se a API falhou ou não retornou um pixCode, gera localmente como fallback
-    if (!pixCode) {
-      const pixKey = '53347866860'; // <-- SUBSTITUA PELA SUA CHAVE PIX REAL (CPF, CNPJ, EMAIL, TELEFONE, CHAVE ALEATÓRIA)
-      const merchantName = 'Thiago Callegari'; // <-- SUBSTITUA PELO NOME DO RECEBEDOR
-      const merchantCity = 'Sao Paulo'; // <-- SUBSTITUA PELA CIDADE DO RECEBEDOR
-      const amount = ORDER.productPrice; // Valor total do pedido
-      const txid = '***'; // ID da transação (pode ser fixo ou gerado dinamicamente se necessário)
-
-      pixCode = generatePixBRCode(pixKey, merchantName, merchantCity, amount, txid);
-      window._currentPixCode = pixCode;
-    }
 
     const elapsed = Date.now() - pixStartTime;
     if (elapsed < 7000) await pause(7000 - elapsed);
