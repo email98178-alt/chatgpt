@@ -1606,7 +1606,7 @@ function getGreeting() {
 function pause(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 async function searchNominatim(query, limit = 1, countrycodes = 'BR') {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query )}&format=json&limit=${limit}&countrycodes=${countrycodes}&addressdetails=1`;
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=${limit}&countrycodes=${countrycodes}&addressdetails=1`;
   try {
     const response = await fetch(url);
     if (!response.ok) {
@@ -1623,7 +1623,7 @@ async function searchNominatim(query, limit = 1, countrycodes = 'BR') {
 async function reverseGeocodeNominatim(lat, lon) {
   const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`;
   try {
-    const response = await fetch(url );
+    const response = await fetch(url);
     if (!response.ok) {
       throw new Error(`HTTP error! status: ${response.status}`);
     }
@@ -1849,9 +1849,9 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorSemDesconto = (ORDER.productPrice * 1.30).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
-    const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
+  const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-  let lojaAddress = window._lojaAddress;
+    let lojaAddress = window._lojaAddress;
   if (!lojaAddress) {
     const userCity = ORDER.location;
     if (userCity) {
@@ -1867,7 +1867,6 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   }
 
   const regraEndereco = `O endereço da nossa loja é: "${lojaAddress}". Responda sempre este mesmo local.`;
-
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
