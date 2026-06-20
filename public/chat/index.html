@@ -1892,10 +1892,19 @@ async function doSend() {
   if (currentBubble) currentBubble.dataset.originalText = originalText;
 
   // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
+    // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
   if (!window._orderConfirmationShown) {
     sendBtnEl.disabled = false;
     return; 
   }
+
+  // FILTRO: Só responde se a mensagem tiver 3 ou mais palavras
+  const palavras = originalText.trim().split(/\s+/);
+  if (palavras.length < 3) {
+    sendBtnEl.disabled = false;
+    return;
+  }
+
     
   // Mostrar indicador de digitação
   setTyping(true);
