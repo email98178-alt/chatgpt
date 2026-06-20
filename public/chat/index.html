@@ -1750,9 +1750,7 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
     ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
     : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
 Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
-- Identificação de Filial Próxima: Quando o cliente informar sua localização (${localidade}), utilize estritamente o seu conhecimento geográfico interno para identificar um bairro VIZINHO REAL, colado ou imediatamente adjacente a essa localidade. 
-- Critério de Seleção: Deve ser obrigatoriamente o bairro vizinho mais próximo possível da base informada pelo cliente. Não invente nomes de bairros e não selecione regiões distantes ou de outras zonas da cidade.
-- Aplicação no Fluxo: Use esse bairro vizinho identificado para simular a localização da filial mais próxima de onde o entregador sairá, mantendo a coerência logística do atendimento.
+1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL colado ou imediatamente adjacente a essa localidade (${localidade}), deve ser o bairro vizinho mais proximo que voce identificar.
 2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
 3. Identifique o CEP REAL exato desse logradouro.
 4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
