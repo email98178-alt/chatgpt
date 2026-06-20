@@ -1900,12 +1900,26 @@ async function doSend() {
   }
 
 
-    const palavras = originalText.trim().split(/\s+/);
+      // FILTRO: Resposta automática para termos de pagamento em mensagens curtas
+  const palavras = originalText.trim().split(/\s+/);
   if (palavras.length < 3) {
+    const termosPagamento = ["pago", "feito", "já", "ja", "paguei", "pagar", "fiz", "finalizei", "efetivado", "finalizado", "realizei", "efetuado", "realizado", "terminei", "acabei", "concluí", "conclui", "concluido", "concluído"];
+    const mensagemMinuscula = originalText.toLowerCase();
+    
+    // Verifica se alguma das palavras-chave está na mensagem do usuário
+    const temTermo = termosPagamento.some(termo => mensagemMinuscula.includes(termo));
+    
+    if (temTermo) {
+      setTyping(true);
+      await pause(1500);
+      setTyping(false);
+      await agentSay("Certo, após o pagamento realizado podemos preparar o envio, o prazo de entrega é de 20-30 minutos. 😄", true, true);
+      saveChatHistory();
+    }
+    
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
   }
-
 
     
   // Mostrar indicador de digitação
