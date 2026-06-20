@@ -1605,6 +1605,76 @@ function getGreeting() {
 }
 function pause(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
+async function searchNominatim(query, limit = 1, countrycodes = 'BR') {
+  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query )}&format=json&limit=${limit}&countrycodes=${countrycodes}&addressdetails=1`;
+  try {
+    const response = await fetch(url);
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao consultar Nominatim:", error);
+    return [];
+  }
+}
+
+async function reverseGeocodeNominatim(lat, lon) {
+  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`;
+  try {
+    const response = await fetch(url );
+    if (!response.ok) {
+      throw new Error(`HTTP error! status: ${response.status}`);
+    }
+    const data = await response.json();
+    return data;
+  } catch (error) {
+    console.error("Erro ao consultar Nominatim (reverse):", error);
+    return null;
+  }
+}
+
+// Função para encontrar um endereço real em um bairro vizinho
+async function findNearbyAddress(city, userLat, userLon) {
+  // Se não tivermos as coordenadas do usuário, tentamos geocodificar a cidade
+  if (!userLat || !userLon) {
+    const cityResults = await searchNominatim(city, 1);
+    if (cityResults.length > 0) {
+      userLat = parseFloat(cityResults[0].lat);
+      userLon = parseFloat(cityResults[0].lon);
+    } else {
+      console.warn(`Não foi possível geocodificar a cidade: ${city}`);
+      return null;
+    }
+  }
+
+  // Tenta encontrar ruas ou avenidas em um raio próximo
+  // Usamos uma query genérica para encontrar ruas/avenidas e depois filtramos
+  const nearbyResults = await searchNominatim(`rua, avenida, ${city}`, 20, 'BR'); // Aumenta o limite para ter mais opções
+
+  // Filtra resultados para garantir que são ruas/avenidas e que estão na cidade correta ou em um bairro próximo
+  const validAddresses = nearbyResults.filter(result => {
+    const address = result.address;
+    return (address && (address.road || address.highway) && 
+            (address.city === city || address.town === city || address.village === city || address.suburb));
+  });
+
+  if (validAddresses.length > 0) {
+    // Seleciona um endereço aleatório entre os válidos
+    const randomIndex = Math.floor(Math.random() * validAddresses.length);
+    const selectedAddress = validAddresses[randomIndex].address;
+
+    const street = selectedAddress.road || selectedAddress.highway || 'Rua Desconhecida';
+    const suburb = selectedAddress.suburb || selectedAddress.neighbourhood || selectedAddress.city_district || 'Bairro Vizinho';
+    const postcode = selectedAddress.postcode || '00000-000';
+
+    return `${street}, ${suburb}, CEP: ${postcode}`;
+  }
+
+  return null; // Não encontrou um endereço adequado
+}
+
 async function agentSay(text, newGroup=false, immediateTyping=false) {
   if (!immediateTyping) await pause(800 + Math.random() * 700);
   const typingMs = Math.max(1200, Math.min(text.split(' ').length * 200 + 600, 3500));
@@ -1779,17 +1849,25 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorSemDesconto = (ORDER.productPrice * 1.30).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
-  const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
+    const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-  const regraEndereco = window._lojaAddress 
-    ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
-    : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
-Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
-1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
-2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
-3. Identifique o CEP REAL exato desse logradouro.
-4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, CEP: cep'".
-Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.`;
+  let lojaAddress = window._lojaAddress;
+  if (!lojaAddress) {
+    const userCity = ORDER.location;
+    if (userCity) {
+      lojaAddress = await findNearbyAddress(userCity, null, null);
+      if (lojaAddress) {
+        window._lojaAddress = lojaAddress;
+      } else {
+        lojaAddress = `Estamos localizados em ${userCity} e região.`;
+      }
+    } else {
+      lojaAddress = `Estamos localizados em sua região.`;
+    }
+  }
+
+  const regraEndereco = `O endereço da nossa loja é: "${lojaAddress}". Responda sempre este mesmo local.`;
+
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
