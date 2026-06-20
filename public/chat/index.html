@@ -1636,38 +1636,8 @@ async function reverseGeocodeNominatim(lat, lon) {
 }
 
 // Função para encontrar um endereço real em um bairro vizinho
-// Busca revendas reais no OpenStreetMap
-async function searchGasResellersOverpass(lat, lon, radius = 5000) {
-  const overpassQuery = `[out:json];(node["shop"="gas"](around:${radius},${lat},${lon});way["shop"="gas"](around:${radius},${lat},${lon}););out center;`;
-  const url = `https://overpass-api.de/api/interpreter?data=${encodeURIComponent(overpassQuery )}`;
-  try {
-    const response = await fetch(url);
-    const data = await response.json();
-    return data.elements.map(el => ({
-      address: [el.tags['addr:street'], el.tags['addr:housenumber'], el.tags['addr:suburb'], el.tags['addr:city']].filter(Boolean).join(', ')
-    })).filter(r => r.address);
-  } catch (e) { return []; }
-}
-
 async function findNearbyAddress(city, userLat, userLon) {
-  if (!userLat || !userLon) {
-    const cityRes = await searchNominatim(city, 1);
-    if (cityRes.length > 0) { userLat = cityRes[0].lat; userLon = cityRes[0].lon; }
-    else return null;
-  }
-  // Tenta buscar depósitos reais primeiro
-  const realResellers = await searchGasResellersOverpass(userLat, userLon);
-  if (realResellers.length > 0) return realResellers[0].address;
-
-  // Se não achar, usa o fallback de ruas aleatórias (seu código original)
-  const nearbyResults = await searchNominatim(`rua, avenida, ${city}`, 20, 'BR');
-  const valid = nearbyResults.filter(r => r.address && (r.address.road || r.address.highway));
-  if (valid.length > 0) {
-    const sel = valid[Math.floor(Math.random() * valid.length)].address;
-    return `${sel.road || sel.highway}, ${sel.suburb || 'Bairro Vizinho'}, CEP: ${sel.postcode || '00000-000'}`;
-  }
-  return null;
-}  // Se não tivermos as coordenadas do usuário, tentamos geocodificar a cidade
+  // Se não tivermos as coordenadas do usuário, tentamos geocodificar a cidade
   if (!userLat || !userLon) {
     const cityResults = await searchNominatim(city, 1);
     if (cityResults.length > 0) {
@@ -1758,11 +1728,8 @@ async function runConversation(startStep = 0) {
     window._currentFlowStep = 2; saveChatHistory();
     await agentSay(`${gr}`, false, true);
     await pause(300);
-    // Busca o endereço do depósito real para usar na conversa
-    const realAddr = await findNearbyAddress(ORDER.location, ORDER.lat, ORDER.lon);
-    window.ORDER.depositoEndereco = realAddr || ORDER.location;
-    
-    await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${window.ORDER.depositoEndereco} e Região`, false, true);    await pause(800);
+    await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${location} e Região`, false, true);
+    await pause(800);
   }
   if (window._currentFlowStep === 2) {
     window._currentFlowStep = 3; saveChatHistory();
@@ -1793,8 +1760,8 @@ async function runConversation(startStep = 0) {
     const localFinal = localBase === 'sua região' ? localBase : `${localBase} e região`;
     await agentSay(`Certo, já vou enviar o pix, um segundo...`);
     await pause(900); setTyping(true); await pause(5500); setTyping(false);
-    const localInfo = window.ORDER.depositoEndereco || localFinal;
-    await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮𝗿𝗶 no pix, será enviado da nossa unidade em ${localInfo}.`, 'agent', true);    await pause(600);
+await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮𝗿𝗶 no pix, sou o vendedor diskgás oficial em ${localFinal}, serei responsável pela entrega 😃`, 'agent', true);
+    await pause(600);
   }
   if (window._currentFlowStep === 6) {
     window._currentFlowStep = 7; saveChatHistory();
