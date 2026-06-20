@@ -1750,7 +1750,7 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
     ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
     : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
 Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
-1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao local do cliente (${localidade}).
+1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que voce encontrar.
 2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
 3. Identifique o CEP REAL exato desse logradouro.
 4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
@@ -1760,7 +1760,7 @@ Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizente
 Você é o Thiago, atendente da Diskgas.
 - Horário: Operação 24h em ${localidade}.
 - Prazo de Entrega: Informe que é de ${prazoEntrega} após o pagamento.
-- Endereço do Centro de Distribuição: ${regraEndereco}
+- Endereço da loja: ${regraEndereco}
 
 --- REGRAS GERAIS ---
 1. Se o cliente perguntar o endereço, use a regra acima.
