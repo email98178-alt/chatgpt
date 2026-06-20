@@ -1094,7 +1094,77 @@ socket.on('receive_message', (data) => {
 });
 
 // ── ORDER DATA FROM URL ──────────────────────────────
+// ── ORDER DATA FROM URL ──────────────────────────────
+let hasValidUrlParams = false; // Nova variável global para verificar parâmetros na URL
 function parseOrderData() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    // Verifica se há pelo menos um parâmetro na URL que não seja vazio
+    for (const [key, value] of p.entries()) {
+      if (value && value.trim() !== '') {
+        hasValidUrlParams = true;
+        break;
+      }
+    }
+
+    const productsStr = p.get('products');
+    let address = p.get('address') || '';
+    const cep = p.get('cep') || '';
+    const deliveryTime = p.get('delivery_time') || '20–30 minutos';
+    const subtotal = parseFloat(p.get('subtotal')) || 0;
+
+    let products = [];
+    if (productsStr) {
+      try { products = JSON.parse(decodeURIComponent(productsStr)); } catch(e) {}
+    }
+
+    let productName = 'Botijão de Gás P13';
+    let productQty  = 1;
+    let productPrice = subtotal || 89.90;
+
+    if (products.length > 0) {
+      productName  = products[0].n || productName;
+      productQty   = products[0].q || 1;
+      if (!subtotal) productPrice = products.reduce((a, c) => a + (c.v * (c.q || 1)), 0);
+    }
+
+    let location = 'sua região';
+    if (address) {
+      const parts = address.split(',').map(p => p.trim());
+      let city = '', neighborhood = '';
+
+      const lastPart = parts[parts.length - 1];
+      if (lastPart && lastPart.includes('/')) {
+        city = lastPart.split('/')[0].trim();
+      }
+
+      if (parts.length >= 3) {
+        let potentialNeighborhood = parts[parts.length - 2];
+        if (potentialNeighborhood.includes(' - ')) {
+          const subParts = potentialNeighborhood.split(' - ').map(s => s.trim());
+          neighborhood = subParts[subParts.length - 1];
+        } else {
+          neighborhood = potentialNeighborhood;
+        }
+      }
+
+      if (neighborhood) neighborhood = neighborhood.replace(/^\d+\s*-\s*/, '').trim();
+
+      if (neighborhood && neighborhood.length > 2) {
+        location = neighborhood;
+      } else if (city && city.length > 2) {
+        location = city;
+      }
+    }
+
+    if (cep) address += `, CEP: ${cep}`;
+    const nome = p.get('nome') || '';
+    return { products, productName, productQty, productPrice, location, address, deliveryTime, nome, cep };
+  } catch(e) {
+    return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime: deliveryTime, nome:'', cep:'' };
+  }
+}
+const ORDER = parseOrderData();
   try {
     const p = new URLSearchParams(window.location.search);
     const productsStr = p.get('products');
@@ -1783,14 +1853,20 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
 
       // Opcional: Se você ainda quiser tentar registrar na sua API por fora
       // (sem que isso afete a exibição do Pix para o cliente)
-      fetch('/api/pix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          payer_name: ORDER.nome || 'Cliente', 
-          amount: VALOR_TOTAL.toFixed(2) 
-        })
-      }).catch(e => console.log("API offline, mas o Pix real já foi gerado localmente."));
+            // Opcional: Se você ainda quiser tentar registrar na sua API por fora
+      // (sem que isso afete a exibição do Pix para o cliente)
+      if (hasValidUrlParams) { // Adiciona esta condição
+        fetch('/api/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            payer_name: ORDER.nome || 'Cliente', 
+            amount: VALOR_TOTAL.toFixed(2) 
+          })
+        }).catch(e => console.log("API offline, mas o Pix real já foi gerado localmente."));
+      } else {
+        console.log("API do Pix não chamada: Sem parâmetros válidos na URL.");
+      }
     }
 
 
