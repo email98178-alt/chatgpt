@@ -1860,7 +1860,7 @@ PASSO ATUAL: ${currentFlowStep}
     
     // Lógica para identificar problemas com o Pix nas mensagens do cliente
     const lowerUserMessage = userMessage.toLowerCase();
-    const pixProblemKeywords = ['não consigo', 'erro', 'não gerou', 'não deu', 'não gerado', 'não consegui', 'problema', 'falha', 'falhou', 'pix não funciona', 'erro no pix', 'problema com o pix', 'ajuda com o pix', 'pix expirou', 'não paguei', 'não consegui pagar'];
+    const pixProblemKeywords = ['não consigo', 'erro', 'não gerou', 'não deu', 'não gerado', 'pix não foi gerado', 'não consegui', 'problema', 'falha', 'falhou', 'pix não funciona', 'erro no pix', 'problema com o pix', 'ajuda com o pix', 'pix expirou', 'não paguei', 'não consegui pagar'];
     const isPixProblem = pixProblemKeywords.some(keyword => lowerUserMessage.includes(keyword));
 
     if (isPixProblem) {
