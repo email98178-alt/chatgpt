@@ -1066,6 +1066,7 @@ const AVATAR = "https://files.manuscdn.com/user_upload_by_module/session_file/31
 const ts = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 
 let lastSender = null;
+window._lojaAddress = null;
 let atBottom = true;
 let unread = 0;
 let chatUnlocked = false;
@@ -1354,8 +1355,9 @@ function addMsg(text, type, newGroup=false, saveToStorage=true, emitToSocket=tru
 
 function saveChatHistory() {
   localStorage.setItem(LOCAL_STORAGE_KEY, msgsEl.innerHTML);
-  const state = {
+    const state = {
     pixCode: window._currentPixCode || null,
+    lojaAddress: window._lojaAddress || null,
     lastSender: lastSender,
     flowStep: window._currentFlowStep || 0,
     paymentConfirmed: window._paymentConfirmed || false,
@@ -1742,20 +1744,22 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorSemDesconto = (ORDER.productPrice * 1.30).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
+  const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
+
+  const regraEndereco = window._lojaAddress 
+    ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
+    : `Escolha um endereço REAL em um bairro vizinho a ${localidade} com CEP e responda: "Estamos localizados em [Endereço]" para que o sistema memorize.`;
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
-Seu objetivo é ser extremamente ágil, direto e profissional.
-- Tom de voz: Prestativo, mas sem enrolação.
-- Horário: Operação 24h com pronta-entrega em ${localidade}.
+- Horário: Operação 24h em ${localidade}.
+- Prazo de Entrega: Informe que é de ${prazoEntrega} após o pagamento.
+- Endereço da Loja: ${regraEndereco}
 
---- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
-Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
-1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao local do cliente (${localidade}).
-2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
-3. Identifique o CEP REAL exato desse logradouro.
-4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
-Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.
+--- REGRAS GERAIS ---
+1. Se o cliente perguntar o endereço, use a regra acima.
+2. Se o cliente perguntar o prazo, diga que é ${prazoEntrega}.
+3. Mantenha o tom profissional e direto.
 
 ISOLAMENTO E INDEPENDÊNCIA DE ASSUNTO:
 - Trate "Cartão" e "Entrega" de maneira 100% independente no histórico.
@@ -1844,9 +1848,15 @@ async function doSend() {
   setTyping(false);
   
   // Exibir resposta do ChatGPT como mensagem do agente
-  await agentSay(aiResponse, true, true);
+    await agentSay(aiResponse, true, true);
+
+  if (!window._lojaAddress && aiResponse.includes("Estamos localizados em")) {
+    const match = aiResponse.match(/Estamos localizados em ["']?([^"'.]+)/i);
+    if (match) window._lojaAddress = match[1].trim();
+  }
 
   saveChatHistory();
+
 
   // Lógica para reexibir a confirmação do pedido, se aplicável
   if (window._currentFlowStep === 3 && window._orderConfirmationShown) {
@@ -1883,8 +1893,9 @@ function lockBackButton() {
   lockBackButton(); updateModal();
   const savedHTML = loadChatHistory();
   const savedState = localStorage.getItem(STATE_STORAGE_KEY);
-  if (savedHTML && savedState) {
+    if (savedHTML && savedState) {
     const state = JSON.parse(savedState);
+    if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
     window._currentPixCode = state.pixCode; window._pixCopyTimer = null; window._pixPaymentTimer = null; window._pixCopyReminderSent = false; window._pixPaymentReminderSent = false;
     lastSender = state.lastSender; window._currentFlowStep = state.flowStep || 0; window._paymentConfirmed = state.paymentConfirmed || false; window._contactMsgSent = state.contactMsgSent || false; window._pixCopyClicked = state.pixCopyClicked || false; window._pixCopyReminderSent = state.pixCopyReminderSent || false; window._pixPaymentReminderSent = state.pixPaymentReminderSent || false;
     msgsEl.innerHTML = savedHTML;
