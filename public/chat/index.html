@@ -1911,12 +1911,12 @@ async function doSend() {
   if (aiResponse === 'PIX_PROBLEM') {
     // Se a IA identificou um problema com o Pix, reenviar o código e instruções
     if (window._currentPixCode) {
-      await agentSay('Entendido! Para facilitar, estou reenviando o código Pix e as instruções de pagamento. Lembre-se que o pagamento é instantâneo e o entregador será acionado logo em seguida! 😉', true, true);
-      await pause(1000);
+      await agentSay('Basta copiar o codigo pix e pagar pelo app do seu banco. Após o pagamento o pedido é aprovado automaticamente 😃', true, true);
+      await pause(3000);
       showDeliverySteps(window._currentPixCode);
       addSys('Código Pix reenviado!', 'brand');
     } else {
-      await agentSay('Desculpe, não consegui encontrar o código Pix gerado anteriormente. Por favor, tente novamente ou entre em contato com o suporte.', true, true);
+      await agentSay('Desculpe, houve um erro o gerar o seu Pix.', true, true);
     }
   } else {
     await agentSay(aiResponse, true, true);
