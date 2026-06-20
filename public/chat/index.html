@@ -1612,6 +1612,33 @@ async function agentSay(text, newGroup=false, immediateTyping=false) {
   addMsg(text, 'agent', newGroup); 
 }
 
+  async function getRealAddressFromAPI(userLocation) {
+  // userLocation pode ser um bairro ou cidade do cliente, obtido de ORDER.location
+  // Para simplificar, vamos usar um exemplo fixo ou uma lógica mais elaborada para buscar um bairro vizinho real.
+  // Em um cenário real, você pode precisar de uma API de geocodificação reversa ou uma lista de bairros por cidade.
+
+  // Exemplo de busca por logradouro na ViaCEP (requer UF, Cidade e Logradouro)
+  // Para encontrar um bairro vizinho, você precisaria de uma base de dados de bairros ou uma API mais avançada.
+  // Por simplicidade, vamos simular a busca por um endereço conhecido em uma cidade próxima ou no mesmo estado.
+
+  // PASSO 1: Determinar uma UF e Cidade base (pode vir da ORDER.location ou de um valor padrão)
+  let uf = 'SP'; // Exemplo: São Paulo
+  let city = 'São Paulo'; // Exemplo: São Paulo
+
+  // Lógica para tentar inferir UF e Cidade da userLocation
+  if (userLocation && userLocation.includes('/')) {
+    const parts = userLocation.split('/');
+    city = parts[0].trim();
+    uf = parts[1].trim();
+  } else if (userLocation) {
+    // Se for apenas um bairro, pode-se tentar uma cidade padrão ou buscar a cidade do bairro
+    // Isso exigiria uma base de dados ou outra API. Para este exemplo, manteremos São Paulo.
+  }
+
+  // PASSO 2: Buscar um logradouro real em um bairro vizinho ou na cidade
+  // Esta é a parte mais complexa sem uma API de 
+
+
 async function runConversation(startStep = 0) {
   const { location } = ORDER;
   const gr = getGreeting();
@@ -1746,15 +1773,11 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-  const regraEndereco = window._lojaAddress 
+    const regraEndereco = window._lojaAddress 
     ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
     : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
-Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
-1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
-2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
-3. Identifique o CEP REAL exato desse logradouro.
-4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
-Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.`;
+Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja, o sistema buscará um endereço real. Não tente gerar um endereço por conta própria. Aguarde a informação do sistema e, se disponível, responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".`;
+
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
