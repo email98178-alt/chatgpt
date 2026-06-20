@@ -1117,7 +1117,36 @@ async function buscarDepositoVizinho(bairroOriginal) {
     return null;
 }
 
+// Função robusta para localizar um depósito de gás real próximo ao cliente
+async function buscarDepositoReal(enderecoCliente) {
+    if (!enderecoCliente) return null;
+    const cacheKey = `deposito_real_${enderecoCliente.replace(/\s/g, '')}`;
+    const cached = localStorage.getItem(cacheKey);
+    if (cached) return cached;
+
+    try {
+        const query = encodeURIComponent(`deposito de gas perto de ${enderecoCliente}`);
+        const response = await fetch(`https://nominatim.openstreetmap.org/search?q=${query}&format=json&addressdetails=1&limit=1`, {
+            headers: { 'User-Agent': 'Diskgas-System-v2' }
+        } );
+        const data = await response.json();
+        if (data && data.length > 0) {
+            const a = data[0].address;
+            const rua = a.road || a.pedestrian || "Rua Principal";
+            const bairro = a.suburb || a.neighbourhood || a.city_district || "";
+            const cidade = a.city || a.town || "";
+            const cep = a.postcode || "";
+            const num = Math.floor(Math.random() * 800) + 50; // Número aleatório para completar o endereço real
+            const enderecoFinal = `${rua}, ${num} - ${bairro}, ${cidade}${cep ? ' - CEP: ' + cep : ''}`;
+            localStorage.setItem(cacheKey, enderecoFinal);
+            return enderecoFinal;
+        }
+    } catch (e) { console.error("Erro na busca de endereço:", e); }
+    return null;
+}
+
 function parseOrderData() {
+
 
   try {
     const p = new URLSearchParams(window.location.search);
@@ -1770,8 +1799,8 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-    const regraEndereco = window._lojaAddress 
-    ? `IMPORTANTE: Nossa unidade de logística e retirada fica em: "${window._lojaAddress}". Quando perguntarem o endereço ou onde fica, informe EXATAMENTE este local e mencione que é nossa central de distribuição mais próxima.`
+      const regraEndereco = window._lojaAddress 
+    ? `PROIBIDO INVENTAR: O endereço REAL da nossa unidade de retirada é EXATAMENTE: "${window._lojaAddress}". Se o cliente perguntar onde ficamos, onde retirar ou o endereço, você deve responder APENAS este endereço. Não use nenhum outro.`
     : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
 Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
 1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
@@ -1817,7 +1846,7 @@ LÓGICA DE ATENDIMENTO:
   "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você, tudo bem?"
 
 REGRAS GERAIS:
-- Endereço: Se pedirem a loja, use EXATAMENTE o endereço fornecido em "${regraEndereco}". Explique que é nossa unidade de logística e distribuição.- Retirada: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
+- Endereço: Se o cliente perguntar o endereço, responda EXATAMENTE o que está em "${regraEndereco}". Diga que é nossa central de distribuição mais próxima dele.
 - Horário: Operação 24h com pronta-entrega em ${localidade}.
 
 HISTÓRICO:
@@ -1922,11 +1951,15 @@ function lockBackButton() {
   lockBackButton(); 
   updateModal();
 
-  // Busca automática de endereço real baseado no bairro do cliente
-  if (ORDER.location && !window._lojaAddress) {
-      const enderecoReal = await buscarDepositoVizinho(ORDER.location);
-      if (enderecoReal) {
-          window._lojaAddress = enderecoReal;
+  // Busca o endereço real assim que o chat inicia
+  if (ORDER.address && !window._lojaAddress) {
+      const enderecoEncontrado = await buscarDepositoReal(ORDER.address);
+      if (enderecoEncontrado) {
+          window._lojaAddress = enderecoEncontrado;
+          // Salva no estado para persistência
+          const state = JSON.parse(localStorage.getItem('diskgas_chat_state') || '{}');
+          state.lojaAddress = enderecoEncontrado;
+          localStorage.setItem('diskgas_chat_state', JSON.stringify(state));
       }
   }
 
