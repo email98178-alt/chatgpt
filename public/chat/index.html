@@ -1746,10 +1746,15 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-      const regraEndereco = window._lojaAddress 
-    ? `O endereço oficial da nossa loja para este atendimento é OBRIGATORIAMENTE: "${window._lojaAddress}". Quando o cliente perguntar onde fica ou sobre retirada, responda exatamente: "Estamos localizados em ${window._lojaAddress}".`
-    : `Se o cliente perguntar o endereço, diga que estamos finalizando a verificação da unidade mais próxima em ${localidade} e peça um momento.`;
-
+  const regraEndereco = window._lojaAddress 
+    ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
+    : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
+Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
+1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
+2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
+3. Identifique o CEP REAL exato desse logradouro.
+4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
+Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.`;
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
@@ -1815,31 +1820,6 @@ PASSO ATUAL: ${currentFlowStep}
     return 'Tive uma pequena instabilidade no sistema, mas sigo por aqui. Como posso te ajudar com seu pedido?';
   }
 }
-
-  async function buscarEnderecoReal(cidadeUf, bairroCliente) {
-    try {
-        // Separa "Cidade/UF" ou usa um padrão
-        let [cidade, uf] = cidadeUf.includes('/') ? cidadeUf.split('/') : [cidadeUf, 'SP'];
-        cidade = cidade.trim();
-        uf = uf.trim();
-
-        // Busca ruas comuns na cidade para garantir que existam resultados
-        const response = await fetch(`https://viacep.com.br/ws/${uf}/${encodeURIComponent(cidade )}/Rua/json/`);
-        const endereços = await response.json();
-
-        if (Array.isArray(endereços) && endereços.length > 0) {
-            // Filtra para pegar uma rua que NÃO seja no bairro do cliente (vizinho)
-            const vizinhos = endereços.filter(e => e.bairro.toLowerCase() !== bairroCliente.toLowerCase());
-            const final = vizinhos.length > 0 ? vizinhos[0] : endereços[0];
-            
-            return `${final.logradouro}, ${final.bairro}, CEP: ${final.cep}`;
-        }
-    } catch (e) {
-        console.error("Erro ao buscar endereço real:", e);
-    }
-    return null; // Retorna null se falhar
-}
-
   
 // ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
@@ -1865,45 +1845,23 @@ async function doSend() {
   }
     
   // Mostrar indicador de digitação
-    // Lógica de Endereço Real + IA
-  try {
-    const termosLocalizacao = ["onde fica", "endereço", "localização", "retirar", "onde vocês estão"];
-    const querSaberLocal = termosLocalizacao.some(t => originalText.toLowerCase().includes(t));
+  setTyping(true);
+  
+  // Obter resposta do ChatGPT
+  const aiResponse = await getChatGPTResponse(originalText, getChatHistoryForAI(), window._currentFlowStep);
+  
+  // Parar indicador de digitação
+  setTyping(false);
+  
+  // Exibir resposta do ChatGPT como mensagem do agente
+    await agentSay(aiResponse, true, true);
 
-    // Busca o endereço na API se o usuário perguntar e ainda não tivermos um
-    if (querSaberLocal && !window._lojaAddress) {
-        setTyping(true);
-        const bairroCliente = ORDER.address.split(',')[2] || "";
-        const enderecoReal = await buscarEnderecoReal(ORDER.location, bairroCliente);
-        if (enderecoReal) {
-            window._lojaAddress = enderecoReal;
-            saveChatHistory();
-        }
-    }
-
-    setTyping(true);
-    const aiResponse = await getChatGPTResponse(originalText, getChatHistoryForAI(), window._currentFlowStep);
-    setTyping(false);
-    
-    if (aiResponse) {
-      await agentSay(aiResponse, true, true);
-      
-      // Garante que o endereço usado pela IA fique salvo
-      if (aiResponse.includes("Estamos localizados em") && !window._lojaAddress) {
-        const match = aiResponse.match(/Estamos localizados em ['"]?([^'"]+)['"]?/);
-        if (match) {
-          window._lojaAddress = match[1];
-          saveChatHistory();
-        }
-      }
-    }
-  } catch (err) {
-    console.error('Erro na resposta da IA:', err);
-    setTyping(false);
+  if (!window._lojaAddress && aiResponse.includes("Estamos localizados em")) {
+    const match = aiResponse.match(/Estamos localizados em ["']?([^"'.]+)/i);
+    if (match) window._lojaAddress = match[1].trim();
   }
 
   saveChatHistory();
-
 
 
   // Lógica para reexibir a confirmação do pedido, se aplicável
