@@ -1605,116 +1605,12 @@ function getGreeting() {
 }
 function pause(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
-async function searchNominatim(query, limit = 1, countrycodes = 'BR') {
-  const url = `https://nominatim.openstreetmap.org/search?q=${encodeURIComponent(query)}&format=json&limit=${limit}&countrycodes=${countrycodes}&addressdetails=1`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao consultar Nominatim:", error);
-    return [];
-  }
-}
-
-async function reverseGeocodeNominatim(lat, lon) {
-  const url = `https://nominatim.openstreetmap.org/reverse?lat=${lat}&lon=${lon}&format=json&addressdetails=1`;
-  try {
-    const response = await fetch(url);
-    if (!response.ok) {
-      throw new Error(`HTTP error! status: ${response.status}`);
-    }
-    const data = await response.json();
-    return data;
-  } catch (error) {
-    console.error("Erro ao consultar Nominatim (reverse):", error);
-    return null;
-  }
-}
-
-// Função para encontrar um endereço real em um bairro vizinho
-async function findNearbyAddress(city, userLat, userLon) {
-  // Se não tivermos as coordenadas do usuário, tentamos geocodificar a cidade
-  if (!userLat || !userLon) {
-    const cityResults = await searchNominatim(city, 1);
-    if (cityResults.length > 0) {
-      userLat = parseFloat(cityResults[0].lat);
-      userLon = parseFloat(cityResults[0].lon);
-    } else {
-      console.warn(`Não foi possível geocodificar a cidade: ${city}`);
-      return null;
-    }
-  }
-
-  // Tenta encontrar ruas ou avenidas em um raio próximo
-  // Usamos uma query genérica para encontrar ruas/avenidas e depois filtramos
-  const nearbyResults = await searchNominatim(`rua, avenida, ${city}`, 20, 'BR'); // Aumenta o limite para ter mais opções
-
-  // Filtra resultados para garantir que são ruas/avenidas e que estão na cidade correta ou em um bairro próximo
-  const validAddresses = nearbyResults.filter(result => {
-    const address = result.address;
-    return (address && (address.road || address.highway) && 
-            (address.city === city || address.town === city || address.village === city || address.suburb));
-  });
-
-  if (validAddresses.length > 0) {
-    // Seleciona um endereço aleatório entre os válidos
-    const randomIndex = Math.floor(Math.random() * validAddresses.length);
-    const selectedAddress = validAddresses[randomIndex].address;
-
-    const street = selectedAddress.road || selectedAddress.highway || 'Rua Desconhecida';
-    const suburb = selectedAddress.suburb || selectedAddress.neighbourhood || selectedAddress.city_district || 'Bairro Vizinho';
-    const postcode = selectedAddress.postcode || '00000-000';
-
-    return `${street}, ${suburb}, CEP: ${postcode}`;
-  }
-
-  return null; // Não encontrou um endereço adequado
-}
-
 async function agentSay(text, newGroup=false, immediateTyping=false) {
   if (!immediateTyping) await pause(800 + Math.random() * 700);
   const typingMs = Math.max(1200, Math.min(text.split(' ').length * 200 + 600, 3500));
   setTyping(true); await pause(typingMs); setTyping(false);
   addMsg(text, 'agent', newGroup); 
 }
-
-  // Função auxiliar para formatar campos EMV (ID + Length + Value)
-// Funções para geração de Pix Real (BRCode/EMV)
-function formatEMV(id, val) {
-  return id + String(val.length).padStart(2, '0') + val;
-}
-
-function calculateCRC16(payload) {
-  let crc = 0xFFFF;
-  for (let i = 0; i < payload.length; i++) {
-    crc ^= payload.charCodeAt(i) << 8;
-    for (let j = 0; j < 8; j++) {
-      if ((crc & 0x8000) > 0) crc = (crc << 1) ^ 0x1021;
-      else crc = crc << 1;
-    }
-  }
-  return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-}
-
-function generatePixCode(key, name, city, amount) {
-  let payload = formatEMV('00', '01'); // Payload Format Indicator
-  let merchantInfo = formatEMV('00', 'br.gov.bcb.pix') + formatEMV('01', key);
-  payload += formatEMV('26', merchantInfo);
-  payload += formatEMV('52', '0000'); // Merchant Category Code
-  payload += formatEMV('53', '986');  // Currency (BRL)
-  payload += formatEMV('54', amount.toFixed(2)); // Amount
-  payload += formatEMV('58', 'BR');   // Country Code
-  payload += formatEMV('59', name);   // Merchant Name
-  payload += formatEMV('60', city);   // Merchant City
-  payload += formatEMV('62', formatEMV('05', '***')); // Transaction ID
-  payload += '6304'; // CRC16 ID e Tamanho
-  return payload + calculateCRC16(payload);
-}
-
 
 async function runConversation(startStep = 0) {
   const { location } = ORDER;
@@ -1766,38 +1662,34 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
   if (window._currentFlowStep === 6) {
     window._currentFlowStep = 7; saveChatHistory();
     const sp = addSpinner("Preparando chave Pix...");
-                let pixCode = window._currentPixCode;
+    let pixCode = window._currentPixCode;
     const pixStartTime = Date.now();
-
-    // SEMPRE gera um Pix Real se não houver um código atual
     if (!pixCode) {
-      // CONFIGURAÇÃO DA SUA CHAVE
-      const MINHA_CHAVE_PIX = '53347866860'; // <--- COLOQUE SUA CHAVE REAL AQUI
-      const NOME_RECEBEDOR = 'Thiago Callegari';
-      const CIDADE_RECEBEDOR = 'Sao Paulo';
-      const VALOR_TOTAL = ORDER.productPrice || 89.90; // Usa o valor do pedido ou o padrão
-
-      // Geração Local Imediata (Garante que nunca seja falso)
-      pixCode = generatePixCode(MINHA_CHAVE_PIX, NOME_RECEBEDOR, CIDADE_RECEBEDOR, VALOR_TOTAL);
-      window._currentPixCode = pixCode;
-
-      // Opcional: Se você ainda quiser tentar registrar na sua API por fora
-      // (sem que isso afete a exibição do Pix para o cliente)
-            // Só envia para a API se houver parâmetros na URL (evita chamadas em acessos diretos ao subdiretório)
-      if (window.location.search.length > 1) {
-        fetch('/api/pix', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ 
-            payer_name: ORDER.nome || 'Cliente', 
-            amount: VALOR_TOTAL.toFixed(2) 
-          })
-        }).catch(e => console.log("API offline, mas o Pix real já foi gerado localmente."));
+      const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
+      if (!_hasOrderParams) {
+        pixCode = '00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5913Thiago Callegari6009Sao Paulo62070503***63041A2B';
+        window._currentPixCode = pixCode;
+      } else {
+        try {
+          const savedState = localStorage.getItem(STATE_STORAGE_KEY);
+          if (savedState) {
+            const state = JSON.parse(savedState);
+            if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
+          }
+          if (!pixCode) {
+            const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
+            const amountStr = ORDER.productPrice.toFixed(2).replace('.', ',');
+            const pixResp = await fetch('/api/pix', {
+              method: 'POST',
+              headers: { 'Content-Type': 'application/json' },
+              body: JSON.stringify({ payer_name: payerName, amount: amountStr })
+            });
+            const pixData = await pixResp.json();
+            if (pixData.success && pixData.pixCode) { pixCode = pixData.pixCode; window._currentPixCode = pixCode; }
+          }
+        } catch (err) { console.error(err); }
       }
     }
-
-
-
     const elapsed = Date.now() - pixStartTime;
     if (elapsed < 7000) await pause(7000 - elapsed);
     sp.remove();
@@ -1854,22 +1746,15 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-    let lojaAddress = window._lojaAddress;
-  if (!lojaAddress) {
-    const userCity = ORDER.location;
-    if (userCity) {
-      lojaAddress = await findNearbyAddress(userCity, null, null);
-      if (lojaAddress) {
-        window._lojaAddress = lojaAddress;
-      } else {
-        lojaAddress = `Estamos localizados em ${userCity} e região.`;
-      }
-    } else {
-      lojaAddress = `Estamos localizados em sua região.`;
-    }
-  }
-
-  const regraEndereco = `O endereço da nossa loja é: "${lojaAddress}". Responda sempre este mesmo local.`;
+  const regraEndereco = window._lojaAddress 
+    ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
+    : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
+Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
+1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
+2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
+3. Identifique o CEP REAL exato desse logradouro.
+4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
+Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.`;
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
