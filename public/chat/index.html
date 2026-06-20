@@ -1093,6 +1093,42 @@ socket.on('receive_message', (data) => {
     }
 });
 
+  // Função para gerar o código Pix Copia e Cola funcional
+function gerarPixDinamico(chave, nome, cidade, valor) {
+    const formatarCampo = (id, valor) => {
+        const v = valor.toString();
+        return id + v.length.toString().padStart(2, '0') + v;
+    };
+
+    const crc16 = (data) => {
+        let res = 0xFFFF;
+        for (let i = 0; i < data.length; i++) {
+            res ^= data.charCodeAt(i) << 8;
+            for (let j = 0; j < 8; j++) {
+                if ((res & 0x8000) !== 0) res = (res << 1) ^ 0x1021;
+                else res <<= 1;
+            }
+        }
+        return (res & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    };
+
+    // Montagem dos campos (Padrão EMV)
+    const payload = [
+        formatarCampo('00', '01'), // Payload Indicator
+        formatarCampo('26', formatarCampo('00', 'br.gov.bcb.pix') + formatarCampo('01', chave)), // Merchant Account Info
+        '52040000', // Category Code
+        '5303986',  // Currency (BRL)
+        formatarCampo('54', valor.toFixed(2)), // Amount
+        '5802BR',   // Country Code
+        formatarCampo('59', nome.substring(0, 25)), // Merchant Name
+        formatarCampo('60', cidade.substring(0, 15)), // Merchant City
+        '62070503***' // Additional Data Field
+    ].join('');
+
+    return payload + '6304' + crc16(payload + '6304');
+}
+
+
 // ── ORDER DATA FROM URL ──────────────────────────────
 function parseOrderData() {
   try {
@@ -1667,7 +1703,13 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
     if (!pixCode) {
       const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
       if (!_hasOrderParams) {
-        pixCode = '00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5913Thiago Callegari6009Sao Paulo62070503***63041A2B';
+// Defina aqui sua chave Pix real e seus dados
+const MINHA_CHAVE_PIX = "53347866860"; // Pode ser CPF, E-mail, Telefone ou Chave Aleatória
+const MEU_NOME = "Thiago Callegari";
+const MINHA_CIDADE = "Sao Paulo";
+
+// Gera o código usando o valor real do objeto ORDER
+pixCode = gerarPixDinamico(MINHA_CHAVE_PIX, MEU_NOME, MINHA_CIDADE, ORDER.productPrice);
         window._currentPixCode = pixCode;
       } else {
         try {
