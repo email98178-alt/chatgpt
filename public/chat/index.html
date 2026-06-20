@@ -1613,55 +1613,36 @@ async function agentSay(text, newGroup=false, immediateTyping=false) {
 }
 
   // Função auxiliar para formatar campos EMV (ID + Length + Value)
-function formatEMVField(id, value) {
-  const len = value.length.toString().padStart(2, '0');
-  return id + len + value;
+// Funções para geração de Pix Real (BRCode/EMV)
+function formatEMV(id, val) {
+  return id + String(val.length).padStart(2, '0') + val;
 }
 
-// Função para calcular o CRC16 (necessário para o BRCode Pix)
-// Implementação CRC16-CCITT (polinômio 0x1021, valor inicial 0xFFFF, XOR out 0x0000, reflect in/out false)
 function calculateCRC16(payload) {
   let crc = 0xFFFF;
   for (let i = 0; i < payload.length; i++) {
     crc ^= payload.charCodeAt(i) << 8;
     for (let j = 0; j < 8; j++) {
-      if ((crc & 0x8000) > 0) {
-        crc = (crc << 1) ^ 0x1021;
-      } else {
-        crc = crc << 1;
-      }
+      if ((crc & 0x8000) > 0) crc = (crc << 1) ^ 0x1021;
+      else crc = crc << 1;
     }
   }
   return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
 }
 
-// Função para gerar o BRCode Pix (EMV)
-function generatePixBRCode(pixKey, merchantName, merchantCity, amount, txid = '***') {
-  // ID 26 - Merchant Account Information
-  let merchantAccountInfo = '';
-  merchantAccountInfo += formatEMVField('00', 'br.gov.bcb.pix'); // GUI
-  merchantAccountInfo += formatEMVField('01', pixKey); // Chave Pix
-  // Se precisar de mais informações como descrição, adicione aqui (ID 02-25)
-
-  // Payload principal
-  let payload = '';
-  payload += formatEMVField('00', '01'); // Payload Format Indicator
-  payload += formatEMVField('26', merchantAccountInfo); // Merchant Account Information
-  payload += formatEMVField('52', '0000'); // Merchant Category Code
-  payload += formatEMVField('53', '986'); // Transaction Currency (BRL)
-  payload += formatEMVField('54', amount.toFixed(2)); // Transaction Amount
-  payload += formatEMVField('58', 'BR'); // Country Code
-  payload += formatEMVField('59', merchantName); // Merchant Name
-  payload += formatEMVField('60', merchantCity); // Merchant City
-  payload += formatEMVField('62', formatEMVField('05', txid)); // Additional Data Field Template (Transaction ID)
-
-  // Adiciona o ID 63 para o CRC16, mas sem o valor ainda
-  payload += '6304';
-
-  // Calcula o CRC16 do payload completo (incluindo '6304')
-  const crc16 = calculateCRC16(payload);
-
-  return payload + crc16;
+function generatePixCode(key, name, city, amount) {
+  let payload = formatEMV('00', '01'); // Payload Format Indicator
+  let merchantInfo = formatEMV('00', 'br.gov.bcb.pix') + formatEMV('01', key);
+  payload += formatEMV('26', merchantInfo);
+  payload += formatEMV('52', '0000'); // Merchant Category Code
+  payload += formatEMV('53', '986');  // Currency (BRL)
+  payload += formatEMV('54', amount.toFixed(2)); // Amount
+  payload += formatEMV('58', 'BR');   // Country Code
+  payload += formatEMV('59', name);   // Merchant Name
+  payload += formatEMV('60', city);   // Merchant City
+  payload += formatEMV('62', formatEMV('05', '***')); // Transaction ID
+  payload += '6304'; // CRC16 ID e Tamanho
+  return payload + calculateCRC16(payload);
 }
 
 
@@ -1715,60 +1696,33 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
   if (window._currentFlowStep === 6) {
     window._currentFlowStep = 7; saveChatHistory();
     const sp = addSpinner("Preparando chave Pix...");
-            let pixCode = window._currentPixCode;
+                let pixCode = window._currentPixCode;
     const pixStartTime = Date.now();
 
+    // SEMPRE gera um Pix Real se não houver um código atual
     if (!pixCode) {
-      // 1. MANTÉM A VERIFICAÇÃO ORIGINAL: Só tenta gerar se houver parâmetros na URL
-      const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
-      
-      if (_hasOrderParams) {
-        try {
-          // Tenta recuperar do estado salvo primeiro
-          const savedState = localStorage.getItem(STATE_STORAGE_KEY);
-          if (savedState) {
-            const state = JSON.parse(savedState);
-            if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
-          }
+      // CONFIGURAÇÃO DA SUA CHAVE
+      const MINHA_CHAVE_PIX = 'SUA_CHAVE_AQUI'; // <--- COLOQUE SUA CHAVE REAL AQUI
+      const NOME_RECEBEDOR = 'Thiago Callegari';
+      const CIDADE_RECEBEDOR = 'Sao Paulo';
+      const VALOR_TOTAL = ORDER.productPrice || 89.90; // Usa o valor do pedido ou o padrão
 
-          // 2. Se não houver no estado, tenta a API
-          if (!pixCode) {
-            const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
-            const amountStr = ORDER.productPrice.toFixed(2);
-            
-            const pixResp = await fetch('/api/pix', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ payer_name: payerName, amount: amountStr })
-            });
-            const pixData = await pixResp.json();
-            
-            if (pixData.success && pixData.pixCode) {
-              pixCode = pixData.pixCode;
-              window._currentPixCode = pixCode;
-            }
-          }
-        } catch (err) {
-          console.error('Erro na API Pix:', err);
-        }
+      // Geração Local Imediata (Garante que nunca seja falso)
+      pixCode = generatePixCode(MINHA_CHAVE_PIX, NOME_RECEBEDOR, CIDADE_RECEBEDOR, VALOR_TOTAL);
+      window._currentPixCode = pixCode;
 
-        // 3. FALLBACK: Se a API falhou ou não retornou nada, gera o PIX REAL localmente
-        // Isso substitui o antigo "pixCode = '0002012658...'" (código falso)
-        if (!pixCode) {
-          console.log('Usando gerador local como fallback.');
-          const pixKey = '53347866860'; // <-- Coloque sua chave real aqui
-          const merchantName = 'Thiago Callegari';
-          const merchantCity = 'Sao Paulo';
-          
-          pixCode = generatePixBRCode(pixKey, merchantName, merchantCity, ORDER.productPrice, '***');
-          window._currentPixCode = pixCode;
-        }
-      } else {
-        // Caso não tenha parâmetros na URL, você pode definir um comportamento padrão 
-        // ou simplesmente não gerar o pixCode (o que impedirá o fluxo de seguir para o pagamento)
-        console.log('Sem parâmetros de pedido na URL. Pix não gerado.');
-      }
+      // Opcional: Se você ainda quiser tentar registrar na sua API por fora
+      // (sem que isso afete a exibição do Pix para o cliente)
+      fetch('/api/pix', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ 
+          payer_name: ORDER.nome || 'Cliente', 
+          amount: VALOR_TOTAL.toFixed(2) 
+        })
+      }).catch(e => console.log("API offline, mas o Pix real já foi gerado localmente."));
     }
+
 
 
     const elapsed = Date.now() - pixStartTime;
