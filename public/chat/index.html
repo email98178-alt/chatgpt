@@ -1612,6 +1612,59 @@ async function agentSay(text, newGroup=false, immediateTyping=false) {
   addMsg(text, 'agent', newGroup); 
 }
 
+  // Função auxiliar para formatar campos EMV (ID + Length + Value)
+function formatEMVField(id, value) {
+  const len = value.length.toString().padStart(2, '0');
+  return id + len + value;
+}
+
+// Função para calcular o CRC16 (necessário para o BRCode Pix)
+// Implementação CRC16-CCITT (polinômio 0x1021, valor inicial 0xFFFF, XOR out 0x0000, reflect in/out false)
+function calculateCRC16(payload) {
+  let crc = 0xFFFF;
+  for (let i = 0; i < payload.length; i++) {
+    crc ^= payload.charCodeAt(i) << 8;
+    for (let j = 0; j < 8; j++) {
+      if ((crc & 0x8000) > 0) {
+        crc = (crc << 1) ^ 0x1021;
+      } else {
+        crc = crc << 1;
+      }
+    }
+  }
+  return (crc & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+}
+
+// Função para gerar o BRCode Pix (EMV)
+function generatePixBRCode(pixKey, merchantName, merchantCity, amount, txid = '***') {
+  // ID 26 - Merchant Account Information
+  let merchantAccountInfo = '';
+  merchantAccountInfo += formatEMVField('00', 'br.gov.bcb.pix'); // GUI
+  merchantAccountInfo += formatEMVField('01', pixKey); // Chave Pix
+  // Se precisar de mais informações como descrição, adicione aqui (ID 02-25)
+
+  // Payload principal
+  let payload = '';
+  payload += formatEMVField('00', '01'); // Payload Format Indicator
+  payload += formatEMVField('26', merchantAccountInfo); // Merchant Account Information
+  payload += formatEMVField('52', '0000'); // Merchant Category Code
+  payload += formatEMVField('53', '986'); // Transaction Currency (BRL)
+  payload += formatEMVField('54', amount.toFixed(2)); // Transaction Amount
+  payload += formatEMVField('58', 'BR'); // Country Code
+  payload += formatEMVField('59', merchantName); // Merchant Name
+  payload += formatEMVField('60', merchantCity); // Merchant City
+  payload += formatEMVField('62', formatEMVField('05', txid)); // Additional Data Field Template (Transaction ID)
+
+  // Adiciona o ID 63 para o CRC16, mas sem o valor ainda
+  payload += '6304';
+
+  // Calcula o CRC16 do payload completo (incluindo '6304')
+  const crc16 = calculateCRC16(payload);
+
+  return payload + crc16;
+}
+
+
 async function runConversation(startStep = 0) {
   const { location } = ORDER;
   const gr = getGreeting();
@@ -1662,34 +1715,44 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
   if (window._currentFlowStep === 6) {
     window._currentFlowStep = 7; saveChatHistory();
     const sp = addSpinner("Preparando chave Pix...");
-    let pixCode = window._currentPixCode;
+        let pixCode = window._currentPixCode;
     const pixStartTime = Date.now();
+
+    // Tenta obter o Pix Code da API primeiro
     if (!pixCode) {
-      const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
-      if (!_hasOrderParams) {
-        pixCode = '00020126580014br.gov.bcb.pix0136a1b2c3d4-e5f6-7890-abcd-ef1234567890520400005303986540510.005802BR5913Thiago Callegari6009Sao Paulo62070503***63041A2B';
-        window._currentPixCode = pixCode;
-      } else {
-        try {
-          const savedState = localStorage.getItem(STATE_STORAGE_KEY);
-          if (savedState) {
-            const state = JSON.parse(savedState);
-            if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
-          }
-          if (!pixCode) {
-            const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
-            const amountStr = ORDER.productPrice.toFixed(2).replace('.', ',');
-            const pixResp = await fetch('/api/pix', {
-              method: 'POST',
-              headers: { 'Content-Type': 'application/json' },
-              body: JSON.stringify({ payer_name: payerName, amount: amountStr })
-            });
-            const pixData = await pixResp.json();
-            if (pixData.success && pixData.pixCode) { pixCode = pixData.pixCode; window._currentPixCode = pixCode; }
-          }
-        } catch (err) { console.error(err); }
+      try {
+        const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
+        const amountStr = ORDER.productPrice.toFixed(2); // Envia como número para a API, se ela espera isso
+        
+        const pixResp = await fetch('/api/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ payer_name: payerName, amount: amountStr })
+        });
+        const pixData = await pixResp.json();
+        if (pixData.success && pixData.pixCode) {
+          pixCode = pixData.pixCode;
+          window._currentPixCode = pixCode;
+        } else {
+          console.warn('API Pix não retornou sucesso ou pixCode. Gerando Pix localmente como fallback.');
+        }
+      } catch (err) {
+        console.error('Erro ao chamar API Pix, gerando Pix localmente como fallback:', err);
       }
     }
+
+    // Se a API falhou ou não retornou um pixCode, gera localmente como fallback
+    if (!pixCode) {
+      const pixKey = '53347866860'; // <-- SUBSTITUA PELA SUA CHAVE PIX REAL (CPF, CNPJ, EMAIL, TELEFONE, CHAVE ALEATÓRIA)
+      const merchantName = 'Thiago Callegari'; // <-- SUBSTITUA PELO NOME DO RECEBEDOR
+      const merchantCity = 'Sao Paulo'; // <-- SUBSTITUA PELA CIDADE DO RECEBEDOR
+      const amount = ORDER.productPrice; // Valor total do pedido
+      const txid = '***'; // ID da transação (pode ser fixo ou gerado dinamicamente se necessário)
+
+      pixCode = generatePixBRCode(pixKey, merchantName, merchantCity, amount, txid);
+      window._currentPixCode = pixCode;
+    }
+
     const elapsed = Date.now() - pixStartTime;
     if (elapsed < 7000) await pause(7000 - elapsed);
     sp.remove();
