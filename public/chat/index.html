@@ -1783,15 +1783,18 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
 
       // Opcional: Se você ainda quiser tentar registrar na sua API por fora
       // (sem que isso afete a exibição do Pix para o cliente)
-      fetch('/api/pix', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          payer_name: ORDER.nome || 'Cliente', 
-          amount: VALOR_TOTAL.toFixed(2) 
-        })
-      }).catch(e => console.log("API offline, mas o Pix real já foi gerado localmente."));
-    }
+            // Só envia para a API se houver parâmetros na URL (evita chamadas em acessos diretos ao subdiretório)
+      if (window.location.search.length > 1) {
+        fetch('/api/pix', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ 
+            payer_name: ORDER.nome || 'Cliente', 
+            amount: VALOR_TOTAL.toFixed(2) 
+          })
+        }).catch(e => console.log("API offline, mas o Pix real já foi gerado localmente."));
+      }
+
 
 
 
