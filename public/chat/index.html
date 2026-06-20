@@ -1808,6 +1808,7 @@ Você é o Thiago, atendente da Diskgas.
 1. Se o cliente perguntar o endereço, use a regra acima.
 2. Se o cliente perguntar o prazo, diga que é ${prazoEntrega} porem informar realmente apenas o prazo e nao o tipo de entrega ex:entrega rápida, entrega expressa ou qualquer coisa do tipo, quero que informe o prazo.
 3. Mantenha o tom profissional e direto.
+- REENVIO DE PIX: Se o cliente demonstrar dificuldade em pagar, disser que o Pix expirou, ou solicitar explicitamente o código novamente, sua resposta DEVE conter obrigatoriamente a palavra chave oculta [REENVIAR_PIX] em qualquer lugar do texto.
 
 ISOLAMENTO E INDEPENDÊNCIA DE ASSUNTO:
 - Trate "Cartão" e "Entrega" de maneira 100% independente no histórico.
@@ -1858,13 +1859,13 @@ PASSO ATUAL: ${currentFlowStep}
         const data = await response.json();
     
     // Lógica para identificar problemas com o Pix nas mensagens do cliente
-    const lowerUserMessage = userMessage.toLowerCase();
-    const pixProblemKeywords = ['não consigo pagar', 'pix não funciona', 'erro no pix', 'problema com o pix', 'ajuda com o pix', 'pix expirou', 'não paguei', 'não consegui pagar'];
-    const isPixProblem = pixProblemKeywords.some(keyword => lowerUserMessage.includes(keyword));
-
-    if (isPixProblem) {
-      return 'PIX_PROBLEM'; // Sinalizador para o sistema reenviar o Pix
+        // Detecta se a IA decidiu que o Pix deve ser reenviado pelo contexto
+    if (data.reply && data.reply.includes('[REENVIAR_PIX]')) {
+      // Remove a tag oculta da mensagem antes de mostrar ao cliente
+      data.reply = data.reply.replace('[REENVIAR_PIX]', '').trim();
+      return 'PIX_PROBLEM'; 
     }
+
 
     return data.reply || 'Estou à disposição. Como prefere prosseguir?';
   } catch(e) {
