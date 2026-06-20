@@ -1031,6 +1031,7 @@ const STATE_STORAGE_KEY = 'diskgas_chat_state';
 const inputEl        = document.getElementById('msgInput');
 const inputWrapEl    = document.getElementById('inputWrap');
 const sendBtnEl      = document.getElementById('sendBtn');
+  sendBtnEl.disabled = !inputEl.value.trim();
 const typingEl       = document.getElementById('typingRow');
 const fabEl          = document.getElementById('scrollFab');
 const fabBadge       = document.getElementById('fabBadge');
@@ -1893,17 +1894,18 @@ async function doSend() {
 
   // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
     // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
-  if (!window._orderConfirmationShown) {
-    sendBtnEl.disabled = false;
+    if (!window._orderConfirmationShown) {
+    sendBtnEl.disabled = !inputEl.value.trim();
     return; 
   }
 
-  // FILTRO: Só responde se a mensagem tiver 3 ou mais palavras
-  const palavras = originalText.trim().split(/\s+/);
+
+    const palavras = originalText.trim().split(/\s+/);
   if (palavras.length < 3) {
-    sendBtnEl.disabled = false;
+    sendBtnEl.disabled = !inputEl.value.trim();
     return;
   }
+
 
     
   // Mostrar indicador de digitação
@@ -1947,10 +1949,11 @@ async function doSend() {
     confirmationMsgIndex = (confirmationMsgIndex + 1) % confirmationMessages.length;
     currentConfirmationBlock = null; showOrderConfirmation();
   }
-  scrollDown(true);
-  // Libera o botão novamente
-  sendBtnEl.disabled = false;
+    scrollDown(true);
+  // Libera o botão apenas se houver algo digitado
+  sendBtnEl.disabled = !inputEl.value.trim();
 }
+
 
 function addProfessionalStatusCard() {
   const card = document.createElement('div');
