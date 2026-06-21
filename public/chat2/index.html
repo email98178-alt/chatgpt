@@ -409,129 +409,135 @@ html,body{
   background:var(--bubble-a);
   border-radius:var(--radius-xs) var(--radius) var(--radius) var(--radius);
   padding:11px 15px;
-  box-shadow:0 1px 4px rgba(0,0,0,.06);
-  display:flex;align-items:center;gap:4px;
+  box-shadow:0 1px 4px rgba(0,0,0,.07);
+  display:flex;gap:5px;align-items:center;
 }
-.dot{width:6px;height:6px;border-radius:50%;background:var(--brand);opacity:.4;animation:dotPulse 1.4s ease infinite;}
-.dot:nth-child(2){animation-delay:.2s;}
-.dot:nth-child(3){animation-delay:.4s;}
-@keyframes dotPulse{0%,60%,100%{transform:translateY(0);opacity:.4;}30%{transform:translateY(-4px);opacity:1;}}
+.td{
+  width:6px;height:6px;border-radius:50%;
+  background:rgba(15,20,25,.2);
+  animation:tdpulse 1.3s ease-in-out infinite;
+}
+.td:nth-child(2){animation-delay:.17s;}
+.td:nth-child(3){animation-delay:.34s;}
+@keyframes tdpulse{
+  0%,65%,100%{transform:translateY(0);opacity:.25;}
+  30%{transform:translateY(-5px);opacity:1;background:var(--brand);}
+}
 
-/* ── INPUT AREA ── */
-.input-wrap{
-  background:var(--surface);
-  padding:10px 14px calc(10px + env(safe-area-inset-bottom));
-  border-top:1px solid var(--border-2);
-  display:flex;align-items:center;gap:10px;
-  flex-shrink:0;
-  position:relative;z-index:10;
+/* ── SCROLL FAB ── */
+.scroll-fab{
+  position:absolute;bottom:78px;right:14px;
+  width:40px;height:40px;border-radius:50%;
+  background:var(--brand);color:#fff;border:none;cursor:pointer;
+  display:none;align-items:center;justify-content:center;
+  box-shadow:0 4px 14px rgba(15,91,168,.3);
+  z-index:20;transition:all .22s var(--spring);
 }
-.input-box{
+.scroll-fab.on{display:flex;}
+.scroll-fab.keyboard-open{display:none !important;}
+.scroll-fab:hover{transform:translateY(-2px);}
+.scroll-fab:active{transform:scale(.9);}
+.fab-badge{
+  position:absolute;top:-5px;right:-5px;
+  background:#EF4444;color:#fff;font-size:9px;font-weight:700;
+  min-width:17px;height:17px;border-radius:10px;
+  display:none;align-items:center;justify-content:center;
+  border:2px solid var(--bg);padding:0 3px;
+}
+.fab-badge.on{display:flex;}
+
+/* ── FOOTER ── */
+/* ── FOOTER / INPUT ── */
+.footer{
+  background:var(--surface);
+  border-top:1px solid var(--border-2);
+  padding:8px 14px max(8px, env(safe-area-inset-bottom));
+  display:flex;align-items:flex-end;gap:10px;
+  position:relative;z-index:20;
+  flex-shrink:0;
+}
+.input-wrap{
   flex:1;background:var(--surface-2);
   border:1.5px solid var(--border-2);
-  border-radius:24px;
-  padding:10px 16px;
-  display:flex;align-items:center;gap:10px;
+  border-radius:24px;padding:4px 14px;
+  display:flex;align-items:flex-end;
   transition:all .2s ease;
 }
-.input-box:focus-within{
-  border-color:var(--brand-mid);
-  background:#fff;
-  box-shadow:0 0 0 3px var(--brand-glow);
+.input-wrap:focus-within{border-color:var(--brand-mid);background:#fff;box-shadow:0 0 0 3px var(--brand-glow);}
+
+.input-el{
+  flex:1;border:none;background:none;
+  padding:8px 0;font-family:inherit;font-size:14.5px;
+  color:var(--text);outline:none;resize:none;
+  max-height:100px;line-height:1.5;
 }
-.input-box input{
-  flex:1;border:none;background:transparent;
-  font-family:inherit;font-size:14.5px;color:var(--text);
-  outline:none;
-}
-.input-box input::placeholder{color:var(--text-3);font-weight:400;}
+.input-el::placeholder{color:var(--text-3);}
 
 .send-btn{
-  width:40px;height:40px;border-radius:50%;
-  background:var(--brand);border:none;cursor:pointer;
-  color:#fff;display:flex;align-items:center;justify-content:center;
+  width:36px;height:36px;border-radius:50%;
+  background:var(--brand);color:#fff;
+  border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  margin-bottom:3px;flex-shrink:0;
   transition:all .2s var(--spring);
-  box-shadow:0 3px 8px var(--brand-glow);
+  box-shadow:0 2px 8px var(--brand-glow);
 }
-.send-btn:disabled{background:var(--border);color:var(--text-3);cursor:default;box-shadow:none;transform:scale(.9);}
-.send-btn:not(:disabled):hover{transform:scale(1.08);background:var(--brand-mid);}
-.send-btn:not(:disabled):active{transform:scale(.92);}
+.send-btn:disabled{background:var(--border);color:var(--text-3);cursor:default;box-shadow:none;transform:scale(.9);opacity:.6;}
+.send-btn:not(:disabled):hover{background:var(--brand-dk);transform:scale(1.05);}
+.send-btn:not(:disabled):active{transform:scale(.95);}
 
-/* ── MODAL ── */
+/* ── MODALS ── */
 .modal-overlay{
-  position:absolute;inset:0;background:rgba(15,20,25,.4);
-  backdrop-filter:blur(4px);z-index:100;
-  display:none;align-items:center;justify-content:center;padding:20px;
-  animation:fadeIn .25s ease;
+  position:absolute;inset:0;background:rgba(0,0,0,.4);
+  z-index:1000;display:none;align-items:flex-end;justify-content:center;
+  backdrop-filter:blur(4px);
 }
 .modal-overlay.on{display:flex;}
-.modal{
-  background:#fff;width:100%;max-width:340px;
-  border-radius:24px;padding:24px;
-  box-shadow:0 20px 50px rgba(0,0,0,.2);
-  animation:modalIn .35s var(--spring);
+.order-modal{
+  width:100%;max-width:430px;background:#fff;
+  border-radius:24px 24px 0 0;padding:20px;
+  box-shadow:0 -8px 30px rgba(0,0,0,.12);
+  animation:slideUp .35s var(--spring);
+  max-height:85dvh;overflow-y:auto;
 }
-@keyframes fadeIn{from{opacity:0;}to{opacity:1;}}
-@keyframes modalIn{from{opacity:0;transform:scale(.9) translateY(20px);}to{opacity:1;transform:scale(1) translateY(0);}}
-
-.modal-title{font-size:18px;font-weight:700;color:var(--text);margin-bottom:6px;}
-.modal-sub{font-size:13px;color:var(--text-2);margin-bottom:20px;line-height:1.4;}
-
-.form-group{margin-bottom:16px;}
-.form-label{display:block;font-size:11px;font-weight:700;color:var(--text-3);text-transform:uppercase;margin-bottom:6px;letter-spacing:.5px;}
-.form-input{
-  width:100%;background:var(--surface-2);border:1.5px solid var(--border-2);
-  border-radius:12px;padding:12px 14px;font-family:inherit;font-size:14px;
-  transition:all .2s;outline:none;
+@keyframes slideUp{from{transform:translateY(100%);}to{transform:translateY(0);}}
+.modal-handle{
+  width:36px;height:4px;border-radius:2px;
+  background:var(--border);margin:0 auto 18px;
 }
-.form-input:focus{border-color:var(--brand);background:#fff;box-shadow:0 0 0 3px var(--brand-glow);}
+.modal-h{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px;}
+.modal-title{font-size:16px;font-weight:700;color:var(--text);}
+.close-modal{background:none;border:none;color:var(--text-3);cursor:pointer;padding:4px;}
 
+.order-items{display:flex;flex-direction:column;gap:10px;margin-bottom:16px;}
+.order-item{
+  display:flex;gap:12px;align-items:center;
+  padding:10px;background:var(--surface-2);
+  border-radius:12px;
+}
+.oi-img{width:48px;height:48px;border-radius:8px;object-fit:cover;background:var(--border-2);}
+.oi-info{flex:1;}
+.oi-name{font-size:13px;font-weight:600;color:var(--text);}
+.oi-price{font-size:13px;color:var(--brand);font-weight:700;margin-top:1px;}
+
+.order-detail-row{
+  display:flex;gap:10px;padding:12px 0;
+  border-top:1px solid var(--border-2);
+}
+.od-icon{color:var(--brand);flex-shrink:0;padding-top:1px;}
+.od-content{flex:1;}
+.od-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.5px;margin-bottom:3px;}
+.od-value{font-size:13px;color:var(--text-2);line-height:1.5;}
+
+.modal-footer{margin-top:16px;}
 .modal-btn{
-  width:100%;padding:14px;border-radius:14px;border:none;
-  background:var(--brand);color:#fff;font-weight:700;font-size:15px;
-  cursor:pointer;transition:all .2s;
-  box-shadow:0 4px 12px var(--brand-glow);
+  width:100%;padding:13px;border-radius:14px;
+  background:var(--brand);color:#fff;border:none;
+  font-weight:700;font-size:14px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(15,91,168,.25);
+  transition:all .2s ease;
 }
-.modal-btn:hover{background:var(--brand-mid);transform:translateY(-1px);}
-.modal-btn:active{transform:translateY(0);}
-
-/* ── CART BUTTON (HEADER) ── */
-.cart-badge{
-  position:absolute;top:-4px;right:-4px;
-  background:var(--orange);color:#fff;
-  font-size:9px;font-weight:800;
-  width:16px;height:16px;border-radius:50%;
-  display:flex;align-items:center;justify-content:center;
-  border:2px solid var(--brand-dk);
-}
-
-/* ── ORDER CONFIRMATION BLOCK ── */
-.order-confirmation-block{
-  background:var(--surface);
-  border:1px solid var(--border-2);
-  border-radius:20px;
-  padding:18px;
-  margin:10px 0;
-  width:100%;max-width:340px;
-  animation:cardIn .5s var(--spring);
-  box-shadow:0 4px 15px rgba(0,0,0,0.04);
-  align-self:flex-start;
-}
-.oc-header{display:flex;justify-content:space-between;align-items:center;margin-bottom:15px;}
-.oc-label{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;letter-spacing:.8px;}
-.oc-edit{color:var(--brand);font-size:11px;font-weight:700;cursor:pointer;display:flex;align-items:center;gap:4px;}
-
-.oc-item{display:flex;gap:12px;margin-bottom:14px;padding-bottom:14px;border-bottom:1px solid var(--border-2);}
-.oc-img{width:50px;height:50px;border-radius:12px;object-fit:cover;background:var(--surface-2);}
-.oc-info{flex:1;}
-.oc-name{font-size:14px;font-weight:700;color:var(--text);margin-bottom:2px;}
-.oc-qty{font-size:12px;color:var(--text-3);font-weight:500;}
-
-.oc-data{display:flex;flex-direction:column;gap:10px;margin-bottom:18px;}
-.oc-row{display:flex;justify-content:space-between;align-items:center;}
-.oc-row-lbl{font-size:12px;color:var(--text-3);font-weight:500;}
-.oc-row-val{font-size:12px;color:var(--text);font-weight:600;}
-.oc-row-val.price{font-size:15px;color:var(--brand);font-weight:800;}
+.modal-btn:hover{background:var(--brand-mid);}
 
 .qty-control{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:8px;padding:4px 8px;border:1px solid var(--border);}
 .qty-btn{width:28px;height:28px;border-radius:6px;border:none;background:var(--surface-2);color:var(--text);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
@@ -552,10 +558,6 @@ html,body{
   animation: cardIn 0.5s var(--spring);
   box-shadow: 0 4px 18px rgba(0,0,0,0.05);
   align-self: flex-start;
-  transition: transform 0.1s;
-}
-.pix-card:active {
-  transform: scale(0.98);
 }
 .pix-card-header {
   display: flex;
@@ -597,118 +599,155 @@ html,body{
 .pix-expiry {
   display: flex;
   align-items: center;
-  gap: 5px;
-  font-size: 11px;
+  gap: 4px;
+  background: #FFF7ED;
+  border: 1px solid rgba(249,115,22,0.22);
+  color: #9A3412;
+  font-size: 10px;
   font-weight: 700;
-  color: var(--orange);
-  background: var(--orange-lt);
-  padding: 4px 10px;
-  border-radius: 20px;
+  padding: 5px 10px;
+  border-radius: 7px;
+  flex-shrink: 0;
 }
-
 .pix-price-hero {
   text-align: center;
-  padding: 18px 0;
-  border-top: 1px solid var(--border-2);
-  margin-top: 5px;
+  padding: 16px 0 22px;
 }
 .pix-price-eyebrow {
-  font-size: 11px;
-  color: var(--text-3);
+  font-size: 10.5px;
   font-weight: 700;
+  color: var(--text-3);
   text-transform: uppercase;
-  letter-spacing: 0.8px;
-  margin-bottom: 6px;
+  letter-spacing: 1.3px;
+  margin-bottom: 8px;
 }
 .pix-price-amount {
-  font-size: 34px;
-  font-weight: 800;
+  font-size: 40px;
+  font-weight: 900;
   color: var(--text);
-  letter-spacing: -0.5px;
+  letter-spacing: -2px;
+  line-height: 1;
+  font-variant-numeric: tabular-nums;
 }
 .pix-price-amount span {
-  font-size: 18px;
+  font-size: 19px;
   font-weight: 700;
-  margin-right: 4px;
-  color: var(--text-3);
+  letter-spacing: 0;
+  margin-right: 3px;
+  vertical-align: 4px;
 }
-
 .pix-code-row {
-  background: var(--surface-2);
-  border: 1.5px dashed var(--border);
-  border-radius: 14px;
-  padding: 14px;
+  background: #F8FAFC;
+  border: 1.5px solid var(--border-2);
+  border-radius: 12px;
+  padding: 11px 14px;
+  margin-bottom: 12px;
   display: flex;
   align-items: center;
-  gap: 12px;
-  margin-bottom: 18px;
+  gap: 8px;
 }
 .pix-code-text {
+  flex: 1;
   font-family: 'JetBrains Mono', monospace;
   font-size: 11.5px;
+  font-weight: 600;
   color: var(--text-2);
-  white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
-  flex: 1;
+  white-space: nowrap;
 }
-
 .pix-copy-btn {
   width: 100%;
-  padding: 16px;
+  padding: 15px;
   background: var(--brand);
   color: #fff;
   border: none;
-  border-radius: 16px;
+  border-radius: 14px;
   font-size: 15px;
   font-weight: 700;
   cursor: pointer;
   display: flex;
   align-items: center;
   justify-content: center;
-  gap: 10px;
-  transition: all 0.2s;
-  box-shadow: 0 4px 14px var(--brand-glow);
+  gap: 8px;
+  transition: background 0.2s ease, transform 0.15s ease;
   margin-bottom: 18px;
+  font-family: inherit;
+  box-shadow: 0 4px 14px rgba(15,91,168,0.22);
+  animation: pulse-brand 2.8s infinite;
 }
 .pix-copy-btn:hover {
   background: var(--brand-mid);
   transform: translateY(-1px);
+  box-shadow: 0 6px 18px rgba(15,91,168,0.28);
 }
-.pix-copy-btn:active {
-  transform: translateY(0);
-}
+.pix-copy-btn:active { transform: scale(0.97); }
 .pix-copy-btn.copied {
-  background: var(--green) !important;
+  background: var(--green);
+  animation: none;
   box-shadow: 0 4px 14px rgba(16,185,129,0.25);
 }
-
 .pix-trust-row {
   display: flex;
-  justify-content: center;
-  gap: 15px;
-  padding-top: 5px;
+  align-items: center;
+  padding-top: 14px;
+  border-top: 1px solid var(--border-2);
 }
 .pix-trust-item {
+  flex: 1;
   display: flex;
   align-items: center;
-  gap: 6px;
-  font-size: 10.5px;
-  font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.4px;
+  gap: 5px;
+  font-size: 11px;
+  font-weight: 600;
 }
 .pix-trust-item.positive { color: var(--green-dk); }
-.pix-trust-item.neutral { color: var(--text-3); }
+.pix-trust-item.neutral { color: var(--text-3); justify-content: flex-end; }
 
-/* ── SELLER INFO MODAL ── */
-.seller-modal-body{padding-top:10px;}
-.seller-profile{display:flex;align-items:center;gap:18px;margin-bottom:24px;background:var(--brand-lt);padding:15px;border-radius:18px;}
-.sp-avatar{width:70px;height:70px;border-radius:50%;border:3px solid #fff;box-shadow:0 4px 10px rgba(0,0,0,0.1);}
-.sp-info{flex:1;}
-.sp-name{font-size:17px;font-weight:800;color:var(--brand-dk);margin-bottom:2px;}
-.sp-role{font-size:12px;color:var(--brand-mid);font-weight:700;display:flex;align-items:center;gap:4px;}
-
+/* ── SELLER MODAL ── */
+.seller-modal-overlay{
+  position:absolute;inset:0;background:rgba(0,0,0,.4);
+  z-index:1100;display:none;align-items:center;justify-content:center;
+  backdrop-filter:blur(6px);padding:20px;
+}
+.seller-modal-overlay.on{display:flex;}
+.seller-modal{
+  width:100%;max-width:340px;background:#fff;
+  border-radius:28px;padding:24px;
+  box-shadow:0 15px 40px rgba(0,0,0,.15);
+  animation:cardIn .4s var(--spring);
+  position:relative;
+}
+.seller-close{
+  position:absolute;top:16px;right:16px;
+  width:32px;height:32px;border-radius:50%;
+  background:var(--surface-2);border:none;cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  color:var(--text-3);transition:all .2s;
+}
+.seller-close:hover{background:var(--border-2);color:var(--text);}
+.seller-header{text-align:center;margin-bottom:20px;}
+.seller-avatar-big{
+  width:84px;height:84px;border-radius:50%;
+  object-fit:cover;border:3px solid var(--brand-lt);
+  box-shadow:0 4px 15px var(--brand-glow);
+  margin-bottom:12px;
+}
+.seller-name-big{font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;}
+.seller-badge-big{
+  display:inline-flex;align-items:center;gap:4px;
+  background:var(--brand-lt);color:var(--brand);
+  font-size:11px;font-weight:700;padding:4px 10px;
+  border-radius:20px;text-transform:uppercase;letter-spacing:.4px;
+}
+.seller-stats{
+  display:grid;grid-template-columns:1fr 1fr;gap:12px;
+  margin-bottom:20px;padding:16px;background:var(--surface-2);
+  border-radius:18px;
+}
+.stat-item{text-align:center;}
+.stat-val{font-size:15px;font-weight:800;color:var(--text);display:block;}
+.stat-lbl{font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;}
 .seller-info-list{display:flex;flex-direction:column;gap:14px;}
 .info-row{display:flex;gap:12px;align-items:flex-start;}
 .info-ico{color:var(--brand);flex-shrink:0;margin-top:2px;}
@@ -724,10 +763,6 @@ html,body{
   border: 1px solid var(--border-2);
   box-shadow: 0 4px 15px rgba(0,0,0,0.05);
   animation: fadeUp 0.5s ease;
-  transition: transform 0.1s;
-}
-.payment-status-card:active {
-  transform: scale(0.98);
 }
 
 .status-header {
@@ -763,63 +798,66 @@ html,body{
   overflow: hidden;
 }
 
+.step-bar.active::after {
+  content: '';
+  position: absolute;
+  left: 0;
+  top: 0;
+  height: 100%;
+  width: 60%;
+  background: var(--brand);
+  animation: pulse-progress 2s infinite ease-in-out;
+}
+
 .step-bar.completed {
   background: var(--green);
 }
 
-.step-bar.active {
-  background: var(--border-2);
-}
-
-.step-bar.active::after {
-  content: '';
-  position: absolute;
-  top: 0;
-  left: 0;
-  height: 100%;
-  width: 50%;
-  background: var(--brand);
-  border-radius: 2px;
-  animation: loadingBar 2s infinite ease-in-out;
-}
-
-@keyframes loadingBar {
-  0% { left: -50%; }
-  100% { left: 100%; }
+@keyframes pulse-progress {
+  0% { opacity: 0.6; width: 40%; }
+  50% { opacity: 1; width: 70%; }
+  100% { opacity: 0.6; width: 40%; }
 }
 
 .status-info {
   display: flex;
   align-items: center;
-  gap: 15px;
+  gap: 12px;
 }
 
+/* Ícone de status com brilho profissional */
 .status-icon-pulse {
-  width: 44px;
-  height: 44px;
-  background: var(--brand-lt);
-  color: var(--brand);
-  border-radius: 50%;
+  width: 42px;
+  height: 42px;
+  background: #fff;
+  border-radius: 12px; /* Formato levemente arredondado em vez de círculo */
   display: flex;
   align-items: center;
   justify-content: center;
+  color: var(--brand);
   position: relative;
-  flex-shrink: 0;
+  box-shadow: 0 4px 12px rgba(15, 91, 168, 0.12);
+  border: 1px solid var(--brand-lt);
 }
 
+/* Efeito de brilho suave (Glow) */
 .status-icon-pulse::before {
   content: '';
   position: absolute;
-  inset: -4px;
-  border: 2px solid var(--brand);
-  border-radius: 50%;
-  animation: pulseIcon 2s infinite;
+  inset: -2px;
+  background: var(--brand);
+  border-radius: 14px;
+  z-index: -1;
+  opacity: 0.15;
+  filter: blur(8px);
+  animation: soft-glow 2s infinite ease-in-out;
 }
 
-@keyframes pulseIcon {
-  0% { transform: scale(1); opacity: 0.5; }
-  100% { transform: scale(1.3); opacity: 0; }
+@keyframes soft-glow {
+  0%, 100% { opacity: 0.1; transform: scale(1); }
+  50% { opacity: 0.3; transform: scale(1.1); }
 }
+
 
 .status-text-main {
   font-size: 14px;
@@ -829,329 +867,688 @@ html,body{
 }
 
 .status-text-sub {
-  font-size: 11.5px;
+  font-size: 12px;
   color: var(--text-3);
-  font-weight: 500;
+  margin-top: 2px;
 }
 
-/* ── RESPONSIVE ── */
-@media (max-width: 360px) {
-  .header{padding:10px 12px;}
-  .h-avatar-img{width:34px;height:34px;}
-  .h-name{font-size:13.5px;}
-  .msgs{padding:12px 10px 4px;}
-  .bubble{font-size:13.5px;padding:9px 12px 7px;}
-  .pix-price-amount{font-size:28px;}
+  .name-highlight {
+  background: var(--brand-lt);
+  color: var(--brand-dk);
+  font-weight: 700;
+  padding: 2px 6px;
+  border-radius: 6px;
+  border: 1px solid rgba(15, 91, 168, 0.15);
+  white-space: nowrap;
 }
+
+
 </style>
 </head>
 <body>
-
 <div class="app">
-  <div class="header">
-    <button class="icon-btn" onclick="location.reload()"><svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg></button>
-    <div class="h-agent" onclick="openSellerModal()">
+
+  <!-- HEADER -->
+  <header class="header">
+    <button class="icon-btn" id="backBtn" aria-label="Voltar">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="19" y1="12" x2="5" y2="12"/><polyline points="12 19 5 12 12 5"/></svg>
+    </button>
+    <div class="h-agent" id="headerSellerTrigger">
       <div class="h-avatar">
-        <img src="https://i.ibb.co/LzfS0pZ/thiago.jpg" class="h-avatar-img" alt="Thiago">
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp" class="h-avatar-img" alt="Thiago">
         <div class="h-dot"></div>
       </div>
-      <div class="h-info" id="headerStatus">
-        <div class="h-name">Thiago Callegari <svg width="12" height="12" viewBox="0 0 24 24" fill="#fff"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg></div>
-        <div class="h-sub">
+      <div class="h-info">
+        <div class="h-name">
+          Thiago Callegari
+          <span style="display:inline-flex;align-items:center;justify-content:center;width:15px;height:15px;background-color:#1d9bf0;border-radius:50%;margin-left:4px;">
+            <svg viewBox="0 0 24 24" aria-label="Verificado" style="width:10px;height:10px;fill:#fff;"><g><path d="M22.25 12c0-1.43-.88-2.67-2.19-3.34.46-1.39.2-2.97-.81-4.08s-2.47-1.49-3.89-1.12c-.77-1.16-2.04-1.96-3.51-1.96s-2.74.8-3.51 1.96c-1.42-.37-2.88.01-3.89 1.12s-1.27 2.69-.81 4.08c-1.31.67-2.19 1.91-2.19 3.34s.88 2.67 2.19 3.34c-.46 1.39-.2 2.97.81 4.08s2.47 1.49 3.89 1.12c.77 1.16 2.04 1.96 3.51 1.96s2.74-.8 3.51-1.96c1.42.37 2.88-.01 3.89-1.12s1.27-2.69.81-4.08c1.31-.67 2.19-1.91 2.19-3.34zm-11.71 4.2L6.8 12.46l1.41-1.42 2.26 2.26 4.8-5.23 1.47 1.35-6.2 6.78z"></path></g></svg>
+          </span>
+        </div>
+        <div class="h-sub" id="headerStatus">
           <span id="statusText">Online · Diskgas</span>
-          <div class="typing-dots-mini" id="typingDotsMini"><div class="tdm"></div><div class="tdm"></div><div class="tdm"></div></div>
+          <div class="typing-dots-mini" id="typingDotsMini">
+            <div class="tdm"></div><div class="tdm"></div><div class="tdm"></div>
+          </div>
         </div>
       </div>
     </div>
-    <div style="position:relative;">
-      <button class="icon-btn" onclick="updateModal(true); modalOverlayEl.classList.add('on');">
-        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
-        <div class="cart-badge" id="cartBadge">1</div>
-      </button>
+    <button class="icon-btn" id="cartBtn" aria-label="Ver Pedido" style="position:relative;">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="9" cy="21" r="1"/><circle cx="20" cy="21" r="1"/><path d="M1 1h4l2.68 13.39a2 2 0 0 0 2 1.61h9.72a2 2 0 0 0 2-1.61L23 6H6"/></svg>
+      <span class="cart-badge" id="cartBadgeEl">1</span>
+    </button>
+  </header>
+
+  <!-- TRUST BAR -->
+  <div class="trust-bar">
+    <div class="t-item">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--green-dk)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+      Seguro
+    </div>
+    <div class="t-sep">·</div>
+    <div class="t-item">
+      <span class="t-stars">★★★★★</span>
+      4,9 · Excelente
+    </div>
+    <div class="t-sep">·</div>
+    <div class="t-item">
+      <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+      Autorizado
     </div>
   </div>
 
-  <div class="trust-bar">
-    <div class="t-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Compra Segura</div>
-    <div class="t-sep">|</div>
-    <div class="t-item"><div class="t-stars">★★★★★</div> 4.9/5</div>
-    <div class="t-sep">|</div>
-    <div class="t-item"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 20-30 min</div>
-  </div>
-
+  <!-- MESSAGES -->
   <div class="msgs" id="msgs"></div>
 
+  <!-- TYPING -->
   <div class="typing-row" id="typingRow">
-    <img src="https://i.ibb.co/LzfS0pZ/thiago.jpg" class="m-avatar" alt="Thiago">
-    <div class="typing-bubble"><div class="dot"></div><div class="dot"></div><div class="dot"></div></div>
-  </div>
-
-  <div class="input-wrap">
-    <div class="input-box">
-      <input type="text" id="userInput" placeholder="Escreva sua mensagem..." autocomplete="off">
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2.5"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>
+    <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp" class="m-avatar" alt="Thiago" id="typingAvatarTrigger">
+    <div class="typing-bubble">
+      <div class="td"></div><div class="td"></div><div class="td"></div>
     </div>
-    <button class="send-btn" id="sendBtn" disabled>
-      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>
+  </div>
+
+  <!-- SCROLL FAB -->
+  <button class="scroll-fab" id="scrollFab" aria-label="Ir para mensagens novas">
+    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>
+    <span class="fab-badge" id="fabBadge">0</span>
+  </button>
+
+  <!-- FOOTER -->
+  <footer class="footer">
+    <div class="input-wrap" id="inputWrap">
+      <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
+    </div>
+    <button class="send-btn" id="sendBtn" disabled aria-label="Enviar">
+      <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
-  </div>
-</div>
+  </footer>
 
-<div class="modal-overlay" id="modalOverlay">
-  <div class="modal">
-    <div class="modal-title">Ajustar Pedido</div>
-    <div class="modal-sub">Edite as informações abaixo para atualizar seu pedido de gás.</div>
-    <div id="modalForm"></div>
-    <button class="modal-btn" onclick="saveOrder()" style="margin-top:10px;">Salvar Alterações</button>
-    <button class="modal-btn" onclick="modalOverlayEl.classList.remove('on')" style="margin-top:8px;background:transparent;color:var(--text-3);box-shadow:none;">Cancelar</button>
-  </div>
-</div>
-
-<div class="modal-overlay" id="sellerModal">
-  <div class="modal" style="max-width:360px;">
-    <div class="modal-title">Vendedor Autorizado</div>
-    <div class="modal-sub">Informações do consultor responsável pelo seu atendimento.</div>
-    <div class="seller-modal-body">
-      <div class="seller-profile">
-        <img src="https://i.ibb.co/LzfS0pZ/thiago.jpg" class="sp-avatar" alt="Thiago">
-        <div class="sp-info">
-          <div class="sp-name">Thiago Callegari</div>
-          <div class="sp-role"><svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor"><path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41L9 16.17z"/></svg> Consultor Oficial</div>
+  <!-- ORDER MODAL -->
+  <div class="modal-overlay" id="modalOverlay">
+    <div class="order-modal">
+      <div class="modal-handle"></div>
+      <div class="modal-h">
+        <h3 class="modal-title">Resumo do Pedido</h3>
+        <button class="close-modal" id="closeModal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      </div>
+      <div class="order-items" id="orderItems"></div>
+      <div class="order-detail-row">
+        <div class="od-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
+        <div class="od-content">
+          <div class="od-label">Endereço de Entrega</div>
+          <div class="od-value" id="orderAddress">...</div>
         </div>
+      </div>
+      <div class="order-detail-row">
+        <div class="od-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+        <div class="od-content">
+          <div class="od-label">Previsão de Entrega</div>
+<div class="od-value" id="orderTime">${ORDER.deliveryTime}</div>
+        </div>
+      </div>
+      <div class="modal-footer">
+        <button class="modal-btn" id="confirmModal">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SELLER MODAL -->
+  <div class="seller-modal-overlay" id="sellerModalOverlay">
+    <div class="seller-modal">
+      <button class="seller-close" id="closeSellerModal"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <div class="seller-header">
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp" class="seller-avatar-big" alt="Thiago">
+        <h3 class="seller-name-big">Thiago Callegari</h3>
+        <span class="seller-badge-big">Vendedor Oficial Diskgas</span>
+      </div>
+      <div class="seller-stats">
+        <div class="stat-item"><span class="stat-val">4,9/5</span><span class="stat-lbl">Avaliação</span></div>
+        <div class="stat-item"><span class="stat-val">+2.5k</span><span class="stat-lbl">Entregas</span></div>
       </div>
       <div class="seller-info-list">
         <div class="info-row">
-          <div class="info-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-          <div class="info-txt"><span class="info-lbl">Atuação</span>Diskgas — São Paulo e Região</div>
+          <div class="info-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
+          <div class="info-txt"><span class="info-lbl">Verificado</span>Identidade e empresa validadas pela Diskgas Brasil.</div>
         </div>
         <div class="info-row">
-          <div class="info-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
-          <div class="info-txt"><span class="info-lbl">Experiência</span>Desde 2019 na rede autorizada</div>
-        </div>
-        <div class="info-row">
-          <div class="info-ico"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M12 8v4l3 3"/></svg></div>
-          <div class="info-txt"><span class="info-lbl">Horário</span>Segunda a Sábado, 08h às 20h</div>
+          <div class="info-ico"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
+          <div class="info-txt"><span class="info-lbl">Tempo de Resposta</span>Geralmente responde em menos de 1 minuto.</div>
         </div>
       </div>
+      <div class="modal-footer" style="margin-top:24px;">
+        <button class="modal-btn" id="closeSellerModalBtn">Voltar ao Chat</button>
+      </div>
     </div>
-    <button class="modal-btn" onclick="sellerModalEl.classList.remove('on')" style="margin-top:25px;">Fechar Perfil</button>
   </div>
+
 </div>
 
 <script>
-// ── CONFIG & STATE ───────────────────────────────────
-const STATE_STORAGE_KEY = 'diskgas_chat_state_v3';
-const HISTORY_STORAGE_KEY = 'diskgas_chat_history_v3';
+const msgsEl         = document.getElementById('msgs');
+const LOCAL_STORAGE_KEY = 'diskgas_chat_history';
+const STATE_STORAGE_KEY = 'diskgas_chat_state';
+const inputEl        = document.getElementById('msgInput');
+const inputWrapEl    = document.getElementById('inputWrap');
+const sendBtnEl      = document.getElementById('sendBtn');
+  sendBtnEl.disabled = !inputEl.value.trim();
+const typingEl       = document.getElementById('typingRow');
+const fabEl          = document.getElementById('scrollFab');
+const fabBadge       = document.getElementById('fabBadge');
+const statusTextEl   = document.getElementById('statusText');
+const typingDotsMini = document.getElementById('typingDotsMini');
+const headerStatusEl = document.getElementById('headerStatus');
+const cartBtnEl      = document.getElementById('cartBtn');
+const backBtnEl      = document.getElementById('backBtn');
+const modalOverlayEl = document.getElementById('modalOverlay');
+const closeModalEl   = document.getElementById('closeModal');
+const confirmModalEl = document.getElementById('confirmModal');
+const orderItemsEl   = document.getElementById('orderItems');
+const orderAddressEl = document.getElementById('orderAddress');
+const orderTimeEl    = document.getElementById('orderTime');
 
-let ORDER = {
-  nome: '',
-  location: '',
-  cep: '',
-  productName: 'Botijão de Gás P13',
-  productPrice: 105.00,
-  qty: 1,
-  img: 'https://i.ibb.co/m0vV5Y9/gas.png'
+// Seller Modal Elements
+const sellerModalOverlayEl = document.getElementById('sellerModalOverlay');
+const closeSellerModalEl   = document.getElementById('closeSellerModal');
+const closeSellerModalBtnEl = document.getElementById('closeSellerModalBtn');
+const headerSellerTriggerEl = document.getElementById('headerSellerTrigger');
+const typingAvatarTriggerEl = document.getElementById('typingAvatarTrigger');
+
+const openSellerModal = () => sellerModalOverlayEl.classList.add('on');
+const closeSellerModal = () => sellerModalOverlayEl.classList.remove('on');
+
+closeSellerModalEl.onclick = closeSellerModal;
+closeSellerModalBtnEl.onclick = closeSellerModal;
+headerSellerTriggerEl.onclick = openSellerModal;
+typingAvatarTriggerEl.onclick = openSellerModal;
+sellerModalOverlayEl.onclick = (e) => { if(e.target===sellerModalOverlayEl) closeSellerModal(); };
+
+const AVATAR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp";
+const ts = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
+
+let lastSender = null;
+window._lojaAddress = null;
+let atBottom = true;
+let unread = 0;
+let chatUnlocked = false;
+let alertTimeout = null;
+
+// ── SOCKET.IO INTEGRATION ────────────────────────────
+const SOCKET_SERVER_URL = window.location.hostname === 'localhost' ? 'http://localhost:3000' : 'https://chat-diskgas.onrender.com';
+const socket = io(SOCKET_SERVER_URL);
+const userId = localStorage.getItem('chatUserId') || `user_${Date.now()}`;
+localStorage.setItem('chatUserId', userId);
+
+socket.on('connect', () => {
+    console.log('Conectado ao Socket:', socket.id);
+    socket.emit('join', { userId: userId, isAdmin: false });
+});
+
+socket.on('receive_message', (data) => {
+    // CORREÇÃO DE DUPLICAÇÃO:
+    // Se a mensagem recebida for do "Thiago" mas tiver o campo `isAuto: true`, 
+    // significa que é uma mensagem que o próprio chat enviou e o servidor está devolvendo.
+    // Ignoramos essas para evitar duplicação.
+    if (data.sender !== 'Cliente' && !data.isAuto) {
+        addMsg(data.text, 'agent', false, true, false); 
+    }
+});
+
+  // Função para gerar o código Pix Copia e Cola funcional
+function gerarPixDinamico(chave, nome, cidade, valor) {
+    const formatarCampo = (id, valor) => {
+        const v = valor.toString();
+        return id + v.length.toString().padStart(2, '0') + v;
+    };
+
+    const crc16 = (data) => {
+        let res = 0xFFFF;
+        for (let i = 0; i < data.length; i++) {
+            res ^= data.charCodeAt(i) << 8;
+            for (let j = 0; j < 8; j++) {
+                if ((res & 0x8000) !== 0) res = (res << 1) ^ 0x1021;
+                else res <<= 1;
+            }
+        }
+        return (res & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
+    };
+
+    // Montagem dos campos (Padrão EMV)
+    const payload = [
+        formatarCampo('00', '01'), // Payload Indicator
+        formatarCampo('26', formatarCampo('00', 'br.gov.bcb.pix') + formatarCampo('01', chave)), // Merchant Account Info
+        '52040000', // Category Code
+        '5303986',  // Currency (BRL)
+        formatarCampo('54', valor.toFixed(2)), // Amount
+        '5802BR',   // Country Code
+        formatarCampo('59', nome.substring(0, 25)), // Merchant Name
+        formatarCampo('60', cidade.substring(0, 15)), // Merchant City
+        '62070503***' // Additional Data Field
+    ].join('');
+
+    return payload + '6304' + crc16(payload + '6304');
+}
+
+
+// ── ORDER DATA FROM URL ──────────────────────────────
+function parseOrderData() {
+  try {
+    const p = new URLSearchParams(window.location.search);
+    const productsStr = p.get('products');
+        let address = p.get('address') || '';
+    const cep = p.get('cep') || '';
+    const deliveryTime = p.get('delivery_time') || '20–30 minutos';
+    const subtotal = parseFloat(p.get('subtotal')) || 0;
+
+    let products = [];
+    if (productsStr) {
+      try { products = JSON.parse(decodeURIComponent(productsStr)); } catch(e) {}
+    }
+
+    let productName = 'Botijão de Gás P13';
+    let productQty  = 1;
+    let productPrice = subtotal || 89.90;
+
+    if (products.length > 0) {
+      productName  = products[0].n || productName;
+      productQty   = products[0].q || 1;
+      if (!subtotal) productPrice = products.reduce((a, c) => a + (c.v * (c.q || 1)), 0);
+    }
+
+    let location = 'sua região';
+        if (address) {
+      // Divide por vírgula para separar Logradouro, Número/Complemento, Bairro e Cidade/UF
+      const parts = address.split(',').map(p => p.trim());
+      let city = '', neighborhood = '';
+
+      // 1. Tenta extrair a Cidade da última parte (ex: "Barueri/SP")
+      const lastPart = parts[parts.length - 1];
+      if (lastPart && lastPart.includes('/')) {
+        city = lastPart.split('/')[0].trim();
+      }
+
+      // 2. Tenta extrair o Bairro
+      // Em endereços do Google/Maps, o bairro costuma ser a penúltima parte antes da cidade
+      if (parts.length >= 3) {
+        // Pega a parte antes da Cidade/UF
+        let potentialNeighborhood = parts[parts.length - 2];
+        
+        // Se essa parte ainda contiver hífens (ex: "12 - teste - Jardim Itaquiti"), 
+        // o bairro real costuma ser a ÚLTIMA sub-parte dessa string
+        if (potentialNeighborhood.includes(' - ')) {
+          const subParts = potentialNeighborhood.split(' - ').map(s => s.trim());
+          neighborhood = subParts[subParts.length - 1];
+        } else {
+          neighborhood = potentialNeighborhood;
+        }
+      }
+
+      // 3. Limpeza final e definição da 'location'
+      if (neighborhood) neighborhood = neighborhood.replace(/^\d+\s*-\s*/, '').trim();
+      
+      // Prioridade: Bairro > Cidade > "sua região"
+      if (neighborhood && neighborhood.length > 2) {
+        location = neighborhood;
+      } else if (city && city.length > 2) {
+        location = city;
+      }
+    }
+
+        if (cep) address += `, CEP: ${cep}`;
+    const nome = p.get('nome') || '';
+    return { products, productName, productQty, productPrice, location, address, deliveryTime, nome, cep };
+  } catch(e) {
+return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime: deliveryTime, nome:'', cep:'' };
+  }
+}
+const ORDER = parseOrderData();
+
+function updateModal(isEditing = false, customTitle = null) {
+  if (isEditing) {
+    document.querySelector('.modal-title').textContent = customTitle || 'Editar Pedido';
+    confirmModalEl.textContent = 'Salvar Alterações';
+    if (ORDER.products.length > 0) {
+      orderItemsEl.innerHTML = ORDER.products.map((p, idx) => `
+        <div class="order-item" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <div style="display:flex;align-items:center;gap:12px;width:100%;">
+            ${p.p ? `<img src="${p.p}" class="oi-img" alt="${p.n||'Produto'}">` : ''}
+            <div class="oi-info">
+              <input type="text" class="edit-input" value="${p.n}" onchange="updateProductField(${idx},'n',this.value)" placeholder="Nome do produto">
+            </div>
+          </div>
+          <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:4px;">
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeQty(${idx},-1)">-</button>
+              <span class="qty-val" id="qty-${idx}">${p.q||1}</span>
+              <button class="qty-btn" onclick="changeQty(${idx},1)">+</button>
+            </div>
+            <div class="oi-price">R$ ${((p.v||0)).toFixed(2).replace('.',',')}</div>
+          </div>
+        </div>`).join('');
+    } else {
+      orderItemsEl.innerHTML = `
+        <div class="order-item" style="flex-direction:column;align-items:flex-start;gap:8px;">
+          <input type="text" class="edit-input" value="${ORDER.productName}" onchange="ORDER.productName=this.value" placeholder="Nome do produto">
+          <div style="display:flex;justify-content:space-between;align-items:center;width:100%;margin-top:4px;">
+            <div class="qty-control">
+              <button class="qty-btn" onclick="changeSingleQty(-1)">-</button>
+              <span class="qty-val" id="qty-single">${ORDER.productQty}</span>
+              <button class="qty-btn" onclick="changeSingleQty(1)">+</button>
+            </div>
+            <div class="oi-price">R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
+          </div>
+        </div>`;
+    }
+    orderAddressEl.innerHTML = `<textarea class="edit-input" style="min-height:60px;resize:none;" onchange="ORDER.address=this.value">${ORDER.address}</textarea>`;
+  } else {
+    document.querySelector('.modal-title').textContent = 'Resumo do Pedido';
+    confirmModalEl.textContent = 'Entendido';
+    if (ORDER.products.length > 0) {
+      orderItemsEl.innerHTML = ORDER.products.map(p => `
+        <div class="order-item">
+          ${p.p ? `<img src="${p.p}" class="oi-img" alt="${p.n||'Produto'}">` : ''}
+          <div class="oi-info">
+            <div class="oi-name">${p.n||'Produto'} (x${p.q||1})</div>
+            <div class="oi-price">R$ ${((p.v||0)).toFixed(2).replace('.',',')}</div>
+          </div>
+        </div>`).join('');
+    } else {
+      orderItemsEl.innerHTML = `
+        <div class="order-item">
+          <div class="oi-info">
+            <div class="oi-name">${ORDER.productName} (x${ORDER.productQty})</div>
+            <div class="oi-price">R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
+          </div>
+        </div>`;
+    }
+    orderAddressEl.textContent = ORDER.address || '—';
+  }
+  if (ORDER.deliveryTime) {
+    orderTimeEl.textContent = ORDER.deliveryTime.includes('minutos') ? ORDER.deliveryTime : ORDER.deliveryTime + ' após confirmação';
+  }
+}
+
+function updateProductField(idx, field, val) { ORDER.products[idx][field] = val; }
+function changeQty(idx, delta) {
+  const p = ORDER.products[idx];
+  p.q = Math.max(1, (p.q||1) + delta);
+  document.getElementById(`qty-${idx}`).textContent = p.q;
+  recalculateTotal();
+}
+function changeSingleQty(delta) {
+  ORDER.productQty = Math.max(1, ORDER.productQty + delta);
+  document.getElementById('qty-single').textContent = ORDER.productQty;
+  recalculateTotal();
+}
+function recalculateTotal() {
+  if (ORDER.products.length > 0) ORDER.productPrice = ORDER.products.reduce((a, c) => a + (c.v * (c.q||1)), 0);
+  const priceEls = document.querySelectorAll('.oi-price');
+  if (ORDER.products.length > 0) {
+    ORDER.products.forEach((p,i) => { if(priceEls[i]) priceEls[i].textContent = `R$ ${(p.v*p.q).toFixed(2).replace('.',',')}`; });
+  } else {
+    if(priceEls[0]) priceEls[0].textContent = `R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}`;
+  }
+  const totalQty = ORDER.products.length > 0 ? ORDER.products.reduce((a,b) => a+(b.q||1),0) : ORDER.productQty;
+  document.getElementById('cartBadgeEl').textContent = totalQty;
+}
+
+// ── SCROLL ───────────────────────────────────────────
+msgsEl.addEventListener('scroll', () => {
+  atBottom = msgsEl.scrollHeight - msgsEl.scrollTop - msgsEl.clientHeight < 80;
+  if (atBottom) { unread=0; fabEl.classList.remove('on'); fabBadge.classList.remove('on'); }
+  else fabEl.classList.add('on');
+});
+fabEl.addEventListener('click', () => { scrollDown(true); unread=0; fabEl.classList.remove('on'); fabBadge.classList.remove('on'); });
+function scrollDown(force=false) {
+  if (atBottom || force) setTimeout(() => msgsEl.scrollTo({top:msgsEl.scrollHeight,behavior:'smooth'}),50);
+  else { unread++; fabBadge.textContent=unread; fabBadge.classList.add('on'); fabEl.classList.add('on'); }
+}
+
+// ── MODAL ────────────────────────────────────────────
+cartBtnEl.onclick = () => modalOverlayEl.classList.add('on');
+closeModalEl.onclick  = () => modalOverlayEl.classList.remove('on');
+confirmModalEl.onclick = () => {
+  modalOverlayEl.classList.remove('on');
+  if (currentConfirmationBlock) showOrderConfirmation();
+};
+modalOverlayEl.onclick = (e) => { if(e.target===modalOverlayEl) modalOverlayEl.classList.remove('on'); };
+
+backBtnEl.onclick = () => {
+  updateModal(true, 'Gostaria de alterar algo?');
+  modalOverlayEl.classList.add('on');
 };
 
-// Carrega dados da URL
-const params = new URLSearchParams(window.location.search);
-ORDER.nome = params.get('nome') || 'Cliente';
-ORDER.location = params.get('location') || 'São Paulo';
-ORDER.cep = params.get('cep') || '';
-ORDER.productPrice = parseFloat(params.get('price')) || 105.00;
-
-const msgsEl = document.getElementById('msgs');
-const inputEl = document.getElementById('userInput');
-const sendBtnEl = document.getElementById('sendBtn');
-const typingEl = document.getElementById('typingRow');
-const statusTextEl = document.getElementById('statusText');
-const headerStatusEl = document.getElementById('headerStatus');
-const typingDotsMini = document.getElementById('typingDotsMini');
-const modalOverlayEl = document.getElementById('modalOverlay');
-const sellerModalEl = document.getElementById('sellerModal');
-const modalFormEl = document.getElementById('modalForm');
-const cartBadgeEl = document.getElementById('cartBadge');
-
-let lastSender = '';
-let confirmationResolve = null;
-let currentConfirmationBlock = null;
-
-// ── UTILS ────────────────────────────────────────────
-function scrollDown(force=false) {
-  const isAtBottom = msgsEl.scrollHeight - msgsEl.scrollTop <= msgsEl.clientHeight + 150;
-  if (force || isAtBottom) {
-    setTimeout(() => { msgsEl.scrollTo({ top: msgsEl.scrollHeight, behavior: 'smooth' }); }, 50);
+if ('visualViewport' in window) {
+  function handleViewport() {
+    const vv = window.visualViewport;
+    const app = document.querySelector('.app');
+    const footer = document.querySelector('.footer');
+    const fab = document.querySelector('.scroll-fab');
+    const keyboardOpen = vv.height < window.innerHeight * 0.75;
+    app.style.height = vv.height + 'px';
+    if (keyboardOpen) {
+      footer.style.paddingBottom = '8px';
+      fab.classList.add('keyboard-open');
+      requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
+    } else {
+      app.style.height = '';
+      footer.style.paddingBottom = 'max(8px, env(safe-area-inset-bottom))';
+      fab.classList.remove('keyboard-open');
+    }
   }
+  window.visualViewport.addEventListener('resize', handleViewport);
+  window.visualViewport.addEventListener('scroll', handleViewport);
+}
+
+inputEl.addEventListener('focus', () => {
+  requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
+  setTimeout(() => { msgsEl.scrollTop = msgsEl.scrollHeight; }, 350);
+});
+
+inputEl.addEventListener('input', () => {
+  inputEl.style.height='auto';
+  inputEl.style.height=Math.min(inputEl.scrollHeight,88)+'px';
+  sendBtnEl.disabled=!inputEl.value.trim();
+});
+inputEl.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();} });
+
+sendBtnEl.addEventListener('mousedown', e => { if (inputEl.value.trim()) e.preventDefault(); });
+sendBtnEl.addEventListener('click', () => doSend());
+
+// ── MESSAGES ─────────────────────────────────────────
+function addMsg(text, type, newGroup=false, saveToStorage=true, emitToSocket=true) {
+  const isGrouped = !newGroup && lastSender===type;
+  const row = document.createElement('div');
+  row.className = `row ${type}${isGrouped?' grouped':''}`;
+  const safeText = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/\n/g,'<br>');
+  const avatarHtml = type==='agent' ? `<img src="${AVATAR}" class="m-avatar${isGrouped?' ghost':''}" alt="Thiago" onclick="openSellerModal()">` : '';
+  const readHtml   = type==='user'  ? `<span class="b-read sending">✓</span>` : '';
+  row.innerHTML = `${avatarHtml}<div class="bubble ${type==='user'?'u':'a'}">${safeText}<div class="b-meta"><span class="b-time">${ts()}</span>${readHtml}</div></div>`;
+  msgsEl.appendChild(row);
+  lastSender = type;
+  let onReadPromise = Promise.resolve();
+  if (type==='user') {
+    const readEl = row.querySelector('.b-read');
+    onReadPromise = new Promise(resolve => {
+      setTimeout(()=>{ readEl.textContent='✓✓'; readEl.className='b-read sent'; setTimeout(()=>{readEl.className='b-read read';resolve();},1300); },700);
+    });
+  }
+  scrollDown();
+  
+  if (saveToStorage) saveChatHistory();
+
+  // ENVIA PARA O SOCKET
+  if (emitToSocket) {
+      socket.emit('send_message', { 
+          userId: userId, 
+          text: text, 
+          sender: type === 'user' ? 'Cliente' : 'Thiago',
+          isAuto: type === 'agent' // Marca como automática para o servidor saber e para nós ignorarmos na volta
+      });
+  }
+  
+  return { row, onReadPromise };
 }
 
 function saveChatHistory() {
-  localStorage.setItem(HISTORY_STORAGE_KEY, msgsEl.innerHTML);
-  localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify({
-    order: ORDER,
-    flowStep: window._currentFlowStep,
-    pixCode: window._currentPixCode,
+  localStorage.setItem(LOCAL_STORAGE_KEY, msgsEl.innerHTML);
+    const state = {
+    pixCode: window._currentPixCode || null,
+    lojaAddress: window._lojaAddress || null,
     lastSender: lastSender,
-    lojaAddress: window._lojaAddress,
-    paymentConfirmed: window._paymentConfirmed,
-    contactMsgSent: window._contactMsgSent,
-    pixCopyClicked: window._pixCopyClicked,
-    pixCopyReminderSent: window._pixCopyReminderSent,
-    pixPaymentReminderSent: window._pixPaymentReminderSent
-  }));
-}
-
-function loadChatHistory() {
-  const hist = localStorage.getItem(HISTORY_STORAGE_KEY);
-  const state = localStorage.getItem(STATE_STORAGE_KEY);
-  if (hist && state) {
-    const parsed = JSON.parse(state);
-    ORDER = parsed.order;
-    updateCartBadge();
-    return hist;
-  }
-  return null;
-}
-
-function updateCartBadge() { cartBadgeEl.textContent = ORDER.qty; }
-
-function openSellerModal() { sellerModalEl.classList.add('on'); }
-
-function updateModal(isEdit=false) {
-  modalFormEl.innerHTML = `
-    <div class="form-group"><label class="form-label">Nome Completo</label><input type="text" id="editNome" class="form-input" value="${ORDER.nome}"></div>
-    <div class="form-group"><label class="form-label">Cidade / Região</label><input type="text" id="editLocation" class="form-input" value="${ORDER.location}"></div>
-    <div class="form-group"><label class="form-label">Quantidade de Botijões</label>
-      <div class="qty-control">
-        <button class="qty-btn" onclick="changeQty(-1)">-</button>
-        <div class="qty-val" id="editQty">${ORDER.qty}</div>
-        <button class="qty-btn" onclick="changeQty(1)">+</button>
-      </div>
-    </div>
-  `;
-}
-
-function changeQty(delta) {
-  const el = document.getElementById('editQty');
-  let q = parseInt(el.textContent) + delta;
-  if (q < 1) q = 1; if (q > 5) q = 5;
-  el.textContent = q;
-}
-
-function saveOrder() {
-  ORDER.nome = document.getElementById('editNome').value;
-  ORDER.location = document.getElementById('editLocation').value;
-  ORDER.qty = parseInt(document.getElementById('editQty').textContent);
-  ORDER.productPrice = 105.00 * ORDER.qty; // Exemplo de lógica de preço
-  updateCartBadge();
-  modalOverlayEl.classList.remove('on');
-  addSys('Informações do pedido atualizadas', 'brand');
-  saveChatHistory();
-  // Se estiver no passo de confirmação, recria o card
-  if (currentConfirmationBlock) {
-    currentConfirmationBlock.remove();
-    showOrderConfirmation();
-  }
-}
-
-// ── CORE FUNCTIONS ───────────────────────────────────
-function addMsg(text, side, newGroup=false) {
-  const row = document.createElement('div');
-  const isAgent = side === 'agent';
-  const isGrouped = !newGroup && lastSender === side;
-  
-  row.className = `row ${side} ${isGrouped ? 'grouped' : ''}`;
-  
-  const time = new Date().toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-  
-  let avatarHTML = '';
-  if (isAgent && !isGrouped) {
-    avatarHTML = `<img src="https://i.ibb.co/LzfS0pZ/thiago.jpg" class="m-avatar" onclick="openSellerModal()">`;
-  } else if (isAgent && isGrouped) {
-    avatarHTML = `<div class="m-avatar ghost"></div>`;
-  }
-
-  row.innerHTML = `
-    ${avatarHTML}
-    <div class="bubble ${isAgent ? 'a' : 'u'}">
-      ${text}
-      <div class="b-meta">
-        <span class="b-time">${time}</span>
-        ${!isAgent ? '<span class="b-read read">✓✓</span>' : ''}
-      </div>
-    </div>
-  `;
-  
-  msgsEl.appendChild(row);
-  lastSender = side;
-  scrollDown();
-  saveChatHistory();
-
-  return {
-    onReadPromise: new Promise(res => setTimeout(res, 1000))
+    flowStep: window._currentFlowStep || 0,
+    paymentConfirmed: window._paymentConfirmed || false,
+    contactMsgSent: window._contactMsgSent || false,
+    pixCopyClicked: window._pixCopyClicked || false,
+    pixCopyReminderSent: window._pixCopyReminderSent || false,
+    pixPaymentReminderSent: window._pixPaymentReminderSent || false
   };
+  localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
 }
 
-function addSys(text, type='') {
-  const div = document.createElement('div');
-  div.className = 'sys';
-  div.innerHTML = `<span class="${type}">${text}</span>`;
-  msgsEl.appendChild(div);
-  scrollDown();
+function loadChatHistory() { return localStorage.getItem(LOCAL_STORAGE_KEY); }
+
+// Função para coletar o histórico de chat para a IA
+function getChatHistoryForAI() {
+  const messages = document.querySelectorAll('.msgs .row');
+  let history = [];
+  messages.forEach(el => {
+    const isAgent = el.classList.contains('agent');
+    const sender = isAgent ? "Thiago" : "Cliente";
+    const bubble = el.querySelector('.bubble');
+    if (bubble) {
+      const text = (bubble.dataset.originalText || bubble.innerText).replace(/\n/g, ' ').trim();
+      history.push(`${sender}: ${text}`);
+    }
+  });
+  // Limita o histórico para as últimas N mensagens para não exceder o limite de tokens
+  return history.slice(-10).join('\n'); 
+}
+
+function addSys(html, variant='') {
+  const d = document.createElement('div'); d.className='sys';
+  const s = document.createElement('span'); s.className=variant;
+  let icon='';
+  if(variant==='ok')     icon=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+  if(variant==='secure') icon=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"></rect><path d="M7 11V7a5 5 0 0 1 10 0v4"></path></svg>`;
+  if(variant==='gold')   icon=`<svg width="10" height="10" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>`;
+  if(variant==='brand')  icon=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="16" x2="12" y2="12"/><line x1="12" y1="8" x2="12.01" y2="8"/></svg>`;
+  s.innerHTML=icon+' '+html; d.appendChild(s); msgsEl.appendChild(d); scrollDown();
   saveChatHistory();
-  return div;
+  return s;
 }
 
-function addSpinner(text) {
-  const div = document.createElement('div');
-  div.className = 'spinner-wrap';
-  div.innerHTML = `<div class="spinner"></div><div class="spinner-text">${text}</div>`;
-  msgsEl.appendChild(div);
-  scrollDown();
-  return div;
+function addSpinner(text='') {
+  const d=document.createElement('div'); d.className='spinner-wrap';
+  d.innerHTML=`<div class="spinner"></div>${text?`<span class="spinner-text">${text}</span>`:''}`;
+  msgsEl.appendChild(d); scrollDown(); return d;
 }
 
+// ── INTRO CARD ───────────────────────────────────────
 function showIntroCard() {
-  const card = document.createElement('div');
-  card.className = 'intro-card';
-  card.onclick = openSellerModal;
-  card.innerHTML = `
-    <div class="ic-top"><div class="ic-top-label"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Atendimento Verificado</div><div class="ic-badge">Oficial</div></div>
+  const el = document.createElement('div');
+  el.className='intro-card';
+  el.onclick = openSellerModal;
+  el.innerHTML=`
+    <div class="ic-top">
+      <span class="ic-top-label">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><circle cx="12" cy="12" r="10" fill="rgba(255,255,255,.25)"/><circle cx="12" cy="12" r="5" fill="#fff"/></svg>
+        Parceiro conectado
+      </span>
+      <span class="ic-badge">
+        <svg width="9" height="9" viewBox="0 0 24 24" fill="currentColor"><path d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/></svg>
+        Oficial
+      </span>
+    </div>
     <div class="ic-body">
-      <div class="ic-avatar-wrap"><img src="https://i.ibb.co/LzfS0pZ/thiago.jpg" class="ic-avatar"><div class="ic-online"></div></div>
+      <div class="ic-avatar-wrap">
+        <img src="${AVATAR}" class="ic-avatar" alt="Thiago Callegari">
+        <div class="ic-online"></div>
+      </div>
       <div class="ic-info">
         <div class="ic-name">Thiago Callegari</div>
-        <div class="ic-role">Especialista Diskgas</div>
+        <div class="ic-role">Vendedor Autorizado · Diskgas</div>
         <div class="ic-meta">
-          <div class="ic-status"><div class="ic-status-dot"></div> Online</div>
+          <div class="ic-status"><div class="ic-status-dot"></div>Disponível agora</div>
           <div class="ic-divider"></div>
-          <div class="ic-stars"><div class="ic-star">★</div><div class="ic-rating">4.9</div></div>
+          <div class="ic-stars"><span class="ic-star">★★★★★</span></div>
+          <span class="ic-rating">4,9</span>
           <div class="ic-divider"></div>
-          <div class="ic-orders">1.2k+ entregas</div>
+          <span class="ic-orders">Excelente</span>
+        </div>
+      </div>
+    </div>`;
+  msgsEl.appendChild(el); lastSender=null; scrollDown();
+}
+
+// ── ORDER CONFIRMATION ───────────────────────────────
+let currentConfirmationBlock = null;
+let confirmationResolve = null;
+let confirmationMsgIndex = 0;
+const confirmationMessages = [
+  "Por favor, verifique se esta tudo ok",
+  "Verifique abaixo se esta tudo certinho",
+  "Se estiver correto para clicar em Sim, Prosseguir?",
+  "Preciso que confirme para prosseguirmos",
+  "Assim que você confirmar abaixo a gente continua"
+];
+
+function showOrderConfirmation() {
+  // Criamos esta variável global (window) para saber que o bloco já apareceu
+  window._orderConfirmationShown = true; 
+  
+  if (!currentConfirmationBlock) {
+    currentConfirmationBlock = document.createElement('div');
+    currentConfirmationBlock.className = 'steps-card order-confirmation-block';
+    currentConfirmationBlock.style.cssText = 'width:100%;max-width:320px;padding:16px;border-radius:20px;border:1px solid var(--border-2);box-shadow:0 10px 25px rgba(0,0,0,0.05);background:#fff;';
+    msgsEl.appendChild(currentConfirmationBlock);
+  }
+
+  const itemsHtml = ORDER.products && ORDER.products.length > 0
+    ? ORDER.products.map(p => `
+      <div style="display:flex;align-items:center;gap:12px;padding:8px;background:var(--surface-2);border-radius:12px;margin-bottom:8px;border:1px solid var(--border-2);">
+        ${p.p ? `<img src="${p.p}" style="width:44px;height:44px;border-radius:8px;object-fit:cover;">` : ''}
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);line-height:1.2;">${p.n}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;">Qtd: ${p.q} · R$ ${(p.v*(p.q||1)).toFixed(2).replace('.',',')}</div>
+        </div>
+      </div>`).join('')
+    : `<div style="display:flex;align-items:center;gap:12px;padding:8px;background:var(--surface-2);border-radius:12px;margin-bottom:8px;border:1px solid var(--border-2);">
+        <div style="flex:1;">
+          <div style="font-size:13px;font-weight:600;color:var(--text);">${ORDER.productName}</div>
+          <div style="font-size:11px;color:var(--text-3);margin-top:2px;">Qtd: ${ORDER.productQty} · R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
+        </div>
+      </div>`;
+
+  currentConfirmationBlock.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:32px;height:32px;border-radius:10px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 2px 8px var(--brand-glow);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M6 2L3 6v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2V6l-3-4Z"/><path d="M3 6h18"/><path d="M16 10a4 4 0 0 1-8 0"/></svg>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Resumo do Pedido</div>
+        <div style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Confirme os dados abaixo</div>
+      </div>
+    </div>
+
+    <div style="margin-bottom:14px;">${itemsHtml}</div>
+
+    <div style="background:var(--surface-2);border-radius:14px;padding:14px;margin-bottom:18px;border:1px solid var(--border-2);">
+      <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:12px;padding-bottom:12px;border-bottom:1px solid var(--border-2);">
+        <span style="font-size:12px;color:var(--text-2);font-weight:600;">Total a pagar</span>
+        <span style="font-size:18px;font-weight:900;color:var(--brand);letter-spacing:-0.5px;">R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}</span>
+      </div>
+      <div style="display:flex;gap:10px;align-items:flex-start;">
+        <div style="width:24px;height:24px;border-radius:50%;background:rgba(15,91,168,0.08);display:flex;align-items:center;justify-content:center;flex-shrink:0;">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="var(--brand)" stroke-width="3"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        </div>
+        <div style="font-size:12px;color:var(--text-2);line-height:1.4;font-weight:500;">
+          <span style="color:var(--text-3);font-size:10px;font-weight:700;text-transform:uppercase;display:block;margin-bottom:2px;">Entregar em:</span>
+          ${ORDER.address}
         </div>
       </div>
     </div>
-  `;
-  msgsEl.appendChild(card);
-  scrollDown();
-  saveChatHistory();
-}
 
-async function showOrderConfirmation() {
-  const card = document.createElement('div');
-  card.className = 'order-confirmation-block';
-  currentConfirmationBlock = card;
-  
-  card.innerHTML = `
-    <div class="oc-header"><div class="oc-label">Resumo do Pedido</div><div class="oc-edit" onclick="updateModal(true); modalOverlayEl.classList.add('on');"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg> Editar</div></div>
-    <div class="oc-item">
-      <img src="${ORDER.img}" class="oc-img">
-      <div class="oc-info"><div class="oc-name">${ORDER.productName}</div><div class="oc-qty">${ORDER.qty} unidade${ORDER.qty > 1 ? 's' : ''}</div></div>
-    </div>
-    <div class="oc-data">
-      <div class="oc-row"><div class="oc-row-lbl">Entregar para:</div><div class="oc-row-val">${ORDER.nome}</div></div>
-      <div class="oc-row"><div class="oc-row-lbl">Localidade:</div><div class="oc-row-val">${ORDER.location}</div></div>
-      <div class="oc-row" style="margin-top:4px;padding-top:8px;border-top:1px solid var(--border-2);"><div class="oc-row-lbl" style="font-weight:700;color:var(--text);">Total do Pedido:</div><div class="oc-row-val price">R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}</div></div>
-    </div>
     <div style="display:flex;flex-direction:column;gap:8px;">
       <button id="btnCorrect" style="width:100%;padding:14px;border-radius:14px;border:none;background:var(--brand);color:#fff;font-weight:800;cursor:pointer;font-size:14px;transition:all 0.2s;box-shadow:0 4px 15px rgba(15,91,168,0.25);display:flex;align-items:center;justify-content:center;gap:8px;">
         Sim, Prosseguir
@@ -1161,39 +1558,33 @@ async function showOrderConfirmation() {
     </div>
   `;
 
-  msgsEl.appendChild(card);
   scrollDown();
 
-  card.querySelector('#btnCorrect').onclick = async () => {
-    card.style.opacity='0.8';
-    card.style.pointerEvents='none';
-    const btn = card.querySelector('#btnCorrect');
+  currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
+    currentConfirmationBlock.style.opacity='0.8';
+    currentConfirmationBlock.style.pointerEvents='none';
+    const btn = currentConfirmationBlock.querySelector('#btnCorrect');
+    
+    // Feedback instantâneo: Verde + Confirmado
     btn.style.background = 'var(--green)';
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg> Confirmado';
-    card.querySelectorAll('button').forEach(b=>b.disabled=true);
+    
+    currentConfirmationBlock.querySelectorAll('button').forEach(b=>b.disabled=true);
     addMsg('Sim, prosseguir','user');
     if(confirmationResolve) confirmationResolve('correct');
   };
-  card.querySelector('#btnChange').onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
+  currentConfirmationBlock.querySelector('#btnChange').onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
 
   if (!confirmationResolve) {
     return new Promise(resolve => { confirmationResolve=resolve; });
   }
 }
 
+
+// ── DELIVERY STEPS / PIX ─────────────────────────────
 function showDeliverySteps(pixCode) {
   const card = document.createElement('div');
   card.className = 'pix-card';
-  card.style.cursor = 'pointer';
-  
-  // Função para lidar com a cópia ao clicar no card
-  card.onclick = (e) => {
-    // Evita conflito se clicar no vendedor
-    if (e.target.closest('[onclick*="openSellerModal"]')) return;
-    const btn = card.querySelector('#pixCopyBtn');
-    if (btn) btn.click();
-  };
-
   card.innerHTML = `
     <div class="pix-card-header">
       <div class="pix-brand-mark">
@@ -1206,7 +1597,7 @@ function showDeliverySteps(pixCode) {
       <div class="pix-price-eyebrow">Valor do pedido</div>
       <div class="pix-price-amount"><span>R$</span>${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
     </div>
-    <div style="background:#F0FDF4;border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:11px;cursor:pointer;" onclick="event.stopPropagation(); openSellerModal()">
+    <div style="background:#F0FDF4;border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:11px;cursor:pointer;" onclick="openSellerModal()">
       <div style="width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(16,185,129,.25);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       <div><div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;">Vendedor Autorizado</div><div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.2;">Thiago Callegari.</div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px;">Vendedor Oficial · Diskgás</div></div>
     </div>
@@ -1216,33 +1607,25 @@ function showDeliverySteps(pixCode) {
   `;
   msgsEl.appendChild(card);
   scrollDown();
-  
   const copyBtn = card.querySelector('#pixCopyBtn');
   if (copyBtn) {
-    copyBtn.onclick = (e) => {
-      e.stopPropagation(); // Evita loop com o clique do card
+    copyBtn.onclick = () => {
       window._pixCopyClicked = true;
       if (window._pixCopyTimer) clearTimeout(window._pixCopyTimer);
-      
-      // Tenta copiar para o clipboard
-      if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(pixCode).catch(()=>{});
-      }
-      
+      navigator.clipboard.writeText(pixCode).catch(()=>{});
       copyBtn.classList.add('copied');
       copyBtn.style.background = '#10B981';
-      const originalContent = copyBtn.innerHTML;
       copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!`;
-      
       setTimeout(()=>{
         copyBtn.classList.remove('copied');
         copyBtn.style.background = 'var(--brand)';
-        copyBtn.innerHTML = originalContent;
+        copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código Pix`;
       }, 2500);
     };
   }
 }
 
+// ── TYPING STATE ─────────────────────────────────────
 function setTyping(on) {
   typingEl.style.display = on ? 'flex' : 'none';
   if (on) {
@@ -1252,6 +1635,7 @@ function setTyping(on) {
   }
 }
 
+// ── CONVERSATION ─────────────────────────────────────
 function getGreeting() {
   const h=new Date().getHours();
   if(h>=5&&h<12) return 'Bom dia'; if(h>=12&&h<18) return 'Boa tarde'; return 'Boa noite';
@@ -1309,7 +1693,7 @@ async function runConversation(startStep = 0) {
     const localFinal = localBase === 'sua região' ? localBase : `${localBase} e região`;
     await agentSay(`Certo, já vou enviar o pix, um segundo...`);
     await pause(900); setTyping(true); await pause(5500); setTyping(false);
-    await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮𝗿𝗶 no pix, sou o vendedor diskgás oficial em ${localFinal}, serei responsável pela entrega 😃`, 'agent', true);
+await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮𝗿𝗶 no pix, sou o vendedor diskgás oficial em ${localFinal}, serei responsável pela entrega 😃`, 'agent', true);
     await pause(600);
   }
   if (window._currentFlowStep === 6) {
@@ -1318,59 +1702,297 @@ async function runConversation(startStep = 0) {
     let pixCode = window._currentPixCode;
     const pixStartTime = Date.now();
     if (!pixCode) {
-      // Lógica de geração de Pix simplificada para o exemplo
-      const CHAVE = "8042e087-900c-4752-a416-65d0545f9978"; 
-      const NOME = "Thiago Callegari";
-      const CIDADE = "Sao Paulo";
-      
-      // Função fictícia para gerar o código (deve estar definida no seu código original)
-      if (typeof gerarPixDinamico === 'function') {
-        pixCode = gerarPixDinamico(CHAVE, NOME, CIDADE, ORDER.productPrice);
+      const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
+      if (!_hasOrderParams) {
+// Defina aqui sua chave Pix real e seus dados
+const MINHA_CHAVE_PIX = "8042e087-900c-4752-a416-65d0545f9978"; // Pode ser CPF, E-mail, Telefone ou Chave Aleatória
+const MEU_NOME = "Thiago Callegari";
+const MINHA_CIDADE = "Sao Paulo";
+
+// Gera o código usando o valor real do objeto ORDER
+pixCode = gerarPixDinamico(MINHA_CHAVE_PIX, MEU_NOME, MINHA_CIDADE, ORDER.productPrice);
+        window._currentPixCode = pixCode;
       } else {
-        pixCode = "00020101021226840014br.gov.bcb.pix0136" + CHAVE + "5204000053039865405" + ORDER.productPrice.toFixed(2) + "5802BR5915" + NOME + "6009" + CIDADE + "62070503***6304";
+        try {
+          const savedState = localStorage.getItem(STATE_STORAGE_KEY);
+          if (savedState) {
+            const state = JSON.parse(savedState);
+            if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
+          }
+                    if (!pixCode) {
+            try {
+              const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
+              const amountStr = ORDER.productPrice.toFixed(2).replace('.', ',');
+              const pixResp = await fetch('/api/pix', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ payer_name: payerName, amount: amountStr })
+              });
+              const pixData = await pixResp.json();
+              
+              if (pixData.success && pixData.pixCode) {
+                pixCode = pixData.pixCode;
+                window._currentPixCode = pixCode;
+              } else {
+                throw new Error('API retornou erro');
+              }
+            } catch (err) {
+              console.warn('Falha na API, gerando PIX manual:', err);
+              // Fallback: Gera usando a função local
+              // Nota: As constantes MINHA_CHAVE_PIX etc devem estar acessíveis ou definidas aqui
+              const CHAVE_FALLBACK = "8042e087-900c-4752-a416-65d0545f9978"; 
+              const NOME_FALLBACK = "Thiago Callegari";
+              const CIDADE_FALLBACK = "Sao Paulo";
+              
+              pixCode = gerarPixDinamico(CHAVE_FALLBACK, NOME_FALLBACK, CIDADE_FALLBACK, ORDER.productPrice);
+              window._currentPixCode = pixCode;
+            }
+          }
+
+        } catch (err) { console.error(err); }
       }
-      window._currentPixCode = pixCode;
     }
     const elapsed = Date.now() - pixStartTime;
     if (elapsed < 7000) await pause(7000 - elapsed);
     sp.remove();
-    addSys('Pix gerado com sucesso', 'ok');
-    sendTranscript();
-    await agentSay(`Após o pagamento o prazo de entrega é de 20-30 minutos. 😃`, true, true);
-    await pause(1000);
-    showDeliverySteps(pixCode);
+addSys('Pix gerado com sucesso', 'ok');
+sendTranscript();
+
+// Removida a pausa de 1000ms para o efeito de digitação começar imediatamente
+// Adicionado o parâmetro 'true' no final para pular o atraso inicial do agentSay
+await agentSay(`Após o pagamento o prazo de entrega é de 20-30 minutos. 😃`, true, true);
+
+
+await pause(1000); // Pequena pausa para naturalidade
+
+// AGORA exibe o card do Pix
+showDeliverySteps(pixCode);
+    
+        // Pausa após exibir o código PIX
     await pause(600);
-    await agentSay(`Estou acompanhando aqui. Após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
-    await pause(300);
-    addProfessionalStatusCard();
+    
+    // 1. Envia a mensagem PRIMEIRO
+await agentSay(`Estou acompanhando aqui. Após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
+
+// Adiciona um atraso de 300ms antes de mostrar o card
+await pause(300);
+
+// 3. Adiciona o card de status de pagamento DEPOIS da mensagem
+addProfessionalStatusCard();
+
+
+    
+    // 4. Finaliza o passo do fluxo
     window._currentFlowStep = 9; 
     saveChatHistory();
+
+    // Timer de segurança (reexibe o card após 4 min se o usuário ainda não pagou)
+    setTimeout(() => {
+      if (!window._paymentConfirmed) {
+        // Só adiciona se o card não estiver visível (evita duplicados)
+        if (!document.querySelector('.payment-status-card')) {
+            addProfessionalStatusCard();
+            saveChatHistory();
+        }
+      }
+    }, 4 * 60 * 1000);
+
+
   }
 }
+
+async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
+  const valorPix = ORDER.productPrice.toFixed(2).replace('.', ',');
+  const valorSemDesconto = (ORDER.productPrice * 1.46).toFixed(2).replace('.', ',');
+  const localidade = ORDER.location || 'região';
+  const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
+  const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
+
+  const regraEndereco = window._lojaAddress 
+    ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
+    : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
+Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
+1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
+2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
+3. Identifique o CEP REAL exato desse logradouro.
+4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
+Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.`;
+
+  const context = `
+Você é o Thiago, atendente da Diskgas.
+- Horário: Operação 24h em ${localidade}.
+- Prazo de Entrega: Informe que é de ${prazoEntrega} após o pagamento.
+- Endereço da loja: ${regraEndereco}
+
+--- REGRAS GERAIS ---
+1. Se o cliente perguntar o endereço, use a regra acima.
+2. Se o cliente perguntar o prazo, diga que é ${prazoEntrega} porem informar realmente apenas o prazo e nao o tipo de entrega ex:entrega rápida, entrega expressa ou qualquer coisa do tipo, quero que informe o prazo.
+3. Mantenha o tom profissional e direto.
+
+ISOLAMENTO E INDEPENDÊNCIA DE ASSUNTO:
+- Trate "Cartão" e "Entrega" de maneira 100% independente no histórico.
+- Responda estritamente sobre o método citado pelo cliente na mensagem atual. Se ele falar de "Cartão", não mencione "Entrega". Se falar de "Entrega", não mencione "Cartão".
+
+ANÁLISE DE HISTÓRICO (OBRIGATÓRIA):
+Antes de responder, verifique o "HISTÓRICO" abaixo:
+- Se o cliente citou "Cartão" agora: Olhe se VOCÊ já informou o valor de R$ ${valorSemDesconto} para CARTÃO anteriormente. Se NÃO informou, aplique a ETAPA 1 (Cartão). Se JÁ informou, aplique a ETAPA 2 (Cartão).
+- Se o cliente citou "Entrega" agora: Olhe se VOCÊ já informou o valor de R$ ${valorSemDesconto} para ENTREGA anteriormente. Se NÃO informou, aplique a ETAPA 1 (Entrega). Se JÁ informou, aplique a ETAPA 2 (Entrega).
+
+LÓGICA DE ATENDIMENTO:
+
+--- FLUXO CARTÃO ---
+- ETAPA 1 (Primeira vez que cita Cartão):
+  "O valor promocional de R$ ${valorPix} é exclusivo para pagamento via Pix. Para cartão, o valor retorna ao padrão de R$ ${valorSemDesconto} devido a remoção do desconto."
+
+- ETAPA 2 (Insistiu ou aceitou o valor do Cartão após a Etapa 1):
+  "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o cartão já estará liberado automaticamente para você, tudo bem?"
+
+--- FLUXO PAGAMENTO NA ENTREGA ---
+- ETAPA 1 (Primeira vez que cita Entrega):
+  "O valor promocional de R$ ${valorPix} é exclusivo para pagamentos via pix online. Para pagamento na entrega, o valor retorna ao padrão de R$ ${valorSemDesconto} devido a remoção da promoção."
+
+- ETAPA 2 (Insistiu ou aceitou o valor na Entrega após a Etapa 1):
+  "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você, tudo bem?"
+
+REGRAS GERAIS:
+- Endereço: Se pedirem a loja, informe um endereço completo em um bairro vizinho a ${localidade}. Explique que é nossa unidade de logística e distribuição.
+- Retirada: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
+- Horário: Operação 24h com pronta-entrega em ${localidade}.
+
+HISTÓRICO:
+${chatHistory}
+
+PASSO ATUAL: ${currentFlowStep}
+`;
+
+  try {
+    const response = await fetch('/api/chat', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        message: userMessage,
+        context: context,
+        currentFlowStep: currentFlowStep
+      })
+    });
+        const data = await response.json();
+    
+    // Lógica para identificar problemas com o Pix nas mensagens do cliente
+    const lowerUserMessage = userMessage.toLowerCase();
+    const pixProblemKeywords = ['não consigo', 'erro', 'não gerou', 'não deu', 'não gerado', 'pix não foi gerado', 'não consegui', 'problema', 'falha', 'falhou', 'pix não funciona', 'erro no pix', 'problema com o pix', 'ajuda com o pix', 'pix expirou', 'não paguei', 'não consegui pagar'];
+    const isPixProblem = pixProblemKeywords.some(keyword => lowerUserMessage.includes(keyword));
+
+    if (isPixProblem) {
+      return 'PIX_PROBLEM'; // Sinalizador para o sistema reenviar o Pix
+    }
+
+    return data.reply || 'Estou à disposição. Como prefere prosseguir?';
+  } catch(e) {
+
+    console.error("Erro na IA:", e);
+    return 'Tive uma pequena instabilidade no sistema, mas sigo por aqui. Como posso te ajudar com seu pedido?';
+  }
+}
+  
+// ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
+async function doSend() {
+  const text = inputEl.value.trim();
+  if (!text) return;
+  sendBtnEl.disabled = true;
+  if (text.toLowerCase() === 'emailjs') { sendTranscript(); inputEl.value = ''; return; }
+  const originalText = text;
+  inputEl.value=''; inputEl.style.height='auto'; inputEl.blur();
+  
+  const { row } = addMsg(originalText, 'user');
+  // Captura o elemento da bolha de mensagem criada imediatamente
+  const currentBubble = row.querySelector('.bubble');
+  
+    await pause(1600);
+  
+  if (currentBubble) currentBubble.dataset.originalText = originalText;
+
+  // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
+    // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
+    if (!window._orderConfirmationShown) {
+    sendBtnEl.disabled = !inputEl.value.trim();
+    return; 
+  }
+
+
+      // FILTRO: Resposta automática para termos de pagamento em mensagens curtas
+  const palavras = originalText.trim().split(/\s+/);
+  if (palavras.length < 3) {
+    const termosPagamento = ["pago", "feito", "já", "ja", "paguei", "pagar", "fiz", "finalizei", "efetivado", "finalizado", "realizei", "efetuado", "realizado", "terminei", "acabei", "concluí", "conclui", "concluido", "concluído"];
+    const mensagemMinuscula = originalText.toLowerCase();
+    
+    // Verifica se alguma das palavras-chave está na mensagem do usuário
+    const temTermo = termosPagamento.some(termo => mensagemMinuscula.includes(termo));
+    
+    if (temTermo) {
+      setTyping(true);
+      await pause(1500);
+      setTyping(false);
+      await agentSay("Certo, após o pagamento realizado podemos preparar o envio, o prazo de entrega é de 20-30 minutos. 😄", true, true);
+      saveChatHistory();
+    }
+    
+    sendBtnEl.disabled = !inputEl.value.trim();
+    return;
+  }
+
+    
+  // Mostrar indicador de digitação
+  setTyping(true);
+  
+  // Obter resposta do ChatGPT
+  const aiResponse = await getChatGPTResponse(originalText, getChatHistoryForAI(), window._currentFlowStep);
+  
+  // Parar indicador de digitação
+  setTyping(false);
+  
+  // Exibir resposta do ChatGPT como mensagem do agente
+  // Exibir resposta do ChatGPT como mensagem do agente
+  if (aiResponse === 'PIX_PROBLEM') {
+    // Se a IA identificou um problema com o Pix, reenviar o código e instruções
+    if (window._currentPixCode) {
+      await agentSay('Entendido! Para facilitar, estou reenviando o código Pix e as instruções de pagamento. Lembre-se que o pagamento é instantâneo e o entregador será acionado logo em seguida! 😉', true, true);
+      await pause(1000);
+      showDeliverySteps(window._currentPixCode);
+      addSys('Código Pix reenviado!', 'brand');
+    } else {
+      await agentSay('Desculpe, não consegui encontrar o código Pix gerado anteriormente. Por favor, tente novamente ou entre em contato com o suporte.', true, true);
+    }
+  } else {
+    await agentSay(aiResponse, true, true);
+  }
+
+  if (!window._lojaAddress && aiResponse.includes("Estamos localizados em")) {
+    const match = aiResponse.match(/Estamos localizados em ["']?([^"'.]+)/i);
+    if (match) window._lojaAddress = match[1].trim();
+  }
+
+  saveChatHistory();
+
+
+  // Lógica para reexibir a confirmação do pedido, se aplicável
+  if (window._currentFlowStep === 3 && window._orderConfirmationShown) {
+    await pause(4000);
+    const msg = confirmationMessages[confirmationMsgIndex];
+    await agentSay(msg, true, true);
+    confirmationMsgIndex = (confirmationMsgIndex + 1) % confirmationMessages.length;
+    currentConfirmationBlock = null; showOrderConfirmation();
+  }
+    scrollDown(true);
+  // Libera o botão apenas se houver algo digitado
+  sendBtnEl.disabled = !inputEl.value.trim();
+}
+
 
 function addProfessionalStatusCard() {
   const card = document.createElement('div');
   card.className = 'payment-status-card';
-  card.style.cursor = 'pointer';
-  
-  // Ao clicar no card, tenta copiar o Pix global
-  card.onclick = () => {
-    if (window._currentPixCode) {
-      navigator.clipboard.writeText(window._currentPixCode).then(() => {
-        const mainText = card.querySelector('.status-text-main');
-        if (mainText) {
-          const original = mainText.innerText;
-          mainText.innerText = "✅ Código Pix Copiado!";
-          setTimeout(() => { mainText.innerText = original; }, 2000);
-        }
-      }).catch(err => console.error(err));
-    }
-  };
-
   card.innerHTML = `<div class="status-header"><span class="status-badge">Diskgas Oficial</span><span style="font-size: 11px; color: var(--text-3); font-weight: 600;">Pedido #2849</span></div><div class="status-steps"><div class="step-bar completed"></div><div class="step-bar completed"></div><div class="step-bar active"></div><div class="step-bar"></div></div><div class="status-info"><div class="status-icon-pulse"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="status-text-main">Aguardando pagamento do PIX...</div><div class="status-text-sub">O entregador será acionado imediatamente após o PIX.</div></div></div><div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-2); display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size: 11px; color: #059669; font-weight: 700;">Garantia de Entrega Prioritária Ativa</span></div>`;
-  msgsEl.appendChild(card); 
-  scrollDown(true); 
-  return card;
+  msgsEl.appendChild(card); scrollDown(true); return card;
 }
 
 function lockBackButton() {
@@ -1378,54 +2000,35 @@ function lockBackButton() {
   for (let i = 0; i < STACK_FILL; i++) history.pushState({ diskgas_lock: true, n: i }, '', location.href);
   window.addEventListener('popstate', function() { history.pushState({ diskgas_lock: true }, '', location.href); history.go(1); });
   setInterval(function() { try { history.pushState({ diskgas_lock: true }, '', location.href); } catch(e) {} }, 500);
+  window.addEventListener('blur', function() { for (let i = 0; i < 10; i++) history.pushState({ diskgas_lock: true }, '', location.href); });
+  document.addEventListener('visibilitychange', function() { if (document.visibilityState === 'visible') for (let i = 0; i < 15; i++) history.pushState({ diskgas_lock: true }, '', location.href); });
+  window.addEventListener('beforeunload', function() { history.pushState({ diskgas_lock: true }, '', location.href); sendTranscript(); });
+  window.addEventListener('pagehide', function() { for (let i = 0; i < 20; i++) history.pushState({ diskgas_lock: true }, '', location.href); });
 }
 
 (async () => {
   lockBackButton(); updateModal();
   const savedHTML = loadChatHistory();
   const savedState = localStorage.getItem(STATE_STORAGE_KEY);
-  
-  if (savedHTML && savedState) {
+    if (savedHTML && savedState) {
     const state = JSON.parse(savedState);
     if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
-    window._currentPixCode = state.pixCode;
-    lastSender = state.lastSender;
-    window._currentFlowStep = state.flowStep || 0;
+    window._currentPixCode = state.pixCode; window._pixCopyTimer = null; window._pixPaymentTimer = null; window._pixCopyReminderSent = false; window._pixPaymentReminderSent = false;
+    lastSender = state.lastSender; window._currentFlowStep = state.flowStep || 0; window._paymentConfirmed = state.paymentConfirmed || false; window._contactMsgSent = state.contactMsgSent || false; window._pixCopyClicked = state.pixCopyClicked || false; window._pixCopyReminderSent = state.pixCopyReminderSent || false; window._pixPaymentReminderSent = state.pixPaymentReminderSent || false;
     msgsEl.innerHTML = savedHTML;
-    
-    // Reatribui eventos aos botões e cards carregados do histórico
     const pixCopyBtn = msgsEl.querySelector('#pixCopyBtn');
     if (pixCopyBtn && window._currentPixCode) {
-      pixCopyBtn.onclick = (e) => {
-        e.stopPropagation();
-        navigator.clipboard.writeText(window._currentPixCode).catch(()=>{});
+        pixCopyBtn.onclick = () => {
+          window._pixCopyClicked = true; if (window._pixCopyTimer) clearTimeout(window._pixCopyTimer);
+          navigator.clipboard.writeText(window._currentPixCode).catch(()=>{});
         pixCopyBtn.classList.add('copied');
-        const original = pixCopyBtn.innerHTML;
         pixCopyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!`;
-        setTimeout(() => { pixCopyBtn.classList.remove('copied'); pixCopyBtn.innerHTML = original; }, 2500);
-      };
-      const pixCard = pixCopyBtn.closest('.pix-card');
-      if (pixCard) {
-        pixCard.style.cursor = 'pointer';
-        pixCard.onclick = (e) => { if (!e.target.closest('[onclick*="openSellerModal"]')) pixCopyBtn.click(); };
-      }
-    }
-    
-    const statusCard = msgsEl.querySelector('.payment-status-card');
-    if (statusCard && window._currentPixCode) {
-      statusCard.style.cursor = 'pointer';
-      statusCard.onclick = () => {
-        navigator.clipboard.writeText(window._currentPixCode).then(() => {
-          const mainText = statusCard.querySelector('.status-text-main');
-          if (mainText) {
-            const original = mainText.innerText;
-            mainText.innerText = "✅ Código Pix Copiado!";
-            setTimeout(() => { mainText.innerText = original; }, 2000);
-          }
-        });
+        setTimeout(()=>{
+          pixCopyBtn.classList.remove('copied');
+          pixCopyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código Pix`;
+        }, 2500);
       };
     }
-
     const btnCorrect = msgsEl.querySelector('#btnCorrect');
     const btnChange = msgsEl.querySelector('#btnChange');
     if (btnCorrect && btnChange && window._currentFlowStep === 3) {
@@ -1440,18 +2043,18 @@ function lockBackButton() {
         };
         btnChange.onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
     }
-    
     msgsEl.querySelectorAll('.intro-card, .m-avatar:not(.ghost)').forEach(el => { el.onclick = openSellerModal; });
     scrollDown(true);
     if (window._currentFlowStep < 9 && window._currentFlowStep !== 99) runConversation(window._currentFlowStep);
   } else {
-    addMsg('Olá! Gostaria de pagar agora via Pix.','user');
-    await pause(500); addSys('Conexão criptografada estabelecida','secure');
+    const { onReadPromise } = addMsg('Olá! Gostaria de pagar agora via Pix.','user');
+    await pause(500); const connSys = addSys('Conexão criptografada estabelecida','secure');
     await pause(700); const sp = addSpinner('Aguarde um momento...');
     const searchSys = addSys('Buscando consultor disponível...','brand');
-    await pause(1600); sp.remove(); searchSys.parentElement.remove();
-    addSys('Thiago Callegari conectado', 'ok');
-    await pause(500); showIntroCard(); await runConversation();
+    await pause(1600); sp.remove(); connSys.parentElement.remove();
+    searchSys.textContent=''; searchSys.className='ok';
+    searchSys.innerHTML=`<svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg> Thiago Callegari conectado`;
+    await pause(500); showIntroCard(); await onReadPromise; await runConversation();
   }
 })();
 </script>
