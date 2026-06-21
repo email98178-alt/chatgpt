@@ -1741,12 +1741,14 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-    const regraEndereco = `[REGRA DE ENDEREÇO E RETIRADA]
-Sempre que o cliente perguntar sobre endereço, localização, rua ou onde retirar o pedido, analise o histórico:
+      const regraEndereco = `[CONTROLE DE FLUXO DE ENDEREÇO]
+Analise o histórico para decidir qual etapa usar:
 
-1. PRIMEIRA VEZ: Informe apenas a localidade geral. Ex: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas."
-2. SE O CLIENTE INSISTIR (Pedir rua, número ou querer retirar): Explique que o local funciona exclusivamente como um depósito e centro de distribuição para a saída dos entregadores. 
-3. EXPLICAÇÃO OBRIGATÓRIA: Por normas de segurança e logística, não realizamos atendimento presencial ao público nem retiradas no local. Operamos 100% com entrega própria para garantir o transporte seguro do produto inflamável.`;
+-> ETAPA 1 (Se você ainda NÃO falou sobre localização nesta conversa):
+Responda APENAS: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas." (Não adicione nenhuma explicação extra aqui).
+
+-> ETAPA 2 (Se o cliente insistiu, perguntou rua, número ou sobre retirar APÓS você já ter enviado a Etapa 1):
+Responda que o local funciona exclusivamente como um depósito/centro de distribuição para a saída dos entregadores e, por normas de segurança e logística, não realizamos atendimento presencial ou retirada no local. Trabalhamos apenas com entrega própria para garantir o transporte correto do produto.`;
 
 
   const context = `
@@ -1756,8 +1758,8 @@ Você é o Thiago, atendente da Diskgas.
 - Endereço da loja: ${regraEndereco}
 
 --- REGRAS GERAIS ---
-1. Se o cliente perguntar o endereço, use a regra acima.
-2. Se o cliente perguntar o prazo, diga que é ${prazoEntrega} porem informar realmente apenas o prazo e nao o tipo de entrega ex:entrega rápida, entrega expressa ou qualquer coisa do tipo, quero que informe o prazo.
+1. Se o cliente perguntar o endereço pela primeira vez, use estritamente a ETAPA 1 da Regra de Endereço.
+2. NUNCA envie a explicação de "depósito/segurança" na primeira interação sobre endereço. Guarde isso apenas para a ETAPA 2 (insistência).
 3. Mantenha o tom profissional e direto.
 
 ISOLAMENTO E INDEPENDÊNCIA DE ASSUNTO:
