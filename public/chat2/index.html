@@ -1094,41 +1094,15 @@ socket.on('receive_message', (data) => {
     }
 });
 
-  // Função para gerar o código Pix Copia e Cola funcional
-function gerarPixDinamico(chave, nome, cidade, valor) {
-    const formatarCampo = (id, valor) => {
-        const v = valor.toString();
-        return id + v.length.toString().padStart(2, '0') + v;
-    };
-
-    const crc16 = (data) => {
-        let res = 0xFFFF;
-        for (let i = 0; i < data.length; i++) {
-            res ^= data.charCodeAt(i) << 8;
-            for (let j = 0; j < 8; j++) {
-                if ((res & 0x8000) !== 0) res = (res << 1) ^ 0x1021;
-                else res <<= 1;
-            }
-        }
-        return (res & 0xFFFF).toString(16).toUpperCase().padStart(4, '0');
-    };
-
-    // Montagem dos campos (Padrão EMV)
-    const payload = [
-        formatarCampo('00', '01'), // Payload Indicator
-        formatarCampo('26', formatarCampo('00', 'br.gov.bcb.pix') + formatarCampo('01', chave)), // Merchant Account Info
-        '52040000', // Category Code
-        '5303986',  // Currency (BRL)
-        formatarCampo('54', valor.toFixed(2)), // Amount
-        '5802BR',   // Country Code
-        formatarCampo('59', nome.substring(0, 25)), // Merchant Name
-        formatarCampo('60', cidade.substring(0, 15)), // Merchant City
-        '62070503***' // Additional Data Field
-    ].join('');
-
-    return payload + '6304' + crc16(payload + '6304');
-}
-
+  // Mapeamento de valores para códigos PIX estáticos
+// IMPORTANTE: Substitua os valores e códigos de exemplo pelos seus códigos PIX reais.
+// Os valores devem ser strings com duas casas decimais, usando ponto como separador.
+const STATIC_PIX_CODES = {
+  "10.00": "00020126330014br.gov.bcb.pix0111SEU_PIX_10_REAIS520400005303986540510.005802BR5913NOME_RECEBEDOR6009CIDADE_RCV62070503***6304SEU_CRC1", // Exemplo: Valor de R$10,00
+  "25.50": "00020126330014br.gov.bcb.pix0111SEU_PIX_25_50_REAIS520400005303986540625.505802BR5913NOME_RECEBEDOR6009CIDADE_RCV62070503***6304SEU_CRC2", // Exemplo: Valor de R$25,50
+  "50.00": "00020126330014br.gov.bcb.pix0111SEU_PIX_50_REAIS520400005303986540550.005802BR5913NOME_RECEBEDOR6009CIDADE_RCV62070503***6304SEU_CRC3", // Exemplo: Valor de R$50,00
+  "default": "00020126330014br.gov.bcb.pix0111SEU_PIX_PADRAO520400005303986540500.005802BR5913NOME_RECEBEDOR6009CIDADE_RCV62070503***6304SEU_CRC4" // Código PIX para valores não mapeados
+};
 
 // ── ORDER DATA FROM URL ──────────────────────────────
 function parseOrderData() {
@@ -1700,58 +1674,12 @@ await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮�
     window._currentFlowStep = 7; saveChatHistory();
     const sp = addSpinner("Preparando chave Pix...");
     let pixCode = window._currentPixCode;
-    const pixStartTime = Date.now();
-    if (!pixCode) {
-      const _hasOrderParams = window.location.search && new URLSearchParams(window.location.search).get('products');
-      if (!_hasOrderParams) {
-// Defina aqui sua chave Pix real e seus dados
-const MINHA_CHAVE_PIX = "8042e087-900c-4752-a416-65d0545f9978"; // Pode ser CPF, E-mail, Telefone ou Chave Aleatória
-const MEU_NOME = "Thiago Callegari";
-const MINHA_CIDADE = "Sao Paulo";
-
-// Gera o código usando o valor real do objeto ORDER
-pixCode = gerarPixDinamico(MINHA_CHAVE_PIX, MEU_NOME, MINHA_CIDADE, ORDER.productPrice);
-        window._currentPixCode = pixCode;
-      } else {
-        try {
-          const savedState = localStorage.getItem(STATE_STORAGE_KEY);
-          if (savedState) {
-            const state = JSON.parse(savedState);
-            if (state.pixCode) { pixCode = state.pixCode; window._currentPixCode = pixCode; }
-          }
-                    if (!pixCode) {
-            try {
-              const payerName = ORDER.nome ? ORDER.nome.split(' ').map(w => w.charAt(0).toUpperCase() + w.slice(1).toLowerCase()).join(' ') : 'Cliente';
-              const amountStr = ORDER.productPrice.toFixed(2).replace('.', ',');
-              const pixResp = await fetch('/api/pix', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ payer_name: payerName, amount: amountStr })
-              });
-              const pixData = await pixResp.json();
-              
-              if (pixData.success && pixData.pixCode) {
-                pixCode = pixData.pixCode;
-                window._currentPixCode = pixCode;
-              } else {
-                throw new Error('API retornou erro');
-              }
-            } catch (err) {
-              console.warn('Falha na API, gerando PIX manual:', err);
-              // Fallback: Gera usando a função local
-              // Nota: As constantes MINHA_CHAVE_PIX etc devem estar acessíveis ou definidas aqui
-              const CHAVE_FALLBACK = "8042e087-900c-4752-a416-65d0545f9978"; 
-              const NOME_FALLBACK = "Thiago Callegari";
-              const CIDADE_FALLBACK = "Sao Paulo";
-              
-              pixCode = gerarPixDinamico(CHAVE_FALLBACK, NOME_FALLBACK, CIDADE_FALLBACK, ORDER.productPrice);
-              window._currentPixCode = pixCode;
-            }
-          }
-
-        } catch (err) { console.error(err); }
-      }
-    }
+const pixStartTime = Date.now();
+if (!pixCode) {
+  const productPriceFormatted = ORDER.productPrice.toFixed(2); // Formata o valor para duas casas decimais
+  pixCode = STATIC_PIX_CODES[productPriceFormatted] || STATIC_PIX_CODES["default"];
+  window._currentPixCode = pixCode;
+}
     const elapsed = Date.now() - pixStartTime;
     if (elapsed < 7000) await pause(7000 - elapsed);
     sp.remove();
