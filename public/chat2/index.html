@@ -1738,17 +1738,11 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorSemDesconto = (ORDER.productPrice * 1.46).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
-  const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
+  const prazoEntrega = ORDER.deliveryTime || '20-30 minutes';
 
   const regraEndereco = window._lojaAddress 
     ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
-    : `--- PROTOCOLO DE LOCALIZAÇÃO DINÂMICA ---
-Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja:
-1. Use seu conhecimento geográfico para identificar um bairro VIZINHO REAL ao lado do local do cliente (${localidade}), deve ser o bairro vizinho mais proximo que tiver.
-2. Escolha uma rua ou avenida REAL e comercial desse bairro vizinho.
-3. Identifique o CEP REAL exato desse logradouro.
-4. Responda OBRIGATORIAMENTE no formato: "Estamos localizados em 'Nome da rua, bairro, cep'".
-Nota: Não invente endereços. O logradouro e o CEP devem ser reais e condizentes com o bairro vizinho escolhido.`;
+    : `Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja, responda OBRIGATORIAMENTE exatamente assim: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas."`;
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
@@ -1787,18 +1781,18 @@ LÓGICA DE ATENDIMENTO:
   "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você, tudo bem?"
 
 REGRAS GERAIS:
-- Endereço: Se pedirem a loja, informe um endereço completo em um bairro vizinho a ${localidade}. Explique que é nossa unidade de logística e distribuição.
+- Endereço: Se pedirem a loja, use estritamente a instrução da "regraEndereco" acima ("Estamos localizados em ${localidade}, atendemos todas as regiões próximas.").
 - Retirada: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
 - Horário: Operação 24h com pronta-entrega em ${localidade}.
 
 --- SEGURANÇA E CONFIRMAÇÃO DE PAGAMENTO ---
 1. Você NUNCA deve confirmar um pagamento, dizer que o Pix foi aprovado, que o pagamento foi confirmado, ou que o pedido já foi finalizado/está saindo para entrega.
 2. Se o cliente enviar um comprovante, disser "paguei", "já fiz o Pix", ou der a entender que o pagamento foi realizado, você deve responder sempre mantendo a instrução de aguardo.
-   - Exemplo de resposta: "Certo, após o pagamento realizado podemos preparar o envio. O prazo de entrega é de ${prazoEntrega} após a confirmação do pagamento. 😄"
+   - Exemplo de resposta: "Com o pagamento realizado já podemos preparar o envio. O prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
    3. Se o cliente perguntar sobre algum tipo de confirmação de pagamento, se esta sendo preparado para envio, se ja saiu para envio, ou algo do tipo manter o tom de "Após o pagamento realizado podemos preparar o envio." para que ele saiba que: Pagamento realizado = Preparando Envio. Porem nunca realmente confirmando isso.
 
 HISTÓRICO:
-${chatHistory}
+${chatHistory}`;
 
 PASSO ATUAL: ${currentFlowStep}
 `;
