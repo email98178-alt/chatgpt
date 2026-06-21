@@ -1742,7 +1742,9 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
 
   const regraEndereco = window._lojaAddress 
     ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
-    : `Sempre que você identificar, pelo contexto da conversa, que o usuário deseja saber o endereço físico, local de retirada ou onde fica a loja, responda OBRIGATORIAMENTE exatamente assim: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas."`;
+    : `Sempre que o usuário perguntar onde fica a loja, endereço ou local de retirada, faça a seguinte validação no HISTÓRICO:
+1. Se você AINDA NÃO falou a frase "Estamos localizados em...", responda exatamente assim: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas."
+2. Se você NOTAR no histórico que já enviou essa frase antes e o cliente insistiu querendo o endereço exato ou ponto de referência, responda informando que o local é apenas um depósito/centro de distribuição para envios e que não realiza atendimento ou recepção de clientes diretamente no local.`;
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
