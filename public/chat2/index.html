@@ -1741,16 +1741,13 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-  const regraEndereco = window._lojaAddress 
-  ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
-  : `[REGRA RIGOROSA DE ENDEREÇO - LEIA O HISTÓRICO]
-Sempre que o cliente perguntar sobre endereço, localização, rua ou onde retirar o pedido, você DEVE analisar o histórico da conversa e aplicar as seguintes etapas:
+    const regraEndereco = `[REGRA DE ENDEREÇO E RETIRADA]
+Sempre que o cliente perguntar sobre endereço, localização, rua ou onde retirar o pedido, analise o histórico:
 
--> ETAPA 1 (Primeira pergunta):
-Se você AINDA NÃO falou a frase "Estamos localizados em..." nesta conversa, responda EXATAMENTE e APENAS com esta frase: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas."
+1. PRIMEIRA VEZ: Informe apenas a localidade geral. Ex: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas."
+2. SE O CLIENTE INSISTIR (Pedir rua, número ou querer retirar): Explique que o local funciona exclusivamente como um depósito e centro de distribuição para a saída dos entregadores. 
+3. EXPLICAÇÃO OBRIGATÓRIA: Por normas de segurança e logística, não realizamos atendimento presencial ao público nem retiradas no local. Operamos 100% com entrega própria para garantir o transporte seguro do produto inflamável.`;
 
--> ETAPA 2 (Cliente insistindo - PROIBIDO REPETIR A ETAPA 1):
-Se você identificar no histórico que JÁ ENVIOU a frase da Etapa 1 e o cliente continuar insistindo em saber a rua exata, número ou ponto de referência, VOCÊ ESTÁ PROIBIDO de repetir a mensagem anterior. Responda de forma natural informando que o local funciona exclusivamente como um depósito/centro de distribuição para a saída dos entregadores e que, por motivos de logística, não realiza atendimento ao público ou retirada presencial.`;
 
   const context = `
 Você é o Thiago, atendente da Diskgas.
@@ -1789,8 +1786,6 @@ LÓGICA DE ATENDIMENTO:
   "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você, tudo bem?"
 
 REGRAS GERAIS:
-- Endereço: Se pedirem a loja, informe um endereço completo em um bairro vizinho a ${localidade}. Explique que é nossa unidade de logística e distribuição.
-- Retirada: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
 - Horário: Operação 24h com pronta-entrega em ${localidade}.
 
 --- SEGURANÇA E CONFIRMAÇÃO DE PAGAMENTO ---
