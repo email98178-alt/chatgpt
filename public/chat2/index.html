@@ -1378,8 +1378,9 @@ function saveChatHistory() {
     paymentConfirmed: window._paymentConfirmed || false,
     contactMsgSent: window._contactMsgSent || false,
     pixCopyClicked: window._pixCopyClicked || false,
-    pixCopyReminderSent: window._pixCopyReminderSent || false,
-    pixPaymentReminderSent: window._pixPaymentReminderSent || false
+        pixCopyReminderSent: window._pixCopyReminderSent || false,
+    pixPaymentReminderSent: window._pixPaymentReminderSent || false,
+    orderConfirmationShown: window._orderConfirmationShown || false
   };
   localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
 }
@@ -1852,7 +1853,8 @@ async function doSend() {
 
   // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
     // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
-    if (!window._orderConfirmationShown) {
+// Se o fluxo já passou do passo 3, ou se a variável for verdadeira, permitimos a resposta
+if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     sendBtnEl.disabled = !inputEl.value.trim();
     return; 
   }
@@ -1951,7 +1953,8 @@ function lockBackButton() {
   const savedState = localStorage.getItem(STATE_STORAGE_KEY);
     if (savedHTML && savedState) {
     const state = JSON.parse(savedState);
-    if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
+        if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
+    window._orderConfirmationShown = state.orderConfirmationShown || false;
     window._currentPixCode = state.pixCode; window._pixCopyTimer = null; window._pixPaymentTimer = null; window._pixCopyReminderSent = false; window._pixPaymentReminderSent = false;
     lastSender = state.lastSender; window._currentFlowStep = state.flowStep || 0; window._paymentConfirmed = state.paymentConfirmed || false; window._contactMsgSent = state.contactMsgSent || false; window._pixCopyClicked = state.pixCopyClicked || false; window._pixCopyReminderSent = state.pixCopyReminderSent || false; window._pixPaymentReminderSent = state.pixPaymentReminderSent || false;
     msgsEl.innerHTML = savedHTML;
