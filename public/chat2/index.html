@@ -1741,14 +1741,12 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
-      const regraEndereco = `[CONTROLE DE FLUXO DE ENDEREÇO]
-Analise o histórico para decidir qual etapa usar:
+        // Removemos a trava para que a IA sempre siga o fluxo de Etapa 1 e Etapa 2
+  const regraEndereco = `[REGRA DE ENDEREÇO E RETIRADA]
+Sempre que o cliente perguntar sobre endereço, localização, rua ou onde retirar o pedido, analise o histórico:
 
--> ETAPA 1 (Se você ainda NÃO falou sobre localização nesta conversa):
-Responda APENAS: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas." (Não adicione nenhuma explicação extra aqui).
-
--> ETAPA 2 (Se o cliente insistiu, perguntou rua, número ou sobre retirar APÓS você já ter enviado a Etapa 1):
-Responda que o local funciona exclusivamente como um depósito/centro de distribuição para a saída dos entregadores e, por normas de segurança e logística, não realizamos atendimento presencial ou retirada no local. Trabalhamos apenas com entrega própria para garantir o transporte correto do produto.`;
+1. ETAPA 1 (Primeira vez): Responda APENAS: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas. 😄"
+2. ETAPA 2 (Insistência ou pedido de retirada): Explique que o local funciona exclusivamente como um depósito e centro de distribuição. Por normas de segurança e logística, não realizamos atendimento presencial ou retirada. Trabalhamos 100% com entrega própria para garantir o transporte seguro do gás, poe se tratar de um produto sensível.`;
 
 
   const context = `
