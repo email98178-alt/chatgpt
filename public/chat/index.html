@@ -1803,7 +1803,7 @@ addProfessionalStatusCard();
 
 async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorPix = ORDER.productPrice.toFixed(2).replace('.', ',');
-  const valorSemDesconto = (ORDER.productPrice * 1.30).toFixed(2).replace('.', ',');
+  const valorSemDesconto = (ORDER.productPrice * 1.46).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
