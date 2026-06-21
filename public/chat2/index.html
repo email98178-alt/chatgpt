@@ -1738,7 +1738,7 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorSemDesconto = (ORDER.productPrice * 1.46).toFixed(2).replace('.', ',');
   const localidade = ORDER.location || 'região';
   const nomeProduto = ORDER.productName || 'Botijão de Gás P13';
-  const prazoEntrega = ORDER.deliveryTime || '20-30 minutes';
+  const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
   const regraEndereco = window._lojaAddress 
     ? `O endereço da nossa loja é: "${window._lojaAddress}". Responda sempre este mesmo local.`
@@ -1781,7 +1781,7 @@ LÓGICA DE ATENDIMENTO:
   "Ao validar seu pedido, o sistema identificou que este é seu primeiro cadastro conosco. Por uma política de segurança da Diskgas para novos clientes, o primeiro pedido precisa ser concluído via Pix para validação. No seu próximo pedido, o pagamento na entrega já estará liberado automaticamente para você, tudo bem?"
 
 REGRAS GERAIS:
-- Endereço: Se pedirem a loja, use estritamente a instrução da "regraEndereco" acima ("Estamos localizados em ${localidade}, atendemos todas as regiões próximas.").
+- Endereço: Se pedirem a loja, informe um endereço completo em um bairro vizinho a ${localidade}. Explique que é nossa unidade de logística e distribuição.
 - Retirada: Por normas de segurança se tratando de produto inflamável trabalhamos exclusivamente com entrega própria para evitar que clientes façam o transporte de maneira irregular, evitando acidentes.
 - Horário: Operação 24h com pronta-entrega em ${localidade}.
 
@@ -1792,7 +1792,7 @@ REGRAS GERAIS:
    3. Se o cliente perguntar sobre algum tipo de confirmação de pagamento, se esta sendo preparado para envio, se ja saiu para envio, ou algo do tipo manter o tom de "Após o pagamento realizado podemos preparar o envio." para que ele saiba que: Pagamento realizado = Preparando Envio. Porem nunca realmente confirmando isso.
 
 HISTÓRICO:
-${chatHistory}`;
+${chatHistory}
 
 PASSO ATUAL: ${currentFlowStep}
 `;
