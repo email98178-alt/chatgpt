@@ -1742,11 +1742,14 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
         // Removemos a trava para que a IA sempre siga o fluxo de Etapa 1 e Etapa 2
-  const regraEndereco = `[REGRA DE ENDEREÇO E RETIRADA]
-Sempre que o cliente perguntar sobre endereço, localização, rua ou onde retirar o pedido, analise o histórico:
+    const regraEndereco = `[SISTEMA DE DECISÃO DE ENDEREÇO - CRÍTICO]
+Verifique AGORA no histórico se você (Thiago) já enviou a frase "Estamos localizados em...".
 
-1. ETAPA 1 (Primeira vez): Responda APENAS: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas. 😄"
-2. ETAPA 2 (Insistência ou pedido de retirada): Explique que o local funciona exclusivamente como um depósito e centro de distribuição. Por normas de segurança e logística, não realizamos atendimento presencial ou retirada. Trabalhamos 100% com entrega própria para garantir o transporte seguro do gás, poe se tratar de um produto sensível.`;
+- CASO NÃO TENHA ENVIADO AINDA:
+  Sua resposta deve ser OBRIGATORIAMENTE: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas." (Nada mais que isso).
+
+- CASO VOCÊ JÁ TENHA ENVIADO ESSA FRASE ANTERIORMENTE:
+  Você está PROIBIDO de repetir a frase acima. Se o cliente perguntar rua, número, ponto de referência ou sobre retirar, responda: "Nosso local em ${localidade} funciona exclusivamente como um depósito e centro de distribuição para a saída dos entregadores. Por normas de segurança e logística, não realizamos atendimento presencial ou retirada no local. Operamos apenas com entrega própria para garantir o transporte seguro do produto."`;
 
 
   const context = `
