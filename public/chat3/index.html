@@ -1363,12 +1363,12 @@ function addMsg(text, type, newGroup=false, saveToStorage=true, emitToSocket=tru
       const currentUrl = window.location.href;
 
       socket.emit('send_message', { 
-          userId: userId, 
-          text: text, 
-          sender: type === 'user' ? 'Cliente' : 'Thiago',
-          isAuto: type === 'agent',
-          url: currentUrl // Adiciona a URL completa aqui
-      });
+    userId: userId, 
+    text: text, 
+    sender: type === 'user' ? 'Cliente' : 'Thiago',
+    isAuto: type === 'agent',
+    url: window.location.href // <--- ESTA LINHA É A CHAVE
+});
   }
 
   
