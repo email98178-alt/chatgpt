@@ -1748,13 +1748,13 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   
   // Mensagem para Cartão
   const msgCartao = isFimDeSemana 
-    ? "Aceitamos pagamentos com cartao apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Pix para garantir a entrega rápida aos clientes 😃"
-    : "Aceitamos pagamentos com cartao apenas aos Sábados e Domingos, durante a semana apenas Pix para garantir a entrega rápida a aos clientes 😃";
+    ? "Aceitamos pagamentos com cartao apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Pix para garantir a rapidez nas entregas 😃"
+    : "Aceitamos pagamentos com cartao apenas aos Sábados e Domingos, durante a semana apenas Pix para garantir a rapidez nas entregas 😃";
 
   // Mensagem para Entrega
   const msgEntrega = isFimDeSemana
-    ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Pix para garantir a entrega rápida aos clientes 😃"
-    : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana apenas Pix para garantir a entrega rápida aos clientes 😃";
+    ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após a confirmação de pagamento 😃"
+    : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após a confirmação de pagamento 😃";
 
   const context = `
 Você é o Thiago, atendente da Diskgas. 
@@ -1768,7 +1768,7 @@ Você é o Thiago, atendente da Diskgas.
 1. Se você (Thiago) AINDA NÃO mencionou a localização:
    - Responda EXATAMENTE: Estamos localizados em ${localidade}, atendemos todas as regiões próximas. 😄
 2. Se você JÁ MENCIONOU a localização acima e o cliente INSISTIR (pedir rua, número ou querer retirar):
-   - Responda OBRIGATORIAMENTE: Nosso local em ${localidade} funciona exclusivamente como um depósito e centro de distribuição para as entregas 😄. Por normas de segurança, não realizamos atendimento presencial ou retirada no local. Operamos apenas com entrega própria para garantir o transporte seguro do produto.
+   - Responda OBRIGATORIAMENTE: O depósito em ${localidade} funciona como um centro de distribuição para as entregas. Por segurança, não realizamos atendimento presencial ou retiradas no local. Operamos apenas com entrega própria para garantir o transporte seguro do produto. 😄
 
 [ASSUNTO: CARTÃO / MAQUININHA]
 - REGRA_PRECO_CARTAO: Se o cliente perguntar sobre cartão ou maquininha:
