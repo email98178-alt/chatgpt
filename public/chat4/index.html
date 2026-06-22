@@ -1759,6 +1759,26 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
     ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após a confirmação de pagamento para garantir a entrega rápida aos clientes 😃"
     : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após a confirmação de pagamento para garantir a entrega rápida aos clientes 😃";
 
+    // Variáveis para controlar se a primeira mensagem de fricção já foi enviada
+  const chatHistoryLower = chatHistory.toLowerCase();
+
+  const hasSentEntregaMsg1 = chatHistoryLower.includes("garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago.");
+  const hasSentPixMsg1 = chatHistoryLower.includes("o pagamento via pix na diskgas é 100% seguro e instantâneo.");
+  const hasSentQualidadeMsg1 = chatHistoryLower.includes("trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis.");
+  const hasSentConfiancaMsg1 = chatHistoryLower.includes("a diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos.");
+
+  // Mensagens de conversão - Nível 1 (já existentes ou ligeiramente ajustadas)
+  const msgEntrega1 = "A sua compra é assegurada pela Diskgas! Garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
+  const msgPix1 = "O pagamento via Pix na Diskgas é 100% seguro e instantâneo. Seus dados são protegidos e a aprovação é imediata, agilizando ainda mais a sua entrega. 😄";
+  const msgQualidade1 = "Trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis. A Diskgas garante a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade. 💯";
+  const msgConfianca1 = "A Diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos. Sua primeira compra conosco é protegida pela nossa política de satisfação garantida. Queremos que você se sinta seguro(a)! ⭐";
+
+  // Mensagens de conversão - Nível 2 (novas, mais detalhadas)
+  const msgEntrega2 = "Entendo sua preocupação com a entrega. Além da nossa garantia de reembolso, saiba que contamos com uma logística otimizada e entregadores treinados para assegurar que seu pedido chegue rápido e em perfeitas condições. Sua tranquilidade é nossa prioridade! 🚀";
+  const msgPix2 = "Compreendo a cautela. Nosso sistema Pix é integrado diretamente com as instituições financeiras, garantindo que cada transação seja rastreável e segura. Milhares de clientes já utilizam e aprovam a agilidade e segurança do nosso Pix. Pode prosseguir com confiança! 🔒";
+  const msgQualidade2 = "Sua segurança é inegociável para nós. Todos os nossos produtos passam por rigorosos controles de qualidade e são de marcas renomadas no mercado. Nosso compromisso é entregar o melhor para você e sua família, com a certeza de um produto seguro e eficiente. ✨";
+  const msgConfianca2 = "É natural ter dúvidas na primeira vez. A Diskgas construiu sua reputação ao longo dos anos com base na transparência, excelência no atendimento e na satisfação dos clientes. Convidamos você a experimentar e comprovar a qualidade e o compromisso que nos tornaram referência na região! 🤝";
+
   const context = `
 Você é o Thiago, atendente da Diskgas. 
 
@@ -1784,20 +1804,20 @@ Você é o Thiago, atendente da Diskgas.
 --- MENSAGENS DE CONVERSÃO (PRIORIDADE ALTA) ---
 
 [RECEIO: ENTREGA / ATRASO / REEMBOLSO]
-- PALAVRAS-CHAVE: "atraso", "demora", "seguro", "garantia", "falso", "reembolso", "receber", "golpe", "fraude", "medo", "receio", "confio", "confiança", "seguro", "confiável", "verdadeiro", "verdade", "sei"
-- Responda: A sua compra é assegurada pela Diskgas! Garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄
+- PALAVRAS-CHAVE: "atraso", "demora", "não chega", "garantia entrega", "reembolso", "receber", "entrega", "chega", "golpe", "fraude", "medo", "receio", "confio", "confiança", "seguro", "confiável", "verdadeiro", "verdade", "sei"
+- Responda: ${hasSentEntregaMsg1 ? msgEntrega2 : msgEntrega1}
 
 [RECEIO: SEGURANÇA DO PAGAMENTO PIX]
 - PALAVRAS-CHAVE: "segurança pix", "confiança pix", "problema pix", "pix seguro", "confiavel pix", "seguro pagar"
-- Responda: O pagamento via Pix na Diskgas é 100% seguro e instantâneo. Seus dados são protegidos e a aprovação é imediata, agilizando ainda mais a sua entrega. 😄
+- Responda: ${hasSentPixMsg1 ? msgPix2 : msgPix1}
 
 [RECEIO: QUALIDADE DO PRODUTO]
 - PALAVRAS-CHAVE: "qualidade", "produto", "gás", "vazamento", "procedência"
-- Responda: A sua compra é assegurada pela Diskgas! Garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄
+- Responda: ${hasSentQualidadeMsg1 ? msgQualidade2 : msgQualidade1}
 
 [RECEIO: CONFIANÇA NA EMPRESA / PRIMEIRA COMPRA]
-- PALAVRAS-CHAVE: "primeira compra", "conheço", "reputação", "seguro comprar"
-- Responda: A sua compra é assegurada pela Diskgas! Garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄
+- PALAVRAS-CHAVE: "primeira compra", "conheço", "reputação", "seguro comprar", "confiança", "confiável"
+- Responda: ${hasSentConfiancaMsg1 ? msgConfianca2 : msgConfianca1}
 
 --- REGRAS DE OURO (USAR APENAS SE NÃO FOR CARTÃO/ENTREGA OU RECEIO) ---
 - PRAZO: Se o cliente perguntar o prazo de entrega isoladamente, responda: "O prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
