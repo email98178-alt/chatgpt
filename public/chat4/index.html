@@ -1768,15 +1768,15 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const hasSentConfiancaMsg1 = chatHistoryLower.includes("a diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos.");
 
   // Mensagens de conversão - Nível 1 (já existentes ou ligeiramente ajustadas)
-  const msgEntrega1 = "A sua compra é assegurada pela Diskgas! Garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
-  const msgPix1 = "O pagamento via Pix na Diskgas é 100% seguro e instantâneo. Seus dados são protegidos e a aprovação é imediata, agilizando ainda mais a sua entrega. 😄";
-  const msgQualidade1 = "Trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis. A Diskgas garante a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade. 💯";
-  const msgConfianca1 = "A Diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos. Sua primeira compra conosco é protegida pela nossa política de satisfação garantida. Queremos que você se sinta seguro(a)! ⭐";
+  const msgEntrega1 = "A sua compra é assegurada pela Diskgas, garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
+  const msgPix1 = "O pagamento via Pix é 100% seguro e protegido. A entrega é garantida e a aprovação imediata, e em caso de qualquer problema fazemos o reembolso completo do valor pago. 😄";
+  const msgQualidade1 = "Trabalhamos apenas com produtos certificados. Garantimos a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade.";
+  const msgConfianca1 = "Temos anos de experiência e milhares de clientes satisfeitos. Sua compra é protegida pelas nossas políticas, garantimos a entrega no prazo ou faremos o reembolso completo do valor pago. 😄";
 
   // Mensagens de conversão - Nível 2 (novas, mais detalhadas)
-  const msgEntrega2 = "Entendo sua preocupação com a entrega. Além da nossa garantia de reembolso, saiba que contamos com uma logística otimizada e entregadores treinados para assegurar que seu pedido chegue rápido e em perfeitas condições. Sua tranquilidade é nossa prioridade! 🚀";
-  const msgPix2 = "Compreendo a cautela. Nosso sistema Pix é integrado diretamente com as instituições financeiras, garantindo que cada transação seja rastreável e segura. Milhares de clientes já utilizam e aprovam a agilidade e segurança do nosso Pix. Pode prosseguir com confiança! 🔒";
-  const msgQualidade2 = "Sua segurança é inegociável para nós. Todos os nossos produtos passam por rigorosos controles de qualidade e são de marcas renomadas no mercado. Nosso compromisso é entregar o melhor para você e sua família, com a certeza de um produto seguro e eficiente. ✨";
+  const msgEntrega2 = "Entendo sua preocupação. Além da nossa garantia de reembolso, saiba que contamos com uma logística otimizada e entregadores treinados para assegurar que seu pedido chegue rápido e em perfeitas condições. Sua tranquilidade é nossa prioridade! 😄";
+  const msgPix2 = "Nosso sistema Pix é integrado diretamente com o vendedor autorizado na sua região, garantindo que cada transação seja rastreável e segura. Milhares de clientes já utilizam e aprovam a agilidade e segurança do nosso.";
+  const msgQualidade2 = "Sua segurança é prioridade, todos os nossos produtos passam por rigorosos controles de qualidade e são de marcas renomadas no mercado. Nosso compromisso é entregar o melhor para você e sua família, com a certeza de um produto seguro e eficiente. ✨";
   const msgConfianca2 = "É natural ter dúvidas na primeira vez. A Diskgas construiu sua reputação ao longo dos anos com base na transparência, excelência no atendimento e na satisfação dos clientes. Convidamos você a experimentar e comprovar a qualidade e o compromisso que nos tornaram referência na região! 🤝";
 
   const context = `
