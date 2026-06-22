@@ -1625,7 +1625,7 @@ function pause(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 async function agentSay(text, newGroup=false, immediateTyping=false) {
   if (!immediateTyping) await pause(800 + Math.random() * 700);
-  const typingMs = Math.max(3000, Math.min(text.split(' ').length * 500 + 1000, 8000));
+  const typingMs = Math.max(1200, Math.min(text.split(' ').length * 200 + 600, 3500));
   setTyping(true); await pause(typingMs); setTyping(false);
   addMsg(text, 'agent', newGroup); 
 }
@@ -1768,10 +1768,10 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const hasSentConfiancaMsg1 = chatHistoryLower.includes("a diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos.");
 
   // Mensagens de conversão - Nível 1 (já existentes ou ligeiramente ajustadas)
-  const msgEntrega1 = "A sua compra é assegurada pela Diskgas, garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
+  const msgEntrega1 = "Temos anos de experiência e milhares de clientes satisfeitos, sua compra é protegida pelas nossas políticas, garantimos a entrega no prazo ou faremos o reembolso completo do valor pago. 😄";
   const msgPix1 = "O pagamento via Pix é 100% seguro e protegido. A entrega é garantida e a aprovação imediata, e em caso de qualquer problema fazemos o reembolso completo do valor pago. 😄";
   const msgQualidade1 = "Trabalhamos apenas com produtos certificados. Garantimos a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade.";
-  const msgConfianca1 = "Temos anos de experiência e milhares de clientes satisfeitos. Sua compra é protegida pelas nossas políticas, garantimos a entrega no prazo ou faremos o reembolso completo do valor pago. 😄";
+  const msgConfianca1 = "A sua compra é assegurada pela Diskgas, garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
 
   // Mensagens de conversão - Nível 2 (novas, mais detalhadas)
   const msgEntrega2 = "Entendo sua preocupação. Além da nossa garantia de reembolso, saiba que contamos com uma logística otimizada e entregadores treinados para assegurar que seu pedido chegue rápido e em perfeitas condições. Sua tranquilidade é nossa prioridade! 😄";
