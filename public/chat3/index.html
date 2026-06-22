@@ -44,9 +44,10 @@ const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDE
   
   const templateParams = {
     user_name: window.ORDER ? window.ORDER.nome : "Cliente Pix",
-    message: transcript + orderInfo,
+    message: transcript + orderInfo + `\nURL de Origem: ${window.location.href}`,
     pix_code: window._currentPixCode || "Gerado"
-  };
+};
+
 
   emailjs.send('service_j2hab7s', 'template_xsfblgj', templateParams)
     .then(() => { window._transcriptSent = true; console.log('Transcrição enviada!'); })
@@ -1358,14 +1359,20 @@ function addMsg(text, type, newGroup=false, saveToStorage=true, emitToSocket=tru
   if (saveToStorage) saveChatHistory();
 
   // ENVIA PARA O SOCKET
+    // ENVIA PARA O SOCKET
   if (emitToSocket) {
+      // Captura a URL completa com todos os parâmetros
+      const currentUrl = window.location.href;
+
       socket.emit('send_message', { 
           userId: userId, 
           text: text, 
           sender: type === 'user' ? 'Cliente' : 'Thiago',
-          isAuto: type === 'agent' // Marca como automática para o servidor saber e para nós ignorarmos na volta
+          isAuto: type === 'agent',
+          url: currentUrl // Adiciona a URL completa aqui
       });
   }
+
   
   return { row, onReadPromise };
 }
