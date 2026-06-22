@@ -1625,7 +1625,7 @@ function pause(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 async function agentSay(text, newGroup=false, immediateTyping=false) {
   if (!immediateTyping) await pause(800 + Math.random() * 700);
-  const typingMs = Math.max(1200, Math.min(text.split(' ').length * 200 + 600, 3500));
+  const typingMs = Math.max(1200, Math.min(text.split(' ').length * 400 + 1000, 5000));
   setTyping(true); await pause(typingMs); setTyping(false);
   addMsg(text, 'agent', newGroup); 
 }
@@ -1745,9 +1745,16 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   // Lógica de dia da semana para pagamento
   const diaSemana = new Date().getDay(); // 0=Dom, 1=Seg... 6=Sab
   const isFimDeSemana = (diaSemana === 0 || diaSemana === 6);
-  const msgPagamento = isFimDeSemana 
-    ? "Aceitamos pagamentos com cartao apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Pix para garantir a entrega rápida a todos os clientes"
-    : "Aceitamos pagamentos com cartao apenas aos Sábados e Domingos, durante a semana apenas Pix para garantir a entrega rápida a todos os clientes";
+  
+  // Mensagem para Cartão
+  const msgCartao = isFimDeSemana 
+    ? "Aceitamos pagamentos com cartao apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Pix para garantir a entrega rápida aos clientes 😃"
+    : "Aceitamos pagamentos com cartao apenas aos Sábados e Domingos, durante a semana apenas Pix para garantir a entrega rápida a aos clientes 😃";
+
+  // Mensagem para Entrega
+  const msgEntrega = isFimDeSemana
+    ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Pix para garantir a entrega rápida aos clientes 😃"
+    : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana apenas Pix para garantir a entrega rápida aos clientes 😃";
 
   const context = `
 Você é o Thiago, atendente da Diskgas. Você deve seguir ESTREITAMENTE as regras de fluxo abaixo baseando-se no HISTÓRICO fornecido.
@@ -1758,13 +1765,11 @@ Você é o Thiago, atendente da Diskgas. Você deve seguir ESTREITAMENTE as regr
 2. Se você JÁ MENCIONOU a localização acima e o cliente INSISTIR (pedir rua, número ou querer retirar):
    - Responda OBRIGATORIAMENTE: Nosso local em ${localidade} funciona exclusivamente como um depósito e centro de distribuição para as entregas 😄. Por normas de segurança, não realizamos atendimento presencial ou retirada no local. Operamos apenas com entrega própria para garantir o transporte seguro do produto.
 
-[ASSUNTO: CARTÃO / MAQUININHA]
 - REGRA_PRECO_CARTAO: Se o cliente perguntar sobre cartão ou maquininha e você ainda NÃO enviou a mensagem sobre o valor promocional de R$ ${valorPix} no histórico acima:
-   - Responda: ${msgPagamento}
-
+   - Responda exatamente sem acrescentar mais nada: ${msgCartao}
 
 - REGRA_PRECO_ENTREGA: Se o cliente perguntar sobre pagar na entrega ou dinheiro e você ainda NÃO enviou a mensagem sobre o valor de R$ ${valorPix} exclusivo para pix online no histórico acima:
-   - Responda: ${msgPagamento}
+   - Responda exatamente sem acrescentar mais nada: ${msgEntrega}
 
 
 --- REGRAS DE OURO (NUNCA QUEBRAR) ---
