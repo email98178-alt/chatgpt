@@ -1756,8 +1756,8 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
 
   // Mensagem para Entrega
   const msgEntrega = isFimDeSemana
-    ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após a confirmação de pagamento para garantir a entrega rápida aos clientes 😃"
-    : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após a confirmação de pagamento para garantir a entrega rápida aos clientes 😃";
+    ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃"
+    : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃";
 
     // Variáveis para controlar se a primeira mensagem de fricção já foi enviada
   const chatHistoryLower = chatHistory.toLowerCase();
