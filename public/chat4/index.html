@@ -1707,8 +1707,11 @@ showDeliverySteps(pixCode);
     await pause(600);
     
     // 1. Envia a mensagem PRIMEIRO
-await agentSay(`Estou acompanhando aqui. Após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
-
+    // 1. Envia a mensagem PRIMEIRO
+    const primeiroNome = (ORDER.nome || "").split(" ")[0];
+    const saudacaoNome = primeiroNome ? ` ${primeiroNome}` : "";
+    await agentSay(`Estou acompanhando aqui${saudacaoNome}. Após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
+    
 // Adiciona um atraso de 300ms antes de mostrar o card
 await pause(300);
 
