@@ -1625,7 +1625,7 @@ function pause(ms){ return new Promise(r=>setTimeout(r,ms)); }
 
 async function agentSay(text, newGroup=false, immediateTyping=false) {
   if (!immediateTyping) await pause(800 + Math.random() * 700);
-  const typingMs = Math.max(2500, Math.min(text.split(' ').length * 400 + 1000, 5000));
+  const typingMs = Math.max(3000, Math.min(text.split(' ').length * 500 + 1000, 8000));
   setTyping(true); await pause(typingMs); setTyping(false);
   addMsg(text, 'agent', newGroup); 
 }
@@ -1710,7 +1710,7 @@ showDeliverySteps(pixCode);
     // 1. Envia a mensagem PRIMEIRO
     const primeiroNome = (ORDER.nome || "").split(" ")[0];
     const saudacaoNome = primeiroNome ? ` ${primeiroNome}` : "";
-    await agentSay(`Estou acompanhando aqui${saudacaoNome}. Após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
+    await agentSay(`Estou acompanhando aqui${saudacaoNome}, após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
     
 // Adiciona um atraso de 300ms antes de mostrar o card
 await pause(300);
