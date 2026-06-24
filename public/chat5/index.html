@@ -1765,8 +1765,13 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
     // Variáveis para controlar se a primeira mensagem de fricção já foi enviada
   const chatHistoryLower = chatHistory.toLowerCase();
 
-  const hasSentEntregaMsg1 = chatHistoryLower.includes("garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago.");
+    const hasSentEntregaMsg1 = chatHistoryLower.includes("garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago.");
   const hasSentPixMsg1 = chatHistoryLower.includes("o pagamento via pix na diskgas é 100% seguro e instantâneo.");
+  
+  // Variáveis de controle de repetição
+  const jaFalouLocalizacao = chatHistoryLower.includes("estamos localizados em") || chatHistoryLower.includes("depósito em");
+  const jaFalouPagamento = chatHistoryLower.includes("aceitamos pagamentos com cartão") || chatHistoryLower.includes("entregador só é liberado após o pagamento");
+
   const hasSentQualidadeMsg1 = chatHistoryLower.includes("trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis.");
   const hasSentConfiancaMsg1 = chatHistoryLower.includes("a diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos.");
 
@@ -1790,19 +1795,22 @@ Você é o Thiago, atendente da Diskgas.
 2. NUNCA junte o texto de pagamento com o prazo de entrega ou saudações extras se uma regra de pagamento for acionada.
 3. Responda EXATAMENTE o que está escrito, sem uma letra a mais.
 
-[ASSUNTO: ENDEREÇO / LOCALIZAÇÃO / RETIRADA]
-1. Se você (Thiago) AINDA NÃO mencionou a localização:
-   - Responda EXATAMENTE: Estamos localizados em ${localidade}, atendemos todas as regiões próximas. 😄
-2. Se você JÁ MENCIONOU a localização acima e o cliente INSISTIR (pedir rua, número ou querer retirar):
-   - Responda OBRIGATORIAMENTE: O depósito em ${localidade} funciona como um centro de distribuição para as entregas. Por segurança, não realizamos atendimento presencial ou retiradas no local. Operamos apenas com entrega própria para garantir o transporte seguro do produto. 😄
+	--- DIRETRIZES DE ATENDIMENTO ---
 
-[ASSUNTO: CARTÃO / MAQUININHA]
-- REGRA_PRECO_CARTAO: Se o cliente perguntar sobre cartão ou maquininha:
-   - Responda exatamente e apenas: ${msgCartao}
+	[LOCALIZAÇÃO E RETIRADA]
+	- Se o assunto for localização e você AINDA NÃO falou sobre isso (${!jaFalouLocalizacao}):
+	  Responda EXATAMENTE: "Estamos localizados em ${localidade}, atendemos todas as regiões próximas. 😄"
+	- Se o cliente insistir ou perguntar detalhes (rua, número, retirada) APÓS você já ter mencionado a localização (${jaFalouLocalizacao}):
+	  NÃO repita scripts. Responda de forma contextual e direta à pergunta do cliente. 
+	  DIRETRIZ: Explique que somos um Centro de Distribuição focado em logística rápida para manter o preço baixo e a entrega em 20-30 min, por isso não temos estrutura de atendimento ao público ou retiradas. Mantenha a proibição, mas converse com o cliente.
 
-[ASSUNTO: PAGAR NA ENTREGA / DINHEIRO]
-- REGRA_PRECO_ENTREGA: Se o cliente perguntar sobre pagar na entrega ou dinheiro:
-   - Responda exatamente e apenas: ${msgEntrega}
+	[PAGAMENTO (CARTÃO / DINHEIRO / ENTREGA)]
+	- Se o assunto for forma de pagamento e você AINDA NÃO explicou a regra (${!jaFalouPagamento}):
+	  Se for Cartão: Responda exatamente "${msgCartao}"
+	  Se for Dinheiro/Entrega: Responda exatamente "${msgEntrega}"
+	- Se o cliente questionar ou pedir exceções APÓS você já ter explicado (${jaFalouPagamento}):
+	  LIBERDADE TOTAL DE RESPOSTA. Responda aos argumentos do cliente de forma humana e contextual.
+	  CONTEXTO: Explique que o sistema é automatizado para garantir rapidez, e a liberação do motoboy depende da baixa do Pix. Se ele tiver receio, reforce que você é o vendedor oficial (Thiago Callegari) e que o pagamento é seguro.
 
 --- MENSAGENS DE CONVERSÃO (PRIORIDADE ALTA) ---
 
@@ -1822,9 +1830,12 @@ Você é o Thiago, atendente da Diskgas.
 - PALAVRAS-CHAVE: "primeira compra", "conheço", "reputação", "seguro comprar", "confiança", "confiável"
 - Responda: ${hasSentConfiancaMsg1 ? msgConfianca2 : msgConfianca1}
 
---- REGRAS DE OURO (USAR APENAS SE NÃO FOR CARTÃO/ENTREGA OU RECEIO) ---
-- PRAZO: Se o cliente perguntar o prazo de entrega isoladamente, responda: "O prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
-- PAGAMENTO: Nunca confirme que o Pix caiu, o pedido foi finalizado ou qualque tipo de confirmação. Se o cliente disser que pagou ou enviar algum comprovante responda: "Com o pagamento realizado podemos preparar o envio, o prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
+	--- COMPORTAMENTO DA IA ---
+	- PRIORIDADE: Responda sempre diretamente ao que o cliente perguntou no contexto atual. 
+	- NATURALIDADE: Se a pergunta não exigir um script obrigatório, aja como um vendedor humano, empático e focado em converter a venda.
+	- NÃO REPETIÇÃO: Nunca diga a mesma frase da mesma forma se ela já aparecer no histórico. Evolua os argumentos.
+	- PAGAMENTO: Nunca confirme que o Pix caiu. Se o cliente disser que pagou, responda: "Com o pagamento realizado podemos preparar o envio, o prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
+
 HISTÓRICO DE CONVERSA:
 ${chatHistory}
 
