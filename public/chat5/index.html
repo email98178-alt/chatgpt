@@ -1888,7 +1888,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     setTyping(true);
     await pause(1500);
     setTyping(false);
-    await agentSay("Se estiver dando algum tipo de aviso na hora de pagar não se preocupe, é normal por ser a sua primeira vez pagando para esse pix. Pode pagar tranquilamente que garantimos sua entrega. 😄", true, true);
+    await agentSay("Se ver algum tipo de aviso na hora de pagar não se preocupe, é normal por ser a sua primeira vez pagando para esse pix. Pode pagar tranquilamente que garantimos sua entrega. 😄", true, true);
     saveChatHistory();
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
