@@ -1642,7 +1642,7 @@ async function runConversation(startStep = 0) {
     window._currentFlowStep = 2; saveChatHistory();
     await agentSay(`${gr}`, false, true);
     await pause(300);
-    await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${location} e Região`, false, true);
+    await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${localidade} e Região`, false, true);
     await pause(800);
   }
   if (window._currentFlowStep === 2) {
@@ -1674,6 +1674,8 @@ async function runConversation(startStep = 0) {
     const localFinal = localBase === 'sua região' ? localBase : `${localBase} e região`;
     await agentSay(`Certo, já vou enviar o pix, um segundo...`);
     await pause(900); setTyping(true); await pause(5500); setTyping(false);
+const localBase = ORDER.location || 'sua região';
+const localFinal = (localBase.toLowerCase() === 'central' || localBase.toLowerCase() === 'centro') ? cidade : `${localBase} e região`;
 await addMsg(`Você verá 𝗧𝗵𝗶𝗮𝗴𝗼 𝗖𝗮𝗹𝗹𝗲𝗴𝗮𝗿𝗶 no pix, sou o vendedor diskgás oficial em ${localFinal}, serei responsável pela entrega 😃`, 'agent', true);
     await pause(600);
   }
@@ -1742,7 +1744,9 @@ addProfessionalStatusCard();
 async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const valorPix = ORDER.productPrice.toFixed(2).replace('.', ',');
   const valorSemDesconto = (ORDER.productPrice * 1.46).toFixed(2).replace('.', ',');
-  const localidade = ORDER.location || 'região';
+  const rawLocation = ORDER.location || 'região';
+const cidade = ORDER.city || rawLocation; // Assumindo que ORDER.city contém o nome da cidade
+const localidade = (rawLocation.toLowerCase() === 'central' || rawLocation.toLowerCase() === 'centro') ? cidade : rawLocation;
     const prazoEntrega = ORDER.deliveryTime || '20-30 minutos';
 
   // Lógica de dia da semana para pagamento
