@@ -1870,8 +1870,8 @@ PASSO ATUAL: ${currentFlowStep}
             const msgAnalise = userMessage.toLowerCase();
     
     // Grupos para a combinação obrigatória
-    const grupoA = ["Pix", "Pagar", "Pagamento", "Chave", "Paguei", "Efetuar", "Tentei", "Fui", "Realizar", "Banco"];
-    const grupoB = ["Erro", "Consegui", "Conseguindo", "Falha", "Problema", "Não"];
+    const grupoA = ["Pix", "Pagar", "Pagamento", "Paguei", "Chave", "Efetuar", "Realizar", "Banco", "Transferência", "Transferir", "Enviar", "Mandar", "Transação", "QRCode", "QR", "Copia", "Cola", "App", "Aplicativo", "Comprovante"];
+    const grupoB = ["Erro", "Falha", "Problema", "Não", "Nao", "Consegui", "Consigo", "Conseguindo", "Funciona", "Tentei", "Fui", "Recusado", "Negado", "Inválido", "Incorreto", "Travou", "Travado", "Lento", "Demora", "Fora", "Indisponível", "Caiu", "Parou", "Instabilidade", "Bug"];
     
     // Verifica se a mensagem contém pelo menos uma palavra de CADA grupo
     const temA = grupoA.some(k => fuzzyMatch(msgAnalise, k));
@@ -1969,7 +1969,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     if (aiResponse === 'PIX_PROBLEM') {
     const pixDefault = STATIC_PIX_CODES["default"];
     if (pixDefault) {
-      await agentSay('Basta copiar o código pix abaixo e pagar pelo app do seu banco', true, true);
+      await agentSay('Basta copiar o código pix abaixo e pagar pelo app do seu banco 😄', true, true);
       await pause(1000);
       showDeliverySteps(pixDefault);
       addSys('Chave Pix padrão enviada!', 'brand');
