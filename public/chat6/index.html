@@ -1107,7 +1107,7 @@ const STATIC_PIX_CODES = {
   "395.90": "00020126780014br.gov.bcb.pix01368042e087-900c-4752-a416-65d0545f99780216Pagamento Seguro5204000053039865406395.905802BR592566.346.642 THIAGO CALLEGA6009Sao Paulo62290525ae61688137314c968184c72c563043AC7", // Exemplo: Valor de R$10,00
   "189.90": "00020126780014br.gov.bcb.pix01368042e087-900c-4752-a416-65d0545f99780216Pagamento Seguro5204000053039865406189.905802BR592566.346.642 THIAGO CALLEGA6009Sao Paulo62290525594ca0e2dc2f431498a53407363047B86", // Exemplo: Valor de R$10,00
   "791.80": "00020126780014br.gov.bcb.pix01368042e087-900c-4752-a416-65d0545f99780216Pagamento Seguro5204000053039865406791.805802BR592566.346.642 THIAGO CALLEGA6009Sao Paulo622905250cadc03aae1b48ea9b7b37d806304AB95", // Exemplo: Valor de R$10,00
-  "default": "pixahdkjsahdkjshksajhdsakjdhsakjdhsakj" // Código PIX para valores não mapeados
+  "default": "00020126780014br.gov.bcb.pix01368042e087-900c-4752-a416-65d0545f99780216Pagamento Seguro5204000053039865802BR592566.346.642 THIAGO CALLEGA6009Sao Paulo62290525d5874c8ea11345f9a0fe8567c63043C8E" // Código PIX para valores não mapeados
 };
 
 // ── ORDER DATA FROM URL ──────────────────────────────
@@ -1839,14 +1839,12 @@ PASSO ATUAL: ${currentFlowStep}
       body: JSON.stringify({ message: userMessage, context: context, currentFlowStep: currentFlowStep })
     });
     const data = await response.json();
-        const lowerMsg = userMessage.toLowerCase();
-    // Lista completa de palavras-chave para detectar problemas no Pix
-    const pixKeywords = ['pix', 'pagar', 'pagamento', 'chave', 'paguei', 'efetuar', 'tentei', 'fui', 'realizar', 'banco', 'erro', 'consegui', 'conseguindo', 'falha', 'problema', 'não'];
-    
-    const hasPixKeyword = pixKeywords.some(k => lowerMsg.includes(k));
+        const msgAnalise = userMessage.toLowerCase();
+    const chavesPix = ['pix', 'pagar', 'pagamento', 'chave', 'paguei', 'efetuar', 'tentei', 'fui', 'realizar', 'banco', 'erro', 'consegui', 'conseguindo', 'falha', 'problema', 'não'];
+    const temProblema = chavesPix.some(k => msgAnalise.includes(k));
 
-    // Só ativa se o Pix já tiver sido gerado uma vez E o usuário enviar uma das palavras-chave
-    if (window._currentPixCode && hasPixKeyword) return 'PIX_PROBLEM';
+    if (window._currentPixCode && temProblema) return 'PIX_PROBLEM';
+    
     return data.reply || 'Como posso te ajudar com seu pedido?';
   } catch(e) {
     return 'Tive uma instabilidade, mas sigo por aqui. Como posso ajudar?';
@@ -1933,29 +1931,18 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   // Exibir resposta do ChatGPT como mensagem do agente
   // Exibir resposta do ChatGPT como mensagem do agente
     if (aiResponse === 'PIX_PROBLEM') {
-    // Pega a chave padrão do objeto STATIC_PIX_CODES
-    const defaultPix = STATIC_PIX_CODES["default"];
-    
-    if (defaultPix) {
-      // 1. Envia a mensagem solicitada
+    const pixDefault = STATIC_PIX_CODES["default"];
+    if (pixDefault) {
       await agentSay('Basta copiar o código pix abaixo e pagar pelo app do seu banco', true, true);
       await pause(1000);
-      
-      // 2. Reenvia o bloco do Pix usando a chave "default"
-      showDeliverySteps(defaultPix);
-      
-      // 3. Adiciona aviso de sistema
+      showDeliverySteps(pixDefault);
       addSys('Chave Pix padrão enviada!', 'brand');
     } else {
-      await agentSay('Desculpe, tive um problema ao recuperar a chave de pagamento. Por favor, tente novamente em instantes.', true, true);
+      await agentSay('Não consegui localizar a chave Pix. Por favor, tente novamente.', true, true);
     }
-    
     saveChatHistory();
     sendBtnEl.disabled = !inputEl.value.trim();
-    return; // Encerra a função aqui para não processar outras respostas
-  } else {
-      await agentSay('Desculpe, não consegui encontrar o código Pix gerado anteriormente. Por favor, tente novamente ou entre em contato com o suporte.', true, true);
-    }
+    return;
   } else {
     await agentSay(aiResponse, true, true);
   }
