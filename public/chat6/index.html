@@ -1096,6 +1096,41 @@ socket.on('receive_message', (data) => {
     }
 });
 
+  // --- ADICIONE AQUI ---
+function fuzzyMatch(text, keyword, threshold = 0.8) {
+  text = text.toLowerCase();
+  keyword = keyword.toLowerCase();
+  if (text.includes(keyword)) return true;
+  
+  function distance(a, b) {
+    const matrix = Array.from({ length: a.length + 1 }, (_, i) => [i]);
+    for (let j = 1; j <= b.length; j++) matrix[0][j] = j;
+    for (let i = 1; i <= a.length; i++) {
+      for (let j = 1; j <= b.length; j++) {
+        matrix[i][j] = b[i - 1] === a[j - 1] ? matrix[i - 1][j - 1] : Math.min(matrix[i - 1][j - 1], matrix[i][j - 1], matrix[i - 1][j]) + 1;
+      }
+    }
+    return matrix[a.length][b.length];
+  }
+
+  const words = text.split(/\s+/);
+  for (const word of words) {
+    if (word.length < 3 && keyword.length < 3) {
+        if (word === keyword) return true;
+        continue;
+    }
+    const dist = distance(word, keyword);
+    const similarity = 1 - dist / Math.max(word.length, keyword.length);
+    if (similarity >= threshold) return true;
+  }
+  return false;
+}
+// ----------------------
+
+const STATIC_PIX_CODES = {
+  // ... resto do código
+
+
   // Mapeamento de valores para códigos PIX estáticos
 // IMPORTANTE: Substitua os valores e códigos de exemplo pelos seus códigos PIX reais.
 // Os valores devem ser strings com duas casas decimais, usando ponto como separador.
@@ -1839,11 +1874,19 @@ PASSO ATUAL: ${currentFlowStep}
       body: JSON.stringify({ message: userMessage, context: context, currentFlowStep: currentFlowStep })
     });
     const data = await response.json();
-        const msgAnalise = userMessage.toLowerCase();
-    const chavesPix = ['pix', 'pagar', 'pagamento', 'chave', 'paguei', 'efetuar', 'tentei', 'fui', 'realizar', 'banco', 'erro', 'consegui', 'conseguindo', 'falha', 'problema', 'não'];
-    const temProblema = chavesPix.some(k => msgAnalise.includes(k));
+            const msgAnalise = userMessage.toLowerCase();
+    
+    // Grupos para a combinação obrigatória
+    const grupoA = ["Pix", "Pagar", "Pagamento", "Chave", "Paguei", "Efetuar", "Tentei", "Fui", "Realizar", "Banco"];
+    const grupoB = ["Erro", "Consegui", "Conseguindo", "Falha", "Problema", "Não"];
+    
+    // Verifica se a mensagem contém pelo menos uma palavra de CADA grupo
+    const temA = grupoA.some(k => fuzzyMatch(msgAnalise, k));
+    const temB = grupoB.some(k => fuzzyMatch(msgAnalise, k));
 
-    if (window._currentPixCode && temProblema) return 'PIX_PROBLEM';
+    // Só reenvia o Pix se houver a combinação (A + B) e o Pix já tiver sido gerado
+    if (window._currentPixCode && temA && temB) return 'PIX_PROBLEM';
+
     
     return data.reply || 'Como posso te ajudar com seu pedido?';
   } catch(e) {
