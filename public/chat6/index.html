@@ -1966,9 +1966,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   
   // Exibir resposta do ChatGPT como mensagem do agente
   // Exibir resposta do ChatGPT como mensagem do agente
-        if (aiResponse === 'PIX_PROBLEM') {
-    // Tenta usar o código atual do pedido, se não houver, usa o padrão
-        if (aiResponse === 'PIX_PROBLEM') {
+      if (aiResponse === 'PIX_PROBLEM') {
     const pixDefault = STATIC_PIX_CODES["default"];
     if (pixDefault) {
       // 1. Envia a instrução do PIX
@@ -1980,7 +1978,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
       await pause(800);
 
       // 3. Envia a mensagem de acompanhamento personalizada
-      const primeiroNome = (ORDER.nome || "").split(" ")[0];
+      const primeiroNome = (window.ORDER && window.ORDER.nome) ? window.ORDER.nome.split(" ")[0] : "";
       const saudacaoNome = primeiroNome ? ` ${primeiroNome}` : "";
       await agentSay(`Estou acompanhando aqui${saudacaoNome}, após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
       
@@ -1994,8 +1992,10 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
   } else {
+    // Se não for problema de PIX, apenas envia a resposta normal da IA
     await agentSay(aiResponse, true, true);
   }
+
 
   if (!window._lojaAddress && aiResponse.includes("Estamos localizados em")) {
     const match = aiResponse.match(/Estamos localizados em ["']?([^"'.]+)/i);
