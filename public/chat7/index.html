@@ -1923,18 +1923,21 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     await pause(1500);
     setTyping(false);
     await agentSay("Para garantir a segurança de nossos clientes esse é o unico canal de atendimento Diskgás, não atendemos por outros meios como whatsapp, ligações ou qualquer outro canal. 😄", true, true);
-    if (window._orderConfirmationShown) {
-      await pause(1000);
-      currentConfirmationBlock = null; // Reseta o bloco atual para gerar um novo
+    saveChatHistory();
+
+    // SÓ REENVIA SE: Estiver no passo 3 E o resumo já apareceu E o pagamento ainda NÃO foi confirmado
+    if (window._currentFlowStep === 3 && window._orderConfirmationShown && !window._paymentConfirmed) {
+      await pause(4000); 
+      const msg = confirmationMessages[confirmationMsgIndex];
+      await agentSay(msg, true, true);
+      confirmationMsgIndex = (confirmationMsgIndex + 1) % confirmationMessages.length;
+      currentConfirmationBlock = null; 
       showOrderConfirmation();
     }
     
-    saveChatHistory();
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
   }
-
-  // NOVO FILTRO: Detecção de aviso de golpe/fraude/segurança
 
 
   // NOVO FILTRO: Detecção de aviso de golpe/fraude/segurança
