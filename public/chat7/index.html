@@ -1923,6 +1923,12 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     await pause(1500);
     setTyping(false);
     await agentSay("Para garantir a segurança de nossos clientes esse é o unico canal de atendimento Diskgás, não atendemos por outros meios como whatsapp, ligações ou qualquer outro canal. 😄", true, true);
+    if (window._orderConfirmationShown) {
+      await pause(1000);
+      currentConfirmationBlock = null; // Reseta o bloco atual para gerar um novo
+      showOrderConfirmation();
+    }
+    
     saveChatHistory();
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
