@@ -1966,13 +1966,19 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   
   // Exibir resposta do ChatGPT como mensagem do agente
   // Exibir resposta do ChatGPT como mensagem do agente
-    if (aiResponse === 'PIX_PROBLEM') {
-    const pixDefault = STATIC_PIX_CODES["default"];
-    if (pixDefault) {
+        if (aiResponse === 'PIX_PROBLEM') {
+    // Tenta usar o código atual do pedido, se não houver, usa o padrão
+    const pixCode = window._currentPixCode || STATIC_PIX_CODES["default"];
+    if (pixCode) {
       await agentSay('Basta copiar o código pix abaixo e pagar pelo app do seu banco 😄', true, true);
       await pause(1000);
-      showDeliverySteps(pixDefault);
-      addSys('Chave Pix padrão enviada!', 'brand');
+      
+      // Reenvia o bloco do PIX
+      showDeliverySteps(pixCode);
+      
+      // Pequena pausa para naturalidade e reenvia o card de aguardando pagamento
+      await pause(400);
+      addProfessionalStatusCard();
     } else {
       await agentSay('Não consegui localizar a chave Pix. Por favor, tente novamente.', true, true);
     }
