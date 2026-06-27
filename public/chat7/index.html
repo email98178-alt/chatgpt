@@ -459,10 +459,35 @@ html,body{
 .input-wrap{
   flex:1;background:var(--surface-2);
   border:1.5px solid var(--border-2);
-  border-radius:24px;padding:4px 14px;
+  border-radius:24px;padding:4px 10px 4px 14px; /* Ajuste no padding para o botão de anexo */
   display:flex;align-items:flex-end;
   transition:all .2s ease;
 }
+
+.attach-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  background: transparent; /* Fundo transparente para harmonizar */
+  color: var(--text-3); /* Cor do ícone */
+  border: none;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 3px; /* Alinhar com o input de texto */
+  flex-shrink: 0;
+  transition: all .2s ease;
+}
+
+.attach-btn:hover {
+  color: var(--brand); /* Mudar cor no hover */
+}
+
+.attach-btn:active {
+  transform: scale(0.95);
+}
+
 .input-wrap:focus-within{border-color:var(--brand-mid);background:#fff;box-shadow:0 0 0 3px var(--brand-glow);}
 
 .input-el{
@@ -954,15 +979,19 @@ html,body{
     <span class="fab-badge" id="fabBadge">0</span>
   </button>
 
-  <!-- FOOTER -->
-  <footer class="footer">
+   <footer class="footer">
     <div class="input-wrap" id="inputWrap">
+      <input type="file" id="fileInput" style="display: none;" accept="image/*, .pdf, .doc, .docx, .txt">
+      <button class="attach-btn" id="attachBtn" aria-label="Anexar arquivo">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.49"/></svg>
+      </button>
       <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
     </div>
     <button class="send-btn" id="sendBtn" disabled aria-label="Enviar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
     </button>
   </footer>
+
 
   <!-- ORDER MODAL -->
   <div class="modal-overlay" id="modalOverlay">
@@ -1364,8 +1393,33 @@ inputEl.addEventListener('input', () => {
 });
 inputEl.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();} });
 
-sendBtnEl.addEventListener('mousedown', e => { if (inputEl.value.trim()) e.preventDefault(); });
-sendBtnEl.addEventListener('click', () => doSend());
+const attachBtn = document.getElementById('attachBtn');
+const fileInput = document.getElementById('fileInput');
+let attachedFile = null; // Variável para armazenar o arquivo anexado
+
+attachBtn.addEventListener('click', () => {
+  fileInput.click(); // Simula o clique no input de arquivo oculto
+});
+
+fileInput.addEventListener('change', (event) => {
+  const file = event.target.files[0];
+  if (file) {
+    attachedFile = file;
+    // Opcional: Adicionar uma indicação visual de que um arquivo foi anexado
+    // Por exemplo, mudar a cor do botão de anexo ou exibir o nome do arquivo
+    console.log('Arquivo anexado:', file.name);
+    // Habilitar o botão de enviar se houver arquivo, mesmo sem texto
+    sendBtnEl.disabled = false;
+  } else {
+    attachedFile = null;
+    // Desabilitar o botão de enviar se não houver texto e nenhum arquivo
+    sendBtnEl.disabled = !inputEl.value.trim();
+  }
+});
+
+sendBtnEl.addEventListener("mousedown", e => { if (inputEl.value.trim() || attachedFile) e.preventDefault(); });
+sendBtnEl.addEventListener("click", () => doSend());
+
 
 // ── MESSAGES ─────────────────────────────────────────
 function addMsg(text, type, newGroup=false, saveToStorage=true, emitToSocket=true) {
@@ -1888,30 +1942,46 @@ PASSO ATUAL: ${currentFlowStep}
 }
 
   
-// ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
-  if (!text) return;
+  // Permite enviar se houver texto OU um arquivo anexado
+  if (!text && !attachedFile) return;
+  
   sendBtnEl.disabled = true;
-  if (text.toLowerCase() === 'emailjs') { sendTranscript(); inputEl.value = ''; return; }
+  
+  if (text.toLowerCase() === 'emailjs') { sendTranscript(); inputEl.value = ''; attachedFile = null; return; }
+  
   const originalText = text;
   inputEl.value=''; inputEl.style.height='auto'; inputEl.blur();
   
-  const { row } = addMsg(originalText, 'user');
+  // Se houver um arquivo anexado, adicione-o à mensagem
+  let messageContent = originalText;
+  if (attachedFile) {
+    // Aqui você precisaria de uma lógica para fazer upload do arquivo
+    // e obter uma URL ou ID para incluir na mensagem.
+    // Por enquanto, vamos apenas adicionar o nome do arquivo.
+    messageContent += `\n[Arquivo Anexado: ${attachedFile.name}]`;
+    // Limpar o arquivo anexado após o envio
+    attachedFile = null;
+    fileInput.value = ''; // Limpa o input de arquivo para permitir anexar o mesmo arquivo novamente
+  }
+
+  const { row } = addMsg(messageContent, 'user'); // Usa messageContent que pode incluir o anexo
   // Captura o elemento da bolha de mensagem criada imediatamente
   const currentBubble = row.querySelector('.bubble');
   
     await pause(1600);
   
-  if (currentBubble) currentBubble.dataset.originalText = originalText;
+  if (currentBubble) currentBubble.dataset.originalText = originalText; // Salva o texto original, sem o anexo
 
   // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
     // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
 // Se o fluxo já passou do passo 3, ou se a variável for verdadeira, permitimos a resposta
 if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
-    sendBtnEl.disabled = !inputEl.value.trim();
+    sendBtnEl.disabled = !inputEl.value.trim() && !attachedFile; // Verifica também se há arquivo
     return; 
   }
+
 
 
           const mensagemMinuscula = originalText.toLowerCase();
