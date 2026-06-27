@@ -1968,15 +1968,23 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   // Exibir resposta do ChatGPT como mensagem do agente
         if (aiResponse === 'PIX_PROBLEM') {
     // Tenta usar o código atual do pedido, se não houver, usa o padrão
-    const pixCode = window._currentPixCode || STATIC_PIX_CODES["default"];
-    if (pixCode) {
+        if (aiResponse === 'PIX_PROBLEM') {
+    const pixDefault = STATIC_PIX_CODES["default"];
+    if (pixDefault) {
+      // 1. Envia a instrução do PIX
       await agentSay('Basta copiar o código pix abaixo e pagar pelo app do seu banco 😄', true, true);
       await pause(1000);
       
-      // Reenvia o bloco do PIX
-      showDeliverySteps(pixCode);
+      // 2. Reenvia o bloco do PIX (sempre o default)
+      showDeliverySteps(pixDefault);
+      await pause(800);
+
+      // 3. Envia a mensagem de acompanhamento personalizada
+      const primeiroNome = (ORDER.nome || "").split(" ")[0];
+      const saudacaoNome = primeiroNome ? ` ${primeiroNome}` : "";
+      await agentSay(`Estou acompanhando aqui${saudacaoNome}, após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
       
-      // Pequena pausa para naturalidade e reenvia o card de aguardando pagamento
+      // 4. Reenvia o card de status de pagamento
       await pause(400);
       addProfessionalStatusCard();
     } else {
