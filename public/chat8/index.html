@@ -1015,50 +1015,6 @@ html,body{
     </button>
   </footer>
 
-  // Máscaras e Validação do Modal de Dados
-const userDataModalOverlayEl = document.getElementById('userDataModalOverlay');
-const confirmUserDataEl = document.getElementById('confirmUserData');
-const inputUserCPF = document.getElementById('inputUserCPF');
-const inputUserPhone = document.getElementById('inputUserPhone');
-
-inputUserCPF.oninput = (e) => {
-  let v = e.target.value.replace(/\D/g,"");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-  e.target.value = v;
-};
-
-inputUserPhone.oninput = (e) => {
-  let v = e.target.value.replace(/\D/g,"");
-  v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
-  v = v.replace(/(\d)(\d{4})$/,"$1-$2");
-  e.target.value = v;
-};
-
-function openUserDataModal() {
-  return new Promise(resolve => {
-    userDataModalOverlayEl.classList.add('on');
-    confirmUserDataEl.onclick = () => {
-      const nome = document.getElementById('inputUserName').value.trim();
-      const cpf = inputUserCPF.value.trim();
-      const phone = inputUserPhone.value.trim();
-      if(nome.length < 3 || cpf.length < 14 || phone.length < 14) {
-        alert("Por favor, preencha todos os campos corretamente.");
-        return;
-      }
-      ORDER.nome = nome; // Atualiza o nome no pedido
-      userDataModalOverlayEl.classList.remove('on');
-      resolve(true);
-    };
-    document.getElementById('closeUserDataModal').onclick = () => {
-      userDataModalOverlayEl.classList.remove('on');
-      resolve(false);
-    };
-  });
-}
-
-
   <!-- SELLER MODAL -->
   <div class="seller-modal-overlay" id="sellerModalOverlay">
     <div class="seller-modal">
