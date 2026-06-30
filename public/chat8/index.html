@@ -1573,27 +1573,34 @@ function showOrderConfirmation() {
 
   scrollDown();
 
-      currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
+        currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
     currentConfirmationBlock.style.opacity='0.8';
     currentConfirmationBlock.style.pointerEvents='none';
     const btn = currentConfirmationBlock.querySelector('#btnCorrect');
     
+    // Feedback visual do botão
     btn.style.background = 'var(--green)';
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg> Confirmado';
     
     currentConfirmationBlock.querySelectorAll('button').forEach(b=>b.disabled=true);
+    
+    // Envia a mensagem do usuário
     addMsg('Sim, prosseguir','user');
     
-    await new Promise(r => setTimeout(r, 600));
-    showPaymentOptions(); // Chama a função que você adicionou no passo 2
+    // AVISA o fluxo principal que pode continuar para a validação
+    if(confirmationResolve) confirmationResolve('correct');
   };
 
-  currentConfirmationBlock.querySelector('#btnChange').onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
+  currentConfirmationBlock.querySelector('#btnChange').onclick = () => { 
+    updateModal(true); 
+    modalOverlayEl.classList.add('on'); 
+  };
 
   if (!confirmationResolve) {
     return new Promise(resolve => { confirmationResolve=resolve; });
   }
 }
+
 
   function showPaymentOptions() {
   const card = document.createElement('div');
@@ -1753,18 +1760,45 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     let action;
   if (window._currentFlowStep === 3) {
     await pause(400);
-        action = await showOrderConfirmation();
-    if (action === 'pix') {
-      window._currentFlowStep = 4; saveChatHistory();
-    } else if (action === 'delivery') {
-      await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
-      window._currentFlowStep = 99; saveChatHistory(); return;
-    } else if (action === 'change') {
+              if (window._currentFlowStep === 3) {
+    await pause(400);
+    action = await showOrderConfirmation();
+    if (action === 'correct') {
+      // 1. Efeito de carregamento "Validando dados..."
+      const spVal = addSpinner("Validando dados do pedido...");
+      await pause(3500); 
+      spVal.remove();
+      
+      // 2. Etiqueta de sistema "Pedido validado"
+      addSys('Pedido validado com sucesso', 'ok');
+      await pause(800);
 
+      // 3. Pergunta do agente
+      await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
+      await pause(300);
+
+      // 4. Exibe os cards e aguarda a seleção do usuário
+      const paymentChoice = await new Promise(resolve => {
+        // Redirecionamos a promessa para ser resolvida pelos cards de pagamento
+        confirmationResolve = resolve;
+        showPaymentOptions();
+      });
+
+      // 5. Trata a escolha do pagamento
+      if (paymentChoice === 'pix') {
+        window._currentFlowStep = 5; // Avança para a geração do Pix
+        saveChatHistory();
+      } else if (paymentChoice === 'delivery') {
+        await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
+        window._currentFlowStep = 99; saveChatHistory(); return;
+      }
+
+    } else if (action === 'change') {
       await agentSay(`Sem problemas! Pode me falar o que deseja alterar ou clique no ícone do carrinho no topo para ajustar seu pedido.`);
       window._currentFlowStep = 99; saveChatHistory(); return;
     }
   }
+
 
   if (window._currentFlowStep === 4) {
     window._currentFlowStep = 5; saveChatHistory();
