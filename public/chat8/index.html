@@ -1015,34 +1015,49 @@ html,body{
     </button>
   </footer>
 
-  <!-- ORDER MODAL -->
-  <div class="modal-overlay" id="modalOverlay">
-    <div class="order-modal">
-      <div class="modal-handle"></div>
-      <div class="modal-h">
-        <h3 class="modal-title">Resumo do Pedido</h3>
-        <button class="close-modal" id="closeModal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-      <div class="order-items" id="orderItems"></div>
-      <div class="order-detail-row">
-        <div class="od-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg></div>
-        <div class="od-content">
-          <div class="od-label">Endereço de Entrega</div>
-          <div class="od-value" id="orderAddress">...</div>
-        </div>
-      </div>
-      <div class="order-detail-row">
-        <div class="od-icon"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg></div>
-        <div class="od-content">
-          <div class="od-label">Previsão de Entrega</div>
-<div class="od-value" id="orderTime">${ORDER.deliveryTime}</div>
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="modal-btn" id="confirmModal">Entendido</button>
-      </div>
-    </div>
-  </div>
+  // Máscaras e Validação do Modal de Dados
+const userDataModalOverlayEl = document.getElementById('userDataModalOverlay');
+const confirmUserDataEl = document.getElementById('confirmUserData');
+const inputUserCPF = document.getElementById('inputUserCPF');
+const inputUserPhone = document.getElementById('inputUserPhone');
+
+inputUserCPF.oninput = (e) => {
+  let v = e.target.value.replace(/\D/g,"");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  e.target.value = v;
+};
+
+inputUserPhone.oninput = (e) => {
+  let v = e.target.value.replace(/\D/g,"");
+  v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
+  v = v.replace(/(\d)(\d{4})$/,"$1-$2");
+  e.target.value = v;
+};
+
+function openUserDataModal() {
+  return new Promise(resolve => {
+    userDataModalOverlayEl.classList.add('on');
+    confirmUserDataEl.onclick = () => {
+      const nome = document.getElementById('inputUserName').value.trim();
+      const cpf = inputUserCPF.value.trim();
+      const phone = inputUserPhone.value.trim();
+      if(nome.length < 3 || cpf.length < 14 || phone.length < 14) {
+        alert("Por favor, preencha todos os campos corretamente.");
+        return;
+      }
+      ORDER.nome = nome; // Atualiza o nome no pedido
+      userDataModalOverlayEl.classList.remove('on');
+      resolve(true);
+    };
+    document.getElementById('closeUserDataModal').onclick = () => {
+      userDataModalOverlayEl.classList.remove('on');
+      resolve(false);
+    };
+  });
+}
+
 
   <!-- SELLER MODAL -->
   <div class="seller-modal-overlay" id="sellerModalOverlay">
@@ -1076,6 +1091,50 @@ html,body{
 </div>
 
 <script>
+
+  // Máscaras e Validação do Modal de Dados
+const userDataModalOverlayEl = document.getElementById('userDataModalOverlay');
+const confirmUserDataEl = document.getElementById('confirmUserData');
+const inputUserCPF = document.getElementById('inputUserCPF');
+const inputUserPhone = document.getElementById('inputUserPhone');
+
+inputUserCPF.oninput = (e) => {
+  let v = e.target.value.replace(/\D/g,"");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d)/,"$1.$2");
+  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
+  e.target.value = v;
+};
+
+inputUserPhone.oninput = (e) => {
+  let v = e.target.value.replace(/\D/g,"");
+  v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
+  v = v.replace(/(\d)(\d{4})$/,"$1-$2");
+  e.target.value = v;
+};
+
+function openUserDataModal() {
+  return new Promise(resolve => {
+    userDataModalOverlayEl.classList.add('on');
+    confirmUserDataEl.onclick = () => {
+      const nome = document.getElementById('inputUserName').value.trim();
+      const cpf = inputUserCPF.value.trim();
+      const phone = inputUserPhone.value.trim();
+      if(nome.length < 3 || cpf.length < 14 || phone.length < 14) {
+        alert("Por favor, preencha todos os campos corretamente.");
+        return;
+      }
+      ORDER.nome = nome; // Atualiza o nome no pedido
+      userDataModalOverlayEl.classList.remove('on');
+      resolve(true);
+    };
+    document.getElementById('closeUserDataModal').onclick = () => {
+      userDataModalOverlayEl.classList.remove('on');
+      resolve(false);
+    };
+  });
+}
+
 const msgsEl         = document.getElementById('msgs');
 const LOCAL_STORAGE_KEY = 'diskgas_chat_history';
 const STATE_STORAGE_KEY = 'diskgas_chat_state';
@@ -1833,12 +1892,17 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
       await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
       await pause(300);
 
-      const paymentChoice = await new Promise(resolve => {
+            const paymentChoice = await new Promise(resolve => {
         confirmationResolve = resolve;
         showPaymentOptions();
       });
 
-            // 3. SE ESCOLHER PIX:
+      // NOVO: Abre o modal de dados antes de qualquer mensagem
+      const dadosPreenchidos = await openUserDataModal();
+      if(!dadosPreenchidos) {
+        window._currentFlowStep = 3; saveChatHistory(); return; // Se fechar o modal, volta
+      }
+
       if (paymentChoice === 'pix') {
         addMsg('Pagar agora via Pix', 'user');
         await pause(800);
@@ -1852,23 +1916,30 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
         window._currentFlowStep = 5; 
         saveChatHistory();
       } 
-      // 4. SE ESCOLHER ENTREGA:
       else if (paymentChoice === 'delivery') {
         addMsg('Pagar na entrega', 'user');
         await pause(800);
-        
-        // Atualiza o preço global para o valor com acréscimo de 30%
-        ORDER.productPrice = ORDER.productPrice * 1.30;
-        
+
+        // LÓGICA DE RESTRIÇÃO DE ENTREGA (Extraída do seu código)
+        const diaSemana = new Date().getDay(); 
+        const isFimDeSemana = (diaSemana === 0 || diaSemana === 6);
+        const msgEntrega = isFimDeSemana
+          ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃"
+          : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃";
+
         const spVal3 = addSpinner("Registrando forma de entrega...");
         await pause(3000);
         spVal3.remove();
-        addSys('Pagamento na entrega registrado', 'ok');
+        
+        // Exibe a mensagem de restrição baseada no dia atual
+        await agentSay(msgEntrega);
+        
+        // Se for o dia errado, oferecemos o Pix ou encerramos
         await pause(1000);
-
-        await agentSay(`Perfeito! O seu pedido já foi confirmado e o valor final ficou em R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}. O pagamento será feito diretamente ao entregador.`);
+        await agentSay("Deseja prosseguir com o pagamento via Pix para receber agora?");
         window._currentFlowStep = 99; saveChatHistory(); return;
       }
+
 
     } else if (action === 'change') {
       await agentSay(`Sem problemas! Pode me falar o que deseja alterar ou clique no ícone do carrinho no topo para ajustar seu pedido.`);
