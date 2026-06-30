@@ -546,6 +546,57 @@ html,body{
 .edit-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;color:var(--text);outline:none;transition:all .2s;background:var(--surface-2);}
 .edit-input:focus{border-color:var(--brand-mid);background:#fff;box-shadow:0 0 0 3px var(--brand-glow);}
 
+/* ── PAYMENT OPTIONS CARD ── */
+.payment-option-card {
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 22px;
+  padding: 22px;
+  margin: 10px 0;
+  width: 100%;
+  max-width: 340px;
+  animation: cardIn 0.5s var(--spring);
+  box-shadow: 0 4px 18px rgba(0,0,0,0.05);
+  align-self: flex-start;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
+.payment-option-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(0,0,0,0.08);
+}
+.payment-option-card.selected {
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px var(--brand-glow);
+}
+.payment-option-card-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 15px;
+}
+.payment-option-card-icon {
+  width: 48px;
+  height: 48px;
+  border-radius: 12px;
+  background: var(--brand-lt);
+  color: var(--brand);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+.payment-option-card-title {
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+}
+.payment-option-card-desc {
+  font-size: 12px;
+  color: var(--text-2);
+  line-height: 1.4;
+}
+
 /* ── PIX CARD (new clean design) ── */
 .pix-card {
   background: var(--surface);
@@ -1573,28 +1624,22 @@ function showOrderConfirmation() {
 
   scrollDown();
 
-        currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
+    currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
     currentConfirmationBlock.style.opacity='0.8';
     currentConfirmationBlock.style.pointerEvents='none';
     const btn = currentConfirmationBlock.querySelector('#btnCorrect');
     
-    // Feedback visual do botão
     btn.style.background = 'var(--green)';
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg> Confirmado';
     
     currentConfirmationBlock.querySelectorAll('button').forEach(b=>b.disabled=true);
-    
-    // Envia a mensagem do usuário
     addMsg('Sim, prosseguir','user');
     
-    // AVISA o fluxo principal que pode continuar para a validação
+    // Apenas resolve para 'correct' para disparar a validação no fluxo principal
     if(confirmationResolve) confirmationResolve('correct');
   };
 
-  currentConfirmationBlock.querySelector('#btnChange').onclick = () => { 
-    updateModal(true); 
-    modalOverlayEl.classList.add('on'); 
-  };
+  currentConfirmationBlock.querySelector('#btnChange').onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
 
   if (!confirmationResolve) {
     return new Promise(resolve => { confirmationResolve=resolve; });
@@ -1602,9 +1647,9 @@ function showOrderConfirmation() {
 }
 
 
-  function showPaymentOptions() {
+function showPaymentOptions() {
   const card = document.createElement('div');
-  card.className = 'steps-card'; 
+  card.className = 'steps-card'; // Reutiliza o estilo de card existente
   card.style.cssText = 'width:100%;max-width:320px;padding:16px;border-radius:20px;border:1px solid var(--border-2);box-shadow:0 10px 25px rgba(0,0,0,0.05);background:#fff;';
   card.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
@@ -1653,19 +1698,23 @@ function showOrderConfirmation() {
     payNowCard.classList.add('selected');
     payOnDeliveryCard.classList.remove('selected');
     await agentSay('Ótimo! Prosseguiremos com o pagamento via Pix.', true, true);
+    // Resolve a promessa com a opção selecionada
     if (confirmationResolve) confirmationResolve('pix');
-    card.remove(); 
+    card.remove(); // Remove os cards de seleção
   };
 
   payOnDeliveryCard.onclick = async () => {
     payOnDeliveryCard.classList.add('selected');
     payNowCard.classList.remove('selected');
     await agentSay('Entendido! Você pagará na entrega.', true, true);
+    // Resolve a promessa com a opção selecionada
     if (confirmationResolve) confirmationResolve('delivery');
-    card.remove();
+    card.remove(); // Remove os cards de seleção
   };
-}
 
+    // Apenas salva o histórico para manter os cards visíveis se recarregar
+  saveChatHistory();
+}
 
 
 // ── DELIVERY STEPS / PIX ─────────────────────────────
@@ -1757,10 +1806,8 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     await pause(3000); spValPre.remove();
     await agentSay(`Peço que verifique se está tudo certo, por gentileza`, true, true);
   }
-    let action;
-  if (window._currentFlowStep === 3) {
-    await pause(400);
-              if (window._currentFlowStep === 3) {
+  let action;
+    if (window._currentFlowStep === 3) {
     await pause(400);
     action = await showOrderConfirmation();
     if (action === 'correct') {
@@ -1777,16 +1824,15 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
       await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
       await pause(300);
 
-      // 4. Exibe os cards e aguarda a seleção do usuário
+      // 4. Exibe os cards e aguarda a seleção
       const paymentChoice = await new Promise(resolve => {
-        // Redirecionamos a promessa para ser resolvida pelos cards de pagamento
         confirmationResolve = resolve;
         showPaymentOptions();
       });
 
       // 5. Trata a escolha do pagamento
       if (paymentChoice === 'pix') {
-        window._currentFlowStep = 5; // Avança para a geração do Pix
+        window._currentFlowStep = 5; // Pula para a parte da geração do Pix
         saveChatHistory();
       } else if (paymentChoice === 'delivery') {
         await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
@@ -1799,13 +1845,6 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     }
   }
 
-
-  if (window._currentFlowStep === 4) {
-    window._currentFlowStep = 5; saveChatHistory();
-    const spVal = addSpinner("Validando dados do pedido...");
-    await pause(3500); spVal.remove();
-    addSys('Pedido validado com sucesso', 'ok');
-  }
   if (window._currentFlowStep === 5) {
     window._currentFlowStep = 6; saveChatHistory();
     const localBase = ORDER.location || 'sua região';
@@ -2200,7 +2239,11 @@ function lockBackButton() {
             btnCorrect.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg> Confirmado';
             block.querySelectorAll('button').forEach(b=>b.disabled=true);
             addMsg('Sim, prosseguir','user');
-            if(confirmationResolve) confirmationResolve('correct');
+            if(confirmationResolve) {
+      // Em vez de resolver diretamente, mostra as opções de pagamento
+      showPaymentOptions();
+      // Não resolve confirmationResolve aqui, será resolvido após a seleção da forma de pagamento
+    }
         };
         btnChange.onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
     }
