@@ -1649,41 +1649,43 @@ function showOrderConfirmation() {
 
 function showPaymentOptions() {
   const card = document.createElement('div');
-  card.className = 'steps-card'; // Reutiliza o estilo de card existente
+  card.className = 'steps-card payment-selection-block'; 
   card.style.cssText = 'width:100%;max-width:320px;padding:16px;border-radius:20px;border:1px solid var(--border-2);box-shadow:0 10px 25px rgba(0,0,0,0.05);background:#fff;';
   card.innerHTML = `
     <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
       <div style="width:32px;height:32px;border-radius:10px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 2px 8px var(--brand-glow);">
-        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </div>
       <div>
-        <div style="font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Como você prefere pagar?</div>
-        <div style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Selecione uma opção abaixo</div>
+        <div style="font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Forma de Pagamento</div>
+        <div style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Como você prefere pagar?</div>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:10px;">
-      <div class="payment-option-card" id="payNowCard">
-        <div class="payment-option-card-header">
+    <div style="display:flex;flex-direction:column;gap:10px;" class="options-container">
+      <div class="payment-option-card" id="payNowCard" style="margin:0; width:100%;">
+        <div class="payment-option-card-header" style="margin-bottom:0;">
           <div class="payment-option-card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           </div>
-          <div>
+          <div style="flex:1;">
             <div class="payment-option-card-title">Pagar Agora (Pix)</div>
-            <div class="payment-option-card-desc">Receba seu pedido mais rápido com pagamento instantâneo.</div>
+            <div class="payment-option-card-desc">Pagamento instantâneo seguro</div>
           </div>
+          <div class="check-icon" style="display:none; color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
       </div>
 
-      <div class="payment-option-card" id="payOnDeliveryCard">
-        <div class="payment-option-card-header">
+      <div class="payment-option-card" id="payOnDeliveryCard" style="margin:0; width:100%;">
+        <div class="payment-option-card-header" style="margin-bottom:0;">
           <div class="payment-option-card-icon">
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2V3h20v14zm0 0l-3.27 3.27a2 2 0 0 1-2.83 0L14 17m-4 0l-3.27 3.27a2 2 0 0 1-2.83 0L2 17"/></svg>
           </div>
-          <div>
+          <div style="flex:1;">
             <div class="payment-option-card-title">Pagar na Entrega</div>
-            <div class="payment-option-card-desc">Pague diretamente ao entregador no momento da entrega.</div>
+            <div class="payment-option-card-desc">Dinheiro ou Cartão</div>
           </div>
+          <div class="check-icon" style="display:none; color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
       </div>
     </div>
@@ -1694,27 +1696,25 @@ function showPaymentOptions() {
   const payNowCard = card.querySelector('#payNowCard');
   const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
 
-  payNowCard.onclick = async () => {
-    payNowCard.classList.add('selected');
-    payOnDeliveryCard.classList.remove('selected');
-    await agentSay('Ótimo! Prosseguiremos com o pagamento via Pix.', true, true);
-    // Resolve a promessa com a opção selecionada
-    if (confirmationResolve) confirmationResolve('pix');
-    card.remove(); // Remove os cards de seleção
+  const finalizeSelection = (selectedCard, choice) => {
+    // Desabilita interações
+    card.style.opacity = '0.9';
+    card.style.pointerEvents = 'none';
+    
+    // Destaque visual no selecionado
+    selectedCard.style.borderColor = 'var(--green)';
+    selectedCard.style.background = 'var(--green-lt)';
+    selectedCard.querySelector('.check-icon').style.display = 'block';
+    
+    if (confirmationResolve) confirmationResolve(choice);
   };
 
-  payOnDeliveryCard.onclick = async () => {
-    payOnDeliveryCard.classList.add('selected');
-    payNowCard.classList.remove('selected');
-    await agentSay('Entendido! Você pagará na entrega.', true, true);
-    // Resolve a promessa com a opção selecionada
-    if (confirmationResolve) confirmationResolve('delivery');
-    card.remove(); // Remove os cards de seleção
-  };
+  payNowCard.onclick = () => finalizeSelection(payNowCard, 'pix');
+  payOnDeliveryCard.onclick = () => finalizeSelection(payOnDeliveryCard, 'delivery');
 
-    // Apenas salva o histórico para manter os cards visíveis se recarregar
   saveChatHistory();
 }
+
 
 
 // ── DELIVERY STEPS / PIX ─────────────────────────────
@@ -1822,22 +1822,18 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
       await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
       await pause(300);
 
-      const paymentChoice = await new Promise(resolve => {
+            const paymentChoice = await new Promise(resolve => {
         confirmationResolve = resolve;
         showPaymentOptions();
       });
 
-      // 3. SE ESCOLHER PIX: Simula o comportamento original completo
       if (paymentChoice === 'pix') {
-        addMsg('Pagar agora via Pix', 'user'); // Simula a mensagem do usuário
+        addMsg('Pagar agora via Pix', 'user');
         await pause(1000);
-        
         window._currentFlowStep = 5; 
         saveChatHistory();
-        // O código continuará para o bloco 'if (window._currentFlowStep === 5)' abaixo
-      } 
-      else if (paymentChoice === 'delivery') {
-        addMsg('Pagar na entrega', 'user'); // Simula a mensagem do usuário
+      } else if (paymentChoice === 'delivery') {
+        addMsg('Pagar na entrega', 'user');
         await pause(1000);
         await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
         window._currentFlowStep = 99; saveChatHistory(); return;
