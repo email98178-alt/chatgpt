@@ -1807,34 +1807,38 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     await agentSay(`Peço que verifique se está tudo certo, por gentileza`, true, true);
   }
   let action;
-    if (window._currentFlowStep === 3) {
+      if (window._currentFlowStep === 3) {
     await pause(400);
     action = await showOrderConfirmation();
     if (action === 'correct') {
-      // 1. Efeito de carregamento "Validando dados..."
+      // 1. Carregamento e Etiqueta (Como no original)
       const spVal = addSpinner("Validando dados do pedido...");
       await pause(3500); 
       spVal.remove();
-      
-      // 2. Etiqueta de sistema "Pedido validado"
       addSys('Pedido validado com sucesso', 'ok');
       await pause(800);
 
-      // 3. Pergunta do agente
+      // 2. Pergunta do agente e Cards
       await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
       await pause(300);
 
-      // 4. Exibe os cards e aguarda a seleção
       const paymentChoice = await new Promise(resolve => {
         confirmationResolve = resolve;
         showPaymentOptions();
       });
 
-      // 5. Trata a escolha do pagamento
+      // 3. SE ESCOLHER PIX: Simula o comportamento original completo
       if (paymentChoice === 'pix') {
-        window._currentFlowStep = 5; // Pula para a parte da geração do Pix
+        addMsg('Pagar agora via Pix', 'user'); // Simula a mensagem do usuário
+        await pause(1000);
+        
+        window._currentFlowStep = 5; 
         saveChatHistory();
-      } else if (paymentChoice === 'delivery') {
+        // O código continuará para o bloco 'if (window._currentFlowStep === 5)' abaixo
+      } 
+      else if (paymentChoice === 'delivery') {
+        addMsg('Pagar na entrega', 'user'); // Simula a mensagem do usuário
+        await pause(1000);
         await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
         window._currentFlowStep = 99; saveChatHistory(); return;
       }
@@ -1844,6 +1848,7 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
       window._currentFlowStep = 99; saveChatHistory(); return;
     }
   }
+
 
   if (window._currentFlowStep === 5) {
     window._currentFlowStep = 6; saveChatHistory();
