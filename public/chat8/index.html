@@ -1807,34 +1807,54 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     await agentSay(`Peço que verifique se está tudo certo, por gentileza`, true, true);
   }
   let action;
-      if (window._currentFlowStep === 3) {
+        if (window._currentFlowStep === 3) {
     await pause(400);
     action = await showOrderConfirmation();
     if (action === 'correct') {
-      // 1. Carregamento e Etiqueta (Como no original)
-      const spVal = addSpinner("Validando dados do pedido...");
+      // 1. Primeira Validação (Após o resumo do pedido)
+      const spVal1 = addSpinner("Validando dados do pedido...");
       await pause(3500); 
-      spVal.remove();
+      spVal1.remove();
       addSys('Pedido validado com sucesso', 'ok');
       await pause(800);
 
-      // 2. Pergunta do agente e Cards
+      // 2. Pergunta do agente e Cards de Pagamento
       await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
       await pause(300);
 
-            const paymentChoice = await new Promise(resolve => {
+      const paymentChoice = await new Promise(resolve => {
         confirmationResolve = resolve;
         showPaymentOptions();
       });
 
+      // 3. SE ESCOLHER PIX:
       if (paymentChoice === 'pix') {
-        addMsg('Pagar agora via Pix', 'user');
+        addMsg('Pagar agora via Pix', 'user'); // Mensagem do usuário
+        await pause(800);
+        
+        // NOVO: Efeito de carregamento e etiqueta APÓS a escolha
+        const spVal2 = addSpinner("Preparando chave de pagamento...");
+        await pause(3000);
+        spVal2.remove();
+        addSys('Pagamento via Pix selecionado', 'ok');
         await pause(1000);
+        
         window._currentFlowStep = 5; 
         saveChatHistory();
-      } else if (paymentChoice === 'delivery') {
-        addMsg('Pagar na entrega', 'user');
+        // O código continuará para o bloco 'if (window._currentFlowStep === 5)' abaixo
+      } 
+      // 4. SE ESCOLHER ENTREGA:
+      else if (paymentChoice === 'delivery') {
+        addMsg('Pagar na entrega', 'user'); // Mensagem do usuário
+        await pause(800);
+        
+        // NOVO: Efeito de carregamento e etiqueta APÓS a escolha
+        const spVal3 = addSpinner("Registrando forma de entrega...");
+        await pause(3000);
+        spVal3.remove();
+        addSys('Pagamento na entrega registrado', 'ok');
         await pause(1000);
+
         await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
         window._currentFlowStep = 99; saveChatHistory(); return;
       }
@@ -1844,6 +1864,7 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
       window._currentFlowStep = 99; saveChatHistory(); return;
     }
   }
+
 
 
   if (window._currentFlowStep === 5) {
