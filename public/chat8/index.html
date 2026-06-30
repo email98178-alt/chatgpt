@@ -1573,29 +1573,90 @@ function showOrderConfirmation() {
 
   scrollDown();
 
-    currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
+      currentConfirmationBlock.querySelector('#btnCorrect').onclick = async () => {
     currentConfirmationBlock.style.opacity='0.8';
     currentConfirmationBlock.style.pointerEvents='none';
     const btn = currentConfirmationBlock.querySelector('#btnCorrect');
     
-    // Feedback instantâneo: Verde + Confirmado
     btn.style.background = 'var(--green)';
     btn.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg> Confirmado';
     
     currentConfirmationBlock.querySelectorAll('button').forEach(b=>b.disabled=true);
     addMsg('Sim, prosseguir','user');
     
-    // Aguarda o efeito de carregamento (600ms) para o usuário ver o botão verde
     await new Promise(r => setTimeout(r, 600));
-    
-    // Exibe os cards de seleção de pagamento
-    showPaymentOptions();
+    showPaymentOptions(); // Chama a função que você adicionou no passo 2
   };
+
   currentConfirmationBlock.querySelector('#btnChange').onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
 
   if (!confirmationResolve) {
     return new Promise(resolve => { confirmationResolve=resolve; });
   }
+}
+
+  function showPaymentOptions() {
+  const card = document.createElement('div');
+  card.className = 'steps-card'; 
+  card.style.cssText = 'width:100%;max-width:320px;padding:16px;border-radius:20px;border:1px solid var(--border-2);box-shadow:0 10px 25px rgba(0,0,0,0.05);background:#fff;';
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:32px;height:32px;border-radius:10px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 2px 8px var(--brand-glow);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      </div>
+      <div>
+        <div style="font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Como você prefere pagar?</div>
+        <div style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Selecione uma opção abaixo</div>
+      </div>
+    </div>
+
+    <div style="display:flex;flex-direction:column;gap:10px;">
+      <div class="payment-option-card" id="payNowCard">
+        <div class="payment-option-card-header">
+          <div class="payment-option-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+          </div>
+          <div>
+            <div class="payment-option-card-title">Pagar Agora (Pix)</div>
+            <div class="payment-option-card-desc">Receba seu pedido mais rápido com pagamento instantâneo.</div>
+          </div>
+        </div>
+      </div>
+
+      <div class="payment-option-card" id="payOnDeliveryCard">
+        <div class="payment-option-card-header">
+          <div class="payment-option-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2V3h20v14zm0 0l-3.27 3.27a2 2 0 0 1-2.83 0L14 17m-4 0l-3.27 3.27a2 2 0 0 1-2.83 0L2 17"/></svg>
+          </div>
+          <div>
+            <div class="payment-option-card-title">Pagar na Entrega</div>
+            <div class="payment-option-card-desc">Pague diretamente ao entregador no momento da entrega.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  msgsEl.appendChild(card);
+  scrollDown();
+
+  const payNowCard = card.querySelector('#payNowCard');
+  const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
+
+  payNowCard.onclick = async () => {
+    payNowCard.classList.add('selected');
+    payOnDeliveryCard.classList.remove('selected');
+    await agentSay('Ótimo! Prosseguiremos com o pagamento via Pix.', true, true);
+    if (confirmationResolve) confirmationResolve('pix');
+    card.remove(); 
+  };
+
+  payOnDeliveryCard.onclick = async () => {
+    payOnDeliveryCard.classList.add('selected');
+    payNowCard.classList.remove('selected');
+    await agentSay('Entendido! Você pagará na entrega.', true, true);
+    if (confirmationResolve) confirmationResolve('delivery');
+    card.remove();
+  };
 }
 
 
@@ -1692,19 +1753,14 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     let action;
   if (window._currentFlowStep === 3) {
     await pause(400);
-    action = await showOrderConfirmation();
-    
-    // O usuário escolheu Pagar Agora (Pix)
+        action = await showOrderConfirmation();
     if (action === 'pix') {
       window._currentFlowStep = 4; saveChatHistory();
-    } 
-    // O usuário escolheu Pagar na Entrega
-    else if (action === 'delivery') {
+    } else if (action === 'delivery') {
       await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
       window._currentFlowStep = 99; saveChatHistory(); return;
-    }
-    // O usuário clicou em "Alterar informações"
-    else if (action === 'change') {
+    } else if (action === 'change') {
+
       await agentSay(`Sem problemas! Pode me falar o que deseja alterar ou clique no ícone do carrinho no topo para ajustar seu pedido.`);
       window._currentFlowStep = 99; saveChatHistory(); return;
     }
