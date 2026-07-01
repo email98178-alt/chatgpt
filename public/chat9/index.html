@@ -456,6 +456,7 @@ html,body{
   display:flex;align-items:flex-end;gap:10px;
   position:relative;z-index:20;
   flex-shrink:0;
+  transition: opacity 0.1s ease; /* Adicione isso para suavizar a transição */
 }
 .input-wrap{
   flex:1;background:var(--surface-2);
@@ -1848,25 +1849,29 @@ function showPaymentOptions() {
     activeFormContainer = formContainer;
 
         // Gerencia a visibilidade da barra de chat apenas quando o teclado REALMENTE sobe
-    const footer = document.querySelector('.footer');
+        const footer = document.querySelector('.footer');
     const inputs = formContainer.querySelectorAll('input');
 
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', () => {
-        // Verifica se a altura da tela diminuiu (teclado aberto)
-        const isKeyboardOpen = window.visualViewport.height < window.innerHeight * 0.85;
-        // Verifica se o foco está em um dos campos deste formulário
-        const isInputFocused = Array.from(inputs).includes(document.activeElement);
-
-        if (footer) {
-          // Só esconde se o teclado estiver aberto E o foco for nos campos de pagamento
-          footer.style.display = (isKeyboardOpen && isInputFocused) ? 'none' : 'flex';
+    inputs.forEach(input => {
+      // Esconde a barra IMEDIATAMENTE ao tocar no campo (evita que ela suba com o teclado)
+      input.addEventListener('focus', () => {
+        const isMobile = window.innerWidth <= 768; // Detecta se é celular/tablet
+        if (footer && isMobile) {
+          footer.style.display = 'none';
         }
       });
-    }
 
-
-
+      // Mostra a barra novamente ao sair do campo
+      input.addEventListener('blur', () => {
+        setTimeout(() => {
+          // Só volta a mostrar se o foco não tiver ido para outro campo de pagamento
+          const isStillInPayment = Array.from(inputs).includes(document.activeElement);
+          if (footer && !isStillInPayment) {
+            footer.style.display = 'flex';
+          }
+        }, 150);
+      });
+    });
 
     // Rolagem automática aprimorada
     // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
