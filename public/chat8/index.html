@@ -1190,46 +1190,6 @@ function openUserDataModal() {
   });
 }
 
-const confirmUserDataEl = document.getElementById('confirmUserData');
-const inputUserCPF = document.getElementById('inputUserCPF');
-const inputUserPhone = document.getElementById('inputUserPhone');
-
-inputUserCPF.oninput = (e) => {
-  let v = e.target.value.replace(/\D/g,"");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d)/,"$1.$2");
-  v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-  e.target.value = v;
-};
-
-inputUserPhone.oninput = (e) => {
-  let v = e.target.value.replace(/\D/g,"");
-  v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
-  v = v.replace(/(\d)(\d{4})$/,"$1-$2");
-  e.target.value = v;
-};
-
-function openUserDataModal() {
-  return new Promise(resolve => {
-    userDataModalOverlayEl.classList.add('on');
-    confirmUserDataEl.onclick = () => {
-      const nome = document.getElementById('inputUserName').value.trim();
-      const cpf = inputUserCPF.value.trim();
-      const phone = inputUserPhone.value.trim();
-      if(nome.length < 3 || cpf.length < 14 || phone.length < 14) {
-        alert("Por favor, preencha todos os campos corretamente.");
-        return;
-      }
-      ORDER.nome = nome;
-      userDataModalOverlayEl.classList.remove('on');
-      resolve(true);
-    };
-    document.getElementById('closeUserDataModal').onclick = () => {
-      userDataModalOverlayEl.classList.remove('on');
-      resolve(false);
-    };
-  });
-}
 sellerModalOverlayEl.onclick = (e) => { if(e.target===sellerModalOverlayEl) closeSellerModal(); };
 
 const AVATAR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp";
@@ -1834,8 +1794,6 @@ function showPaymentOptions() {
   card.querySelector('#payOnDeliveryCard').onclick = () => finalizeSelection(card.querySelector('#payOnDeliveryCard'), 'delivery');
   saveChatHistory();
 }
-
-
 
   if (window._currentFlowStep === 3) {
     await pause(400);
