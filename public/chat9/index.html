@@ -1776,21 +1776,28 @@ function showPaymentOptions() {
 
     let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
-            function handlePaymentSelection(selectedCard, choice) {
-        // 1. Reset de estado dos cards
+                function handlePaymentSelection(selectedCard, choice) {
+        // NOVO: Se o card já estiver selecionado, não faz nada (evita resetar o formulário ao clicar nos campos ou botão)
+        if (selectedCard.classList.contains('selected')) {
+            return; 
+        }
+
+        // 1. Reset de estado dos outros cards
         document.querySelectorAll('.payment-option-card').forEach(card => {
-            card.classList.remove('selected');
-            const form = card.querySelector('.payment-form-container');
-            if (form) form.style.display = 'none';
+            if (card !== selectedCard) {
+                card.classList.remove('selected');
+                const form = card.querySelector('.payment-form-container');
+                if (form) form.style.display = 'none';
+            }
         });
 
         selectedCard.classList.add('selected');
 
-        // 2. Verifica se o formulário já existe, se não, cria ele
+        // 2. Criação do formulário
         let formContainer = selectedCard.querySelector('.payment-form-container');
         if (!formContainer) {
             selectedCard.insertAdjacentHTML('beforeend', `
-                <div class="payment-form-container">
+                <div class="payment-form-container" onclick="event.stopPropagation()">
                     <div class="payment-form-group">
                         <input type="text" id="userName" class="edit-input" placeholder="Nome Completo" required>
                     </div>
@@ -1800,15 +1807,14 @@ function showPaymentOptions() {
                     <div class="payment-form-group">
                         <input type="tel" id="userPhone" class="edit-input" placeholder="(00) 00000-0000" maxlength="15" required>
                     </div>
-                    <button class="modal-btn" id="confirmPaymentBtn">Confirmar Dados</button>
+                    <button class="modal-btn" id="confirmPaymentBtn" type="button">Confirmar Dados</button>
                 </div>
             `);
             formContainer = selectedCard.querySelector('.payment-form-container');
 
-            // Aplicar máscaras nos novos campos
+            // Máscaras
             const cpfInput = formContainer.querySelector('#userCpf');
             const phoneInput = formContainer.querySelector('#userPhone');
-            
             cpfInput.oninput = (e) => {
                 let v = e.target.value.replace(/\D/g, "");
                 v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
@@ -1821,37 +1827,36 @@ function showPaymentOptions() {
             };
         }
 
-        // 3. AGORA vinculamos o evento do botão (dentro da função, após garantir que ele existe)
+        // 3. Configuração do Botão de Confirmação
         const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
         
-        // Técnica para evitar conflito com o teclado mobile
-        confirmBtn.onmousedown = (e) => e.preventDefault();
-
+        // Removemos o onmousedown anterior e usamos apenas o onclick com proteção dupla
         confirmBtn.onclick = (event) => {
-            event.stopPropagation();
+            event.preventDefault();
+            event.stopPropagation(); // ESSENCIAL: Impede que o clique chegue no card pai
+            
             const userName = formContainer.querySelector('#userName').value.trim();
             const userCpf = formContainer.querySelector('#userCpf').value.trim();
             const userPhone = formContainer.querySelector('#userPhone').value.trim();
 
             if (userName && userCpf && userPhone) {
-                // Salva os dados na ordem global
                 window.ORDER.customerName = userName;
                 window.ORDER.customerCpf = userCpf;
                 window.ORDER.customerPhone = userPhone;
                 
-                // Fecha o teclado e finaliza
                 formContainer.querySelectorAll('input').forEach(i => i.blur());
+                
+                // Pequeno delay para o feedback visual de clique
                 setTimeout(() => {
                     finalizeSelection(selectedCard, choice);
-                }, 200);
+                }, 250);
             } else {
                 alert('Por favor, preencha todos os campos corretamente.');
             }
         };
 
-        // 4. Exibe o formulário e configura a visibilidade da barra de chat
+        // 4. Visibilidade e Barra de Chat
         formContainer.style.display = 'block';
-        
         const footer = document.querySelector('.footer');
         const inputs = formContainer.querySelectorAll('input');
         const screenHeightBase = window.innerHeight;
@@ -1865,7 +1870,6 @@ function showPaymentOptions() {
         };
 
         if (window.visualViewport) {
-            window.visualViewport.removeEventListener('resize', updateFooterVisibility); // Limpa listener antigo
             window.visualViewport.addEventListener('resize', updateFooterVisibility);
         }
 
@@ -1874,11 +1878,12 @@ function showPaymentOptions() {
             input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
         });
 
-        // 5. Centraliza o card na tela
+        // 5. Scroll para o card
         setTimeout(() => {
             selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
     }
+
 
 
 
