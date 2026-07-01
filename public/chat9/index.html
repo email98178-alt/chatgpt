@@ -1721,84 +1721,62 @@ function showPaymentOptions() {
     if (confirmationResolve) confirmationResolve(choice);
   };
 
-    payNowCard.onclick = () => handlePaymentSelection(payNowCard, 'pix');
+      payNowCard.onclick = () => handlePaymentSelection(payNowCard, 'pix');
   payOnDeliveryCard.onclick = () => handlePaymentSelection(payOnDeliveryCard, 'delivery');
 
 
+
+    let activeFormContainer = null; // Variável para rastrear o formulário ativo
+
   function handlePaymentSelection(selectedCard, choice) {
-    // Esconde o conteúdo original do card
-    const originalContent = selectedCard.innerHTML;
-    selectedCard.innerHTML = '';
+    // Remove a classe 'selected' de todos os cards e esconde todos os formulários
+    document.querySelectorAll('.payment-option-card').forEach(card => {
+      card.classList.remove('selected');
+      const form = card.querySelector('.payment-form-container');
+      if (form) form.style.display = 'none';
+    });
 
-    // Adiciona o formulário ao card
-    selectedCard.insertAdjacentHTML('beforeend', `
-      <div class="payment-form-container" style="padding-top: 15px; border-top: 1px solid var(--border-2);">
-        <div style="margin-bottom: 10px;"><input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required></div>
-        <div style="margin-bottom: 10px;"><input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required></div>
-        <div style="margin-bottom: 15px;"><input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required></div>
-        <button class="modal-btn" id="confirmPaymentBtn" style="width:100%; padding:12px; border-radius:12px; font-size:14px;">Prosseguir com o Pagamento</button>
-      </div>
-    `);
-
-    // Adiciona a classe 'selected' ao card
+    // Adiciona a classe 'selected' ao card clicado
     selectedCard.classList.add('selected');
 
-    const confirmBtn = selectedCard.querySelector('#confirmPaymentBtn');
-    confirmBtn.onclick = () => {
-      const userName = selectedCard.querySelector('#userName').value;
-      const userCpf = selectedCard.querySelector('#userCpf').value;
-      const userPhone = selectedCard.querySelector('#userPhone').value;
+    let formContainer = selectedCard.querySelector('.payment-form-container');
 
-      if (userName && userCpf && userPhone) {
-        // Armazena os dados no objeto ORDER (ou onde for apropriado)
-        window.ORDER.customerName = userName;
-        window.ORDER.customerCpf = userCpf;
-        window.ORDER.customerPhone = userPhone;
+    if (!formContainer) {
+      // Se o formulário não existe, cria e adiciona ao card
+      selectedCard.insertAdjacentHTML('beforeend', `
+        <div class="payment-form-container" style="padding-top: 15px; border-top: 1px solid var(--border-2); margin-top: 15px;">
+          <div style="margin-bottom: 10px;"><input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required></div>
+          <div style="margin-bottom: 10px;"><input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required></div>
+          <div style="margin-bottom: 15px;"><input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required></div>
+          <button class="modal-btn" id="confirmPaymentBtn" style="width:100%; padding:12px; border-radius:12px; font-size:14px;">Prosseguir com o Pagamento</button>
+        </div>
+      `);
+      formContainer = selectedCard.querySelector('.payment-form-container');
 
-        // Chama a função original finalizeSelection
-        finalizeSelection(selectedCard, choice);
-      } else {
-        alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
-      }
-    };
-  }
+      const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
+      confirmBtn.onclick = (event) => {
+        event.stopPropagation(); // Impede que o clique no botão propague para o card pai
+        const userName = formContainer.querySelector('#userName').value;
+        const userCpf = formContainer.querySelector('#userCpf').value;
+        const userPhone = formContainer.querySelector('#userPhone').value;
 
-    function handlePaymentSelection(selectedCard, choice) {
-    // Esconde o conteúdo original do card
-    const originalContent = selectedCard.innerHTML;
-    selectedCard.innerHTML = '';
+        if (userName && userCpf && userPhone) {
+          window.ORDER.customerName = userName;
+          window.ORDER.customerCpf = userCpf;
+          window.ORDER.customerPhone = userPhone;
+          finalizeSelection(selectedCard, choice);
+        } else {
+          alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
+        }
+      };
+    }
 
-    // Adiciona o formulário ao card
-    selectedCard.insertAdjacentHTML('beforeend', `
-      <div class="payment-form-container" style="padding-top: 15px; border-top: 1px solid var(--border-2);">
-        <div style="margin-bottom: 10px;"><input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required></div>
-        <div style="margin-bottom: 10px;"><input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required></div>
-        <div style="margin-bottom: 15px;"><input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required></div>
-        <button class="modal-btn" id="confirmPaymentBtn" style="width:100%; padding:12px; border-radius:12px; font-size:14px;">Prosseguir com o Pagamento</button>
-      </div>
-    `);
+    // Exibe o formulário do card selecionado
+    formContainer.style.display = 'block';
+    activeFormContainer = formContainer; // Atualiza o formulário ativo
 
-    // Adiciona a classe 'selected' ao card
-    selectedCard.classList.add('selected');
-
-    const confirmBtn = selectedCard.querySelector('#confirmPaymentBtn');
-    confirmBtn.onclick = () => {
-      const userName = selectedCard.querySelector('#userName').value;
-      const userCpf = selectedCard.querySelector('#userCpf').value;
-      const userPhone = selectedCard.querySelector('#userPhone').value;
-
-      if (userName && userCpf && userPhone) {
-        // Armazena os dados no objeto ORDER (ou onde for apropriado)
-        window.ORDER.customerName = userName;
-        window.ORDER.customerCpf = userCpf;
-        window.ORDER.customerPhone = userPhone;
-
-        // Chama a função original finalizeSelection
-        finalizeSelection(selectedCard, choice);
-      } else {
-        alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
-      }
-    };
+    // Opcional: rolar para o formulário para garantir que esteja visível
+    formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   saveChatHistory();
@@ -1807,6 +1785,7 @@ function showPaymentOptions() {
 
 // ── DELIVERY STEPS / PIX ─────────────────────────────
 function showDeliverySteps(pixCode) {
+
 
   const card = document.createElement('div');
   card.className = 'pix-card';
