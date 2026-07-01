@@ -1435,7 +1435,7 @@ if ('visualViewport' in window) {
     const fab = document.querySelector('.scroll-fab');
     const keyboardOpen = vv.height < window.innerHeight * 0.75;
     app.style.height = vv.height + 'px';
-            if (keyboardOpen) {
+                    if (keyboardOpen) {
       footer.style.paddingBottom = \'8px\';
       fab.classList.add(\'keyboard-open\');
       // Removido: footer.classList.add(\'keyboard-open\');
@@ -1806,45 +1806,80 @@ function showPaymentOptions() {
       `);
       formContainer = selectedCard.querySelector('.payment-form-container');
 
-      const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-            // Adiciona listeners para ocultar/mostrar o footer ao focar/desfocar os campos de pagamento
-      const paymentInputs = formContainer.querySelectorAll(\'.edit-input\');
-      paymentInputs.forEach(input => {
-        input.addEventListener(\'focus\', () => {
-          document.querySelector(\'.footer\').classList.add(\'hide-for-payment-input\');
-        });
-        input.addEventListener(\'blur\', () => {
-          // Pequeno atraso para evitar que o footer apareça e suma rapidamente ao mudar de campo
-          setTimeout(() => {
-            // Verifica se nenhum outro campo de pagamento está focado antes de mostrar o footer
-            const anyPaymentInputFocused = Array.from(paymentInputs).some(i => i === document.activeElement);
-            if (!anyPaymentInputFocused) {
-              document.querySelector(\'.footer\').classList.remove(\'hide-for-payment-input\');
-            }
-          }, 50);
-        });
-      });
+          // Garante que o formContainer existe, criando-o se necessário
+    if (!formContainer) {
+      selectedCard.insertAdjacentHTML(\'beforeend\', `
+        <div class="payment-form-container">
+          <div class="payment-form-group">
+            <input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required>
+          </div>
+          <div class="payment-form-group">
+            <input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required>
+          </div>
+          <div class="payment-form-group">
+            <input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required>
+          </div>
+          <button class="modal-btn" id="confirmPaymentBtn">Prosseguir com o Pagamento</button>
+        </div>
+      `);
+      formContainer = selectedCard.querySelector(\'.payment-form-container\');
     }
 
     // Exibe o formulário do card selecionado
-    formContainer.style.display = 'block';
+    formContainer.style.display = \'block\';
     activeFormContainer = formContainer; // Atualiza o formulário ativo
 
+    // Adiciona listeners para ocultar/mostrar o footer ao focar/desfocar os campos de pagamento
+    const paymentInputs = formContainer.querySelectorAll(\".edit-input\");
+    paymentInputs.forEach(input => {
+      // Remove listeners anteriores para evitar duplicação se a função for chamada novamente
+      input.removeEventListener(\'focus\', handlePaymentInputFocus);
+      input.removeEventListener(\'blur\', handlePaymentInputBlur);
+
+      input.addEventListener(\'focus\', handlePaymentInputFocus);
+      input.addEventListener(\'blur\', handlePaymentInputBlur);
+    });
+
+    // Define as funções de handler fora do loop para evitar recriação desnecessária
+    function handlePaymentInputFocus() {
+      document.querySelector(\".footer\").classList.add(\'hide-for-payment-input\');
+    }
+
+    function handlePaymentInputBlur() {
+      setTimeout(() => {
+        const anyPaymentInputFocused = Array.from(paymentInputs).some(i => i === document.activeElement);
+        if (!anyPaymentInputFocused) {
+          document.querySelector(\".footer\").classList.remove(\'hide-for-payment-input\');
+        }
+      }, 50);
+    }
+
+    // Adiciona o listener para o botão de confirmação (se ainda não foi adicionado)
+    const confirmBtn = formContainer.querySelector(\'#confirmPaymentBtn\');
+    // Remove listener anterior para evitar duplicação
+    confirmBtn.removeEventListener(\'click\', handleConfirmPaymentClick);
+    confirmBtn.addEventListener(\'click\', handleConfirmPaymentClick);
+
+    function handleConfirmPaymentClick(event) {
+      event.stopPropagation(); // Impede que o clique no botão propague para o card pai
+      const userName = formContainer.querySelector(\'#userName\').value;
+      const userCpf = formContainer.querySelector(\'#userCpf\').value;
+      const userPhone = formContainer.querySelector(\'#userPhone\').value;
+
+      if (userName && userCpf && userPhone) {
+        window.ORDER.customerName = userName;
+        window.ORDER.customerCpf = userCpf;
+        window.ORDER.customerPhone = userPhone;
+        finalizeSelection(selectedCard, choice);
+      } else {
+        alert(\'Por favor, preencha todos os campos: Nome, CPF e Telefone.\');
+      }
+    }
+
     // Rolagem automática aprimorada
-    // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
-    // e a altura do formulário foi calculada antes de rolar.
     setTimeout(() => {
-      // Rola a área de mensagens (msgsEl) para que o card selecionado fique visível
-      // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
-      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-            // Removido o foco automático para evitar que o teclado abra sozinho
-      /* const firstInput = formContainer.querySelector('#userName');
-      if (firstInput) {
-        firstInput.focus();
-      } */
+      selectedCard.scrollIntoView({ behavior: \'smooth\', block: \'center\' });
     }, 50);
-  }
 
   saveChatHistory();
 }
