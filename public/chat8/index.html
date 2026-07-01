@@ -1115,37 +1115,55 @@ html,body{
     </div>
   </div>
 
-    <!-- USER DATA MODAL -->
+      <!-- USER DATA MODAL (APRIMORADO) -->
   <div class="user-data-overlay" id="userDataOverlay">
     <div class="user-data-modal">
       <button class="ud-close" id="udCloseBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      
+      <div style="display: flex; align-items: center; justify-content: center; gap: 6px; margin-bottom: 12px; color: var(--green-dk); font-size: 11px; font-weight: 700; text-transform: uppercase; letter-spacing: 0.5px;">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        Ambiente 100% Seguro
+      </div>
+
       <div class="user-data-header">
-        <h3 class="user-data-title">Confirmar Detalhes</h3>
-        <p class="user-data-desc">Preencha os dados para emissão do pedido</p>
+        <h3 class="user-data-title">Checkout Seguro</h3>
+        <p class="user-data-desc">Confirme seus dados para emissão da nota e entrega</p>
       </div>
       
-      <div class="ud-value-tag">
-        <span class="ud-value-label">Total do Pedido</span>
-        <span class="ud-value-amount" id="udDisplayValue">R$ 0,00</span>
+      <div class="ud-value-tag" style="background: var(--surface-2); border: 1px dashed var(--border);">
+        <span class="ud-value-label" style="color: var(--text-2);">Total a pagar</span>
+        <span class="ud-value-amount" id="udDisplayValue" style="color: var(--text);">R$ 0,00</span>
       </div>
 
       <div class="user-data-form">
         <div class="user-input-group">
-          <label class="user-input-label">NOME COMPLETO</label>
-          <input type="text" class="user-input" id="udNome" placeholder="Ex: João Silva">
+          <label class="user-input-label">NOME DO TITULAR</label>
+          <input type="text" class="user-input" id="udNome" placeholder="Nome completo">
         </div>
-        <div class="user-input-group">
-          <label class="user-input-label">CPF</label>
-          <input type="text" class="user-input" id="udCpf" placeholder="000.000.000-00" maxlength="14">
+        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+          <div class="user-input-group">
+            <label class="user-input-label">CPF</label>
+            <input type="text" class="user-input" id="udCpf" placeholder="000.000.000-00" maxlength="14">
+          </div>
+          <div class="user-input-group">
+            <label class="user-input-label">CELULAR</label>
+            <input type="tel" class="user-input" id="udTelefone" placeholder="(00) 00000-0000" maxlength="15">
+          </div>
         </div>
-        <div class="user-input-group">
-          <label class="user-input-label">WHATSAPP / TELEFONE</label>
-          <input type="tel" class="user-input" id="udTelefone" placeholder="(00) 00000-0000" maxlength="15">
+        
+        <button class="user-data-btn" id="udProsseguirBtn" style="display: flex; align-items: center; justify-content: center; gap: 8px;">
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="11" width="18" height="11" rx="2" ry="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Confirmar e Pagar
+        </button>
+
+        <div style="text-align: center; margin-top: 10px; opacity: 0.6; display: flex; align-items: center; justify-content: center; gap: 15px;">
+           <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%2Bpix.png" height="12" style="filter: grayscale(1 );">
+           <span style="font-size: 10px; font-weight: 600;">🔒 Dados Protegidos (LGPD)</span>
         </div>
-        <button class="user-data-btn" id="udProsseguirBtn">Finalizar e Prosseguir</button>
       </div>
     </div>
   </div>
+
 
   <!-- SELLER MODAL -->
   <div class="seller-modal-overlay" id="sellerModalOverlay">
@@ -1925,30 +1943,56 @@ function showPaymentOptions() {
 
 
 
-// ── DELIVERY STEPS / PIX ─────────────────────────────
 function showDeliverySteps(pixCode) {
   const card = document.createElement('div');
   card.className = 'pix-card';
+  card.style.border = '2px solid var(--brand-lt)';
   card.innerHTML = `
-    <div class="pix-card-header">
+    <div class="pix-card-header" style="background: var(--brand-lt); margin: -20px -20px 20px; padding: 15px 20px; border-bottom: 1px solid rgba(15,91,168,0.1);">
       <div class="pix-brand-mark">
-        <div class="pix-logo">PIX</div>
-        <div><div class="pix-brand-label">Pagamento Instantâneo</div><div class="pix-brand-sub">Diskgas Oficial</div></div>
+        <img src="https://upload.wikimedia.org/wikipedia/commons/a/a2/Logo%2Bpix.png" height="18" style="margin-right: 10px;">
+        <div><div class="pix-brand-label" style="color: var(--brand-dk );">Pagamento via PIX</div><div class="pix-brand-sub">Processamento Instantâneo</div></div>
       </div>
-      <div class="pix-expiry"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 15:00</div>
+      <div class="pix-expiry" style="background: #fff; color: var(--orange); padding: 4px 8px; border-radius: 6px; font-weight: 700; font-size: 10px; box-shadow: 0 2px 4px rgba(0,0,0,0.05);">EXPIRA EM 15:00</div>
     </div>
-    <div class="pix-price-hero">
-      <div class="pix-price-eyebrow">Valor do pedido</div>
-      <div class="pix-price-amount"><span>R$</span>${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
+
+    <div style="text-align: center; margin-bottom: 20px;">
+      <div style="font-size: 11px; color: var(--text-3); text-transform: uppercase; font-weight: 700; letter-spacing: 1px; margin-bottom: 4px;">Valor Total do Pedido</div>
+      <div style="font-size: 32px; font-weight: 900; color: var(--text); letter-spacing: -1px;">R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
     </div>
-    <div style="background:#F0FDF4;border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:11px;cursor:pointer;" onclick="openSellerModal()">
-      <div style="width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(16,185,129,.25);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;">Vendedor Autorizado</div><div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.2;">Thiago Callegari.</div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px;">Vendedor Oficial · Diskgás</div></div>
+
+    <div style="background: #f8fafc; border: 1.5px solid var(--border-2); border-radius: 14px; padding: 12px; margin-bottom: 15px; display: flex; align-items: center; gap: 12px;">
+      <div style="width: 40px; height: 40px; border-radius: 50%; background: #fff; border: 2px solid var(--brand-lt); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;">
+        <img src="https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp" width="100%">
+      </div>
+      <div style="flex: 1;">
+        <div style="font-size: 12px; font-weight: 800; color: var(--text );">Recebedor: Thiago Callegari</div>
+        <div style="font-size: 10px; color: var(--text-3); font-weight: 600;">Vendedor Oficial Diskgás em ${ORDER.location}</div>
+      </div>
+      <div style="color: var(--green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"/><polyline points="22 4 12 14.01 9 11.01"/></svg></div>
     </div>
-    <div class="pix-code-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><div class="pix-code-text">${pixCode.substring(0,40)}…</div></div>
-    <button class="pix-copy-btn" id="pixCopyBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código Pix</button>
-    <div class="pix-trust-row"><div class="pix-trust-item positive"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Seguro</div><div class="pix-trust-item neutral"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pagamento seguro</div></div>
+
+    <div class="pix-code-row" style="background: var(--surface-2); border: 1px solid var(--border-2); padding: 12px; border-radius: 10px; margin-bottom: 12px;">
+      <div class="pix-code-text" style="font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text-2);">${pixCode.substring(0,35)}...</div>
+    </div>
+
+    <button class="pix-copy-btn" id="pixCopyBtn" style="height: 52px; font-size: 15px; box-shadow: 0 4px 12px var(--brand-glow);">
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+      Copiar Código de Pagamento
+    </button>
+
+    <div style="margin-top: 15px; display: flex; justify-content: center; gap: 20px; opacity: 0.7;">
+      <div style="display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; color: var(--text-3);">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg>
+        COMPRA GARANTIDA
+      </div>
+      <div style="display: flex; align-items: center; gap: 5px; font-size: 10px; font-weight: 700; color: var(--text-3);">
+        <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><circle cx="12" cy="12" r="10"/><path d="m9 12 2 2 4-4"/></svg>
+        ENTREGA PRIORITÁRIA
+      </div>
+    </div>
   `;
+
   msgsEl.appendChild(card);
   scrollDown();
   const copyBtn = card.querySelector('#pixCopyBtn');
