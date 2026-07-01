@@ -1849,47 +1849,42 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer;
 
-                    const footer = document.querySelector('.footer');
+                        const footer = document.querySelector('.footer');
     const inputs = formContainer.querySelectorAll('input');
-
-    // Armazena a altura inicial para comparação (ajustado para lidar com redimensionamentos)
-    let lastViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+    
+    // Captura a altura da tela no momento em que o card foi aberto (sem teclado)
+    const screenHeightBase = window.innerHeight;
 
     const updateFooterVisibility = () => {
-      if (!window.visualViewport || !footer) return;
+      if (!footer) return;
 
-      const currentHeight = window.visualViewport.height;
-      // Detecta teclado: se a altura atual for pelo menos 25% menor que a altura da janela
-      const isKeyboardActive = currentHeight < (window.innerHeight * 0.75);
-      const isPaymentInputFocused = Array.from(inputs).includes(document.activeElement);
+      // Pegamos a altura atual (que diminui quando o teclado abre)
+      const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+      
+      // O teclado é detectado se a altura atual for significativamente menor que a base (mais de 15% de diferença)
+      const isKeyboardActive = currentHeight < (screenHeightBase * 0.85);
+      const isInputFocused = Array.from(inputs).includes(document.activeElement);
 
-      // A barra só some se o teclado estiver ativo E um campo de pagamento estiver focado
-      if (isKeyboardActive && isPaymentInputFocused) {
+      if (isKeyboardActive && isInputFocused) {
         footer.style.display = 'none';
       } else {
-        // Caso contrário, garante que ela volte a aparecer
         footer.style.display = 'flex';
       }
-      
-      lastViewportHeight = currentHeight;
     };
 
-    // Eventos do Visual Viewport (os mais precisos para teclado mobile)
+    // Monitora redimensionamento e scroll (essencial para teclado mobile)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', updateFooterVisibility);
+      window.visualViewport.addEventListener('scroll', updateFooterVisibility);
     }
 
-    // Garante a verificação quando o usuário troca de campo ou entra/sai deles
     inputs.forEach(input => {
-      input.addEventListener('focus', () => {
-        // Pequeno atraso para esperar a animação do teclado começar
-        setTimeout(updateFooterVisibility, 300);
-      });
-      input.addEventListener('blur', () => {
-        // Pequeno atraso para verificar o estado após a saída do campo
-        setTimeout(updateFooterVisibility, 100);
-      });
+      // Ao focar, verificamos após um pequeno delay para o teclado subir
+      input.addEventListener('focus', () => setTimeout(updateFooterVisibility, 300));
+      // Ao sair do campo
+      input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 100));
     });
+
 
 
 
