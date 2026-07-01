@@ -115,6 +115,7 @@ html,body{
 .app{
   width:100%;max-width:430px;height:100dvh;
   display:flex;flex-direction:column;
+  height: 100dvh; /* Garante que use a altura dinâmica do dispositivo */
   background:var(--bg);
   position:relative;overflow:hidden;
 }
@@ -1848,30 +1849,41 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer;
 
-        // Gerencia a visibilidade da barra de chat apenas quando o teclado REALMENTE sobe
-        const footer = document.querySelector('.footer');
+            const footer = document.querySelector('.footer');
     const inputs = formContainer.querySelectorAll('input');
 
-    inputs.forEach(input => {
-      // Esconde a barra IMEDIATAMENTE ao tocar no campo (evita que ela suba com o teclado)
-      input.addEventListener('focus', () => {
-        const isMobile = window.innerWidth <= 768; // Detecta se é celular/tablet
-        if (footer && isMobile) {
-          footer.style.display = 'none';
-        }
-      });
+    // Função para verificar se o teclado está REALMENTE visível
+    const updateFooterVisibility = () => {
+      if (!window.visualViewport) return;
 
-      // Mostra a barra novamente ao sair do campo
+      // Se a altura disponível for menor que 80% da altura total, o teclado está aberto
+      const isKeyboardOpen = window.visualViewport.height < (window.innerHeight * 0.8);
+      // Verifica se o usuário está com o foco em algum campo de pagamento
+      const isInputFocused = Array.from(inputs).includes(document.activeElement);
+
+      if (footer) {
+        // A barra só some se o teclado estiver aberto E o foco for nos campos de pagamento
+        if (isKeyboardOpen && isInputFocused) {
+          footer.style.display = 'none';
+        } else {
+          footer.style.display = 'flex';
+        }
+      }
+    };
+
+    // Ouve a mudança de tamanho da tela (abertura do teclado)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateFooterVisibility);
+      window.visualViewport.addEventListener('scroll', updateFooterVisibility);
+    }
+
+    // Ouve quando o usuário sai do campo (para garantir que a barra volte)
+    inputs.forEach(input => {
       input.addEventListener('blur', () => {
-        setTimeout(() => {
-          // Só volta a mostrar se o foco não tiver ido para outro campo de pagamento
-          const isStillInPayment = Array.from(inputs).includes(document.activeElement);
-          if (footer && !isStillInPayment) {
-            footer.style.display = 'flex';
-          }
-        }, 150);
+        setTimeout(updateFooterVisibility, 100);
       });
     });
+
 
     // Rolagem automática aprimorada
     // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
