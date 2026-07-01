@@ -544,8 +544,47 @@ html,body{
 .qty-btn{width:28px;height:28px;border-radius:6px;border:none;background:var(--surface-2);color:var(--text);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
 .qty-btn:hover{background:var(--border-2);}
 .qty-val{font-size:14px;font-weight:700;min-width:20px;text-align:center;}
-.edit-input{width:100%;border:1.5px solid var(--border);border-radius:10px;padding:10px 12px;font-family:inherit;font-size:13px;color:var(--text);outline:none;transition:all .2s;background:var(--surface-2);}
-.edit-input:focus{border-color:var(--brand-mid);background:#fff;box-shadow:0 0 0 3px var(--brand-glow);}
+.edit-input {
+  width: 100%;
+  border: 1.5px solid var(--border);
+  border-radius: 12px; /* Arredondamento um pouco maior */
+  padding: 14px 16px; /* Mais espaço interno para respiro */
+  font-family: inherit;
+  font-size: 14px; /* Fonte ligeiramente maior para legibilidade */
+  color: var(--text);
+  outline: none;
+  transition: all 0.3s ease; /* Transição mais suave */
+  background: var(--surface-2);
+  box-shadow: inset 0 1px 2px rgba(0,0,0,0.02); /* Sombra interna sutil */
+}
+
+.edit-input::placeholder {
+  color: var(--text-3);
+  font-weight: 400;
+}
+
+.edit-input:focus {
+  border-color: var(--brand);
+  background: #fff;
+  box-shadow: 0 0 0 4px var(--brand-glow), inset 0 1px 2px rgba(0,0,0,0.01);
+}
+
+/* Estilo específico para o container do formulário de pagamento */
+.payment-form-container {
+  padding-top: 20px;
+  border-top: 1px solid var(--border-2);
+  margin-top: 18px;
+  animation: fadeUp 0.4s ease forwards; /* Animação de entrada suave */
+}
+
+.payment-form-group {
+  margin-bottom: 14px;
+}
+
+.payment-form-container .modal-btn {
+  margin-top: 8px;
+  box-shadow: 0 4px 14px rgba(15,91,168,0.2);
+}
 
 /* ── PAYMENT OPTIONS CARD ── */
 .payment-option-card {
@@ -1728,7 +1767,7 @@ function showPaymentOptions() {
 
     let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
-  function handlePaymentSelection(selectedCard, choice) {
+    function handlePaymentSelection(selectedCard, choice) {
     // Remove a classe 'selected' de todos os cards e esconde todos os formulários
     document.querySelectorAll('.payment-option-card').forEach(card => {
       card.classList.remove('selected');
@@ -1742,13 +1781,19 @@ function showPaymentOptions() {
     let formContainer = selectedCard.querySelector('.payment-form-container');
 
     if (!formContainer) {
-      // Se o formulário não existe, cria e adiciona ao card
+      // Se o formulário não existe, cria e adiciona ao card usando a nova estrutura CSS
       selectedCard.insertAdjacentHTML('beforeend', `
-        <div class="payment-form-container" style="padding-top: 15px; border-top: 1px solid var(--border-2); margin-top: 15px;">
-          <div style="margin-bottom: 10px;"><input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required></div>
-          <div style="margin-bottom: 10px;"><input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required></div>
-          <div style="margin-bottom: 15px;"><input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required></div>
-          <button class="modal-btn" id="confirmPaymentBtn" style="width:100%; padding:12px; border-radius:12px; font-size:14px;">Prosseguir com o Pagamento</button>
+        <div class="payment-form-container">
+          <div class="payment-form-group">
+            <input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required>
+          </div>
+          <div class="payment-form-group">
+            <input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required>
+          </div>
+          <div class="payment-form-group">
+            <input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required>
+          </div>
+          <button class="modal-btn" id="confirmPaymentBtn">Prosseguir com o Pagamento</button>
         </div>
       `);
       formContainer = selectedCard.querySelector('.payment-form-container');
@@ -1775,8 +1820,20 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer; // Atualiza o formulário ativo
 
-    // Opcional: rolar para o formulário para garantir que esteja visível
-    formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    // Rolagem automática aprimorada
+    // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
+    // e a altura do formulário foi calculada antes de rolar.
+    setTimeout(() => {
+      // Rola a área de mensagens (msgsEl) para que o card selecionado fique visível
+      // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
+      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Foca no primeiro campo de input automaticamente
+      const firstInput = formContainer.querySelector('#userName');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 50);
   }
 
   saveChatHistory();
