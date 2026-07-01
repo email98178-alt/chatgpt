@@ -1847,24 +1847,24 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer;
 
-    // Gerencia a visibilidade da barra de chat baseada no foco dos inputs
+        // Gerencia a visibilidade da barra de chat apenas quando o teclado REALMENTE sobe
     const footer = document.querySelector('.footer');
     const inputs = formContainer.querySelectorAll('input');
 
-    inputs.forEach(input => {
-      // Quando o usuário clica para digitar, esconde a barra do chat
-      input.addEventListener('focus', () => {
-        if (footer) footer.style.display = 'none';
-      });
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', () => {
+        // Verifica se a altura da tela diminuiu (teclado aberto)
+        const isKeyboardOpen = window.visualViewport.height < window.innerHeight * 0.85;
+        // Verifica se o foco está em um dos campos deste formulário
+        const isInputFocused = Array.from(inputs).includes(document.activeElement);
 
-      // Quando o usuário sai do campo, a barra do chat volta a aparecer
-      input.addEventListener('blur', () => {
-        // Pequeno atraso para evitar que a barra apareça e suma rápido ao trocar de campo
-        setTimeout(() => {
-          if (footer) footer.style.display = 'flex';
-        }, 100);
+        if (footer) {
+          // Só esconde se o teclado estiver aberto E o foco for nos campos de pagamento
+          footer.style.display = (isKeyboardOpen && isInputFocused) ? 'none' : 'flex';
+        }
       });
-    });
+    }
+
 
 
 
