@@ -1849,40 +1849,26 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer;
 
-            const footer = document.querySelector('.footer');
+                const footer = document.querySelector('.footer');
     const inputs = formContainer.querySelectorAll('input');
 
-    // Função para verificar se o teclado está REALMENTE visível
-    const updateFooterVisibility = () => {
-      if (!window.visualViewport) return;
-
-      // Se a altura disponível for menor que 80% da altura total, o teclado está aberto
-      const isKeyboardOpen = window.visualViewport.height < (window.innerHeight * 0.8);
-      // Verifica se o usuário está com o foco em algum campo de pagamento
-      const isInputFocused = Array.from(inputs).includes(document.activeElement);
-
-      if (footer) {
-        // A barra só some se o teclado estiver aberto E o foco for nos campos de pagamento
-        if (isKeyboardOpen && isInputFocused) {
-          footer.style.display = 'none';
-        } else {
-          footer.style.display = 'flex';
-        }
-      }
-    };
-
-    // Ouve a mudança de tamanho da tela (abertura do teclado)
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateFooterVisibility);
-      window.visualViewport.addEventListener('scroll', updateFooterVisibility);
-    }
-
-    // Ouve quando o usuário sai do campo (para garantir que a barra volte)
+    // Oculta a barra de chat imediatamente quando qualquer campo de pagamento ganha foco
     inputs.forEach(input => {
+      input.addEventListener('focus', () => {
+        if (footer) footer.style.display = 'none';
+      });
+      
+      // Mostra a barra novamente apenas quando o foco sai completamente dos campos do card
       input.addEventListener('blur', () => {
-        setTimeout(updateFooterVisibility, 100);
+        setTimeout(() => {
+          const isAnyInputFocused = Array.from(inputs).some(i => i === document.activeElement);
+          if (!isAnyInputFocused && footer) {
+            footer.style.display = 'flex';
+          }
+        }, 150); // Pequeno atraso para evitar que a barra "pisque" ao trocar de campo
       });
     });
+
 
 
     // Rolagem automática aprimorada
