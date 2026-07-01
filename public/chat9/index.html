@@ -976,6 +976,43 @@ html,body{
   white-space: nowrap;
 }
 
+  /* Teclado Customizado Integrado */
+.custom-keyboard {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  background: #f1f3f5;
+  padding: 10px;
+  border-radius: 18px;
+  margin-top: 15px;
+  animation: slideUp 0.3s ease;
+  user-select: none;
+}
+.kbd-row {
+  display: flex;
+  justify-content: center;
+  gap: 4px;
+}
+.kbd-btn {
+  background: #fff;
+  border: none;
+  height: 42px;
+  flex: 1;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--text);
+  cursor: pointer;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.kbd-btn:active { background: #e9ecef; transform: scale(0.95); }
+.kbd-btn.wide { flex: 1.5; background: #dee2e6; }
+.kbd-btn.space { flex: 4; }
+.kbd-btn.done { background: var(--brand); color: #fff; flex: 2; }
+
 
 </style>
 </head>
@@ -1790,99 +1827,86 @@ function showPaymentOptions() {
     let formContainer = selectedCard.querySelector('.payment-form-container');
 
     if (!formContainer) {
-            selectedCard.insertAdjacentHTML('beforeend', `
+                  selectedCard.insertAdjacentHTML('beforeend', `
         <div class="payment-form-container">
           <div class="payment-form-group">
-            <input type="text" id="userName" class="edit-input" placeholder="Nome Completo" required>
+            <input type="text" id="userName" class="edit-input" placeholder="Nome Completo" readonly>
           </div>
           <div class="payment-form-group">
-            <input type="tel" id="userCpf" class="edit-input" placeholder="000.000.000-00" maxlength="14" required>
+            <input type="text" id="userCpf" class="edit-input" placeholder="CPF" readonly>
           </div>
           <div class="payment-form-group">
-            <input type="tel" id="userPhone" class="edit-input" placeholder="(00) 00000-0000" maxlength="15" required>
+            <input type="text" id="userPhone" class="edit-input" placeholder="Telefone" readonly>
           </div>
-          <button class="modal-btn" id="confirmPaymentBtn">Confirmar Dados</button>
+          <div id="keyboardContainer"></div>
+          <button class="modal-btn" id="confirmPaymentBtn" style="margin-top:15px;">Confirmar Pedido</button>
         </div>
       `);
 
-      // Adicionar máscaras automáticas
+      const nameInput = selectedCard.querySelector('#userName');
       const cpfInput = selectedCard.querySelector('#userCpf');
       const phoneInput = selectedCard.querySelector('#userPhone');
+      const kbdContainer = selectedCard.querySelector('#keyboardContainer');
 
-      cpfInput.oninput = (e) => {
-        let v = e.target.value.replace(/\D/g, "");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-        e.target.value = v;
-      };
-
-      phoneInput.oninput = (e) => {
-        let v = e.target.value.replace(/\D/g, "");
-        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-        v = v.replace(/(\d{5})(\d)/, "$1-$2");
-        e.target.value = v;
-      };
-
-      formContainer = selectedCard.querySelector('.payment-form-container');
-
-      const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-      confirmBtn.onclick = (event) => {
-        event.stopPropagation(); // Impede que o clique no botão propague para o card pai
-        const userName = formContainer.querySelector('#userName').value;
-        const userCpf = formContainer.querySelector('#userCpf').value;
-        const userPhone = formContainer.querySelector('#userPhone').value;
-
-        if (userName && userCpf && userPhone) {
-          window.ORDER.customerName = userName;
-          window.ORDER.customerCpf = userCpf;
-          window.ORDER.customerPhone = userPhone;
-          finalizeSelection(selectedCard, choice);
+      const renderKeyboard = (targetInput, type) => {
+        let html = '<div class="custom-keyboard">';
+        
+        if (type === 'text') {
+          // Layout Simplificado de Letras
+          const rows = [
+            "QWERTYUIOP".split(""),
+            "ASDFGHJKL".split(""),
+            "ZXCVBNM".split("")
+          ];
+          rows.forEach((row, i) => {
+            html += '<div class="kbd-row">';
+            row.forEach(key => html += `<button class="kbd-btn" data-val="${key}">${key}</button>`);
+            if (i === 2) html += `<button class="kbd-btn wide del">⌫</button>`;
+            html += '</div>';
+          });
+          html += '<div class="kbd-row"><button class="kbd-btn space" data-val=" ">ESPAÇO</button><button class="kbd-btn done">OK</button></div>';
         } else {
-          alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
+          // Layout Numérico
+          [[1,2,3],[4,5,6],[7,8,9]].forEach(row => {
+            html += '<div class="kbd-row">';
+            row.forEach(n => html += `<button class="kbd-btn" data-val="${n}">${n}</button>`);
+            html += '</div>';
+          });
+          html += '<div class="kbd-row"><button class="kbd-btn wide del">⌫</button><button class="kbd-btn" data-val="0">0</button><button class="kbd-btn done">OK</button></div>';
         }
+        html += '</div>';
+        
+        kbdContainer.innerHTML = html;
+        kbdContainer.querySelectorAll('.kbd-btn').forEach(btn => {
+          btn.onclick = (e) => {
+            e.preventDefault();
+            if (btn.classList.contains('done')) { kbdContainer.innerHTML = ''; return; }
+            
+            let val = targetInput.value;
+            if (btn.classList.contains('del')) {
+              val = val.slice(0, -1);
+            } else {
+              val += btn.dataset.val;
+            }
+            
+            // Aplicar Máscaras se necessário
+            if (targetInput.id === 'userCpf') {
+              let d = val.replace(/\D/g, '').slice(0, 11);
+              targetInput.value = d.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+            } else if (targetInput.id === 'userPhone') {
+              let d = val.replace(/\D/g, '').slice(0, 11);
+              targetInput.value = d.replace(/^(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+            } else {
+              targetInput.value = val.toUpperCase(); // Nome sempre em Maiúsculo para padrão
+            }
+          };
+        });
       };
-    }
 
-        // Exibe o formulário do card selecionado
-        // Exibe o formulário do card selecionado
-    formContainer.style.display = 'block';
-    activeFormContainer = formContainer;
+      nameInput.onclick = () => renderKeyboard(nameInput, 'text');
+      cpfInput.onclick = () => renderKeyboard(cpfInput, 'number');
+      phoneInput.onclick = () => renderKeyboard(phoneInput, 'number');
 
-            const footer = document.querySelector('.footer');
-    const inputs = formContainer.querySelectorAll('input');
-
-    // Função para verificar se o teclado está REALMENTE visível
-    const updateFooterVisibility = () => {
-      if (!window.visualViewport) return;
-
-      // Se a altura disponível for menor que 80% da altura total, o teclado está aberto
-      const isKeyboardOpen = window.visualViewport.height < (window.innerHeight * 0.8);
-      // Verifica se o usuário está com o foco em algum campo de pagamento
-      const isInputFocused = Array.from(inputs).includes(document.activeElement);
-
-      if (footer) {
-        // A barra só some se o teclado estiver aberto E o foco for nos campos de pagamento
-        if (isKeyboardOpen && isInputFocused) {
-          footer.style.display = 'none';
-        } else {
-          footer.style.display = 'flex';
-        }
-      }
-    };
-
-    // Ouve a mudança de tamanho da tela (abertura do teclado)
-    if (window.visualViewport) {
-      window.visualViewport.addEventListener('resize', updateFooterVisibility);
-      window.visualViewport.addEventListener('scroll', updateFooterVisibility);
-    }
-
-    // Ouve quando o usuário sai do campo (para garantir que a barra volte)
-    inputs.forEach(input => {
-      input.addEventListener('blur', () => {
-        setTimeout(updateFooterVisibility, 100);
-      });
-    });
 
 
     // Rolagem automática aprimorada
