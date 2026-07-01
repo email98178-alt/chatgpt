@@ -436,6 +436,7 @@ html,body{
 }
 .scroll-fab.on{display:flex;}
 .scroll-fab.keyboard-open{display:none !important;}
+.footer.keyboard-open{display:none !important;}
 .scroll-fab:hover{transform:translateY(-2px);}
 .scroll-fab:active{transform:scale(.9);}
 .fab-badge{
@@ -1429,14 +1430,16 @@ if ('visualViewport' in window) {
     const fab = document.querySelector('.scroll-fab');
     const keyboardOpen = vv.height < window.innerHeight * 0.75;
     app.style.height = vv.height + 'px';
-    if (keyboardOpen) {
+        if (keyboardOpen) {
       footer.style.paddingBottom = '8px';
       fab.classList.add('keyboard-open');
+      footer.classList.add('keyboard-open'); // Esconde o footer
       requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
     } else {
       app.style.height = '';
       footer.style.paddingBottom = 'max(8px, env(safe-area-inset-bottom))';
       fab.classList.remove('keyboard-open');
+      footer.classList.remove('keyboard-open'); // Mostra o footer novamente
     }
   }
   window.visualViewport.addEventListener('resize', handleViewport);
@@ -1828,11 +1831,11 @@ function showPaymentOptions() {
       // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
       selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       
-      // Foca no primeiro campo de input automaticamente
-      const firstInput = formContainer.querySelector('#userName');
+            // Removido o foco automático para evitar que o teclado abra sozinho
+      /* const firstInput = formContainer.querySelector('#userName');
       if (firstInput) {
         firstInput.focus();
-      }
+      } */
     }, 50);
   }
 
