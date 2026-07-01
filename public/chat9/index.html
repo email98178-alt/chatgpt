@@ -1826,32 +1826,18 @@ function showPaymentOptions() {
 
       formContainer = selectedCard.querySelector('.payment-form-container');
 
-            const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-      
-      // Usamos mousedown para capturar o clique ANTES do campo perder o foco (blur)
-      confirmBtn.onmousedown = (event) => {
-        event.preventDefault(); // Impede que o foco saia do campo antes do clique ser processado
-      };
-
+      const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
       confirmBtn.onclick = (event) => {
-        event.stopPropagation();
-        
-        const userName = formContainer.querySelector('#userName').value.trim();
-        const userCpf = formContainer.querySelector('#userCpf').value.trim();
-        const userPhone = formContainer.querySelector('#userPhone').value.trim();
+        event.stopPropagation(); // Impede que o clique no botão propague para o card pai
+        const userName = formContainer.querySelector('#userName').value;
+        const userCpf = formContainer.querySelector('#userCpf').value;
+        const userPhone = formContainer.querySelector('#userPhone').value;
 
         if (userName && userCpf && userPhone) {
-          // Desativa os inputs para evitar que o teclado tente abrir novamente
-          formContainer.querySelectorAll('input').forEach(i => i.blur());
-          
           window.ORDER.customerName = userName;
           window.ORDER.customerCpf = userCpf;
           window.ORDER.customerPhone = userPhone;
-          
-          // Pequeno atraso para garantir que o teclado começou a fechar antes de finalizar
-          setTimeout(() => {
-            finalizeSelection(selectedCard, choice);
-          }, 100);
+          finalizeSelection(selectedCard, choice);
         } else {
           alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
         }
@@ -1896,8 +1882,11 @@ function showPaymentOptions() {
       // Ao focar, verificamos após um pequeno delay para o teclado subir
       input.addEventListener('focus', () => setTimeout(updateFooterVisibility, 300));
       // Ao sair do campo
-input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
+      input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 100));
     });
+
+
+
 
 
     // Rolagem automática aprimorada
