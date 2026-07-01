@@ -973,11 +973,6 @@ html,body{
   white-space: nowrap;
 }
 
-  /* Classe para esconder o footer com transição suave */
-.footer.hidden {
-  display: none !important;
-}
-
 
 </style>
 </head>
@@ -1785,64 +1780,32 @@ function showPaymentOptions() {
 
     let formContainer = selectedCard.querySelector('.payment-form-container');
 
-        if (!formContainer) {
-      // ... (mantenha o insertAdjacentHTML que usamos no passo anterior)
+    if (!formContainer) {
+      // Se o formulário não existe, cria e adiciona ao card usando a nova estrutura CSS
       selectedCard.insertAdjacentHTML('beforeend', `
         <div class="payment-form-container">
           <div class="payment-form-group">
-            <input type="text" id="userName" class="edit-input payment-field" 
-              placeholder="Seu Nome Completo" required
-              autocomplete="new-password" autocorrect="off" autocapitalize="none" spellcheck="false">
+            <input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required>
           </div>
           <div class="payment-form-group">
-            <input type="text" id="userCpf" class="edit-input payment-field" 
-              placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required
-              autocomplete="one-time-code" autocorrect="off" autocapitalize="none" spellcheck="false"
-              inputmode="numeric">
+            <input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required>
           </div>
           <div class="payment-form-group">
-            <input type="text" id="userPhone" class="edit-input payment-field" 
-              placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required
-              autocomplete="one-time-code" autocorrect="off" autocapitalize="none" spellcheck="false"
-              inputmode="tel">
+            <input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required>
           </div>
           <button class="modal-btn" id="confirmPaymentBtn">Prosseguir com o Pagamento</button>
         </div>
       `);
-
       formContainer = selectedCard.querySelector('.payment-form-container');
-      const footer = document.querySelector('.footer');
-      const inputs = formContainer.querySelectorAll('.payment-field');
-
-      // Lógica para esconder/mostrar o footer baseado no foco
-      inputs.forEach(input => {
-        input.onfocus = () => {
-          footer.classList.add('hidden');
-          // Garante que o card continue visível ao abrir o teclado
-          setTimeout(() => {
-            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-          }, 300);
-        };
-        
-        input.onblur = () => {
-          // Pequeno atraso para o caso do usuário pular de um input para outro
-          setTimeout(() => {
-            if (!document.activeElement.classList.contains('payment-field')) {
-              footer.classList.remove('hidden');
-            }
-          }, 100);
-        };
-      });
 
       const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
       confirmBtn.onclick = (event) => {
-        event.stopPropagation();
+        event.stopPropagation(); // Impede que o clique no botão propague para o card pai
         const userName = formContainer.querySelector('#userName').value;
         const userCpf = formContainer.querySelector('#userCpf').value;
         const userPhone = formContainer.querySelector('#userPhone').value;
 
         if (userName && userCpf && userPhone) {
-          footer.classList.remove('hidden'); // Garante que o footer volte ao finalizar
           window.ORDER.customerName = userName;
           window.ORDER.customerCpf = userCpf;
           window.ORDER.customerPhone = userPhone;
@@ -1853,37 +1816,24 @@ function showPaymentOptions() {
       };
     }
 
-          selectedCard.insertAdjacentHTML('beforeend', `
-        <div class="payment-form-container">
-          <div class="payment-form-group">
-            <input type="text" id="userName" class="edit-input" 
-              placeholder="Seu Nome Completo" required
-              autocomplete="new-password" 
-              autocorrect="off" 
-              autocapitalize="none" 
-              spellcheck="false">
-          </div>
-          <div class="payment-form-group">
-            <input type="text" id="userCpf" class="edit-input" 
-              placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required
-              autocomplete="one-time-code" 
-              autocorrect="off" 
-              autocapitalize="none" 
-              spellcheck="false"
-              inputmode="numeric">
-          </div>
-          <div class="payment-form-group">
-            <input type="text" id="userPhone" class="edit-input" 
-              placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required
-              autocomplete="one-time-code" 
-              autocorrect="off" 
-              autocapitalize="none" 
-              spellcheck="false"
-              inputmode="tel">
-          </div>
-          <button class="modal-btn" id="confirmPaymentBtn">Prosseguir com o Pagamento</button>
-        </div>
-      `);
+    // Exibe o formulário do card selecionado
+    formContainer.style.display = 'block';
+    activeFormContainer = formContainer; // Atualiza o formulário ativo
+
+    // Rolagem automática aprimorada
+    // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
+    // e a altura do formulário foi calculada antes de rolar.
+    setTimeout(() => {
+      // Rola a área de mensagens (msgsEl) para que o card selecionado fique visível
+      // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
+      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      
+      // Foca no primeiro campo de input automaticamente
+      const firstInput = formContainer.querySelector('#userName');
+      if (firstInput) {
+        firstInput.focus();
+      }
+    }, 50);
   }
 
   saveChatHistory();
