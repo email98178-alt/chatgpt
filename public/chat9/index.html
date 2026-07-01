@@ -1828,11 +1828,12 @@ function showPaymentOptions() {
       // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
       selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       
-      // Foca no primeiro campo de input automaticamente
-      const firstInput = formContainer.querySelector('#userName');
-      if (firstInput) {
-        firstInput.focus();
-      }
+            // Foco automático removido para evitar abertura indesejada do teclado
+      // const firstInput = formContainer.querySelector('#userName');
+      // if (firstInput) {
+      //   firstInput.focus();
+      // }
+
     }, 50);
   }
 
