@@ -1070,39 +1070,10 @@ html,body{
       <div class="modal-footer" style="margin-top:24px;">
         <button class="modal-btn" id="closeSellerModalBtn">Voltar ao Chat</button>
       </div>
-        </div>
-  </div>
-
-  <!-- USER DATA MODAL -->
-  <div class="modal-overlay" id="userDataModalOverlay" style="z-index: 1200;">
-    <div class="order-modal">
-      <div class="modal-handle"></div>
-      <div class="modal-h">
-        <h3 class="modal-title">Dados para Entrega</h3>
-        <button class="close-modal" id="closeUserDataModal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-      <div style="display:flex; flex-direction:column; gap:15px; padding:10px 0;">
-        <div>
-          <label class="od-label">Nome Completo</label>
-          <input type="text" id="inputUserName" class="edit-input" placeholder="Seu nome">
-        </div>
-        <div>
-          <label class="od-label">CPF</label>
-          <input type="tel" id="inputUserCPF" class="edit-input" placeholder="000.000.000-00" maxlength="14">
-        </div>
-        <div>
-          <label class="od-label">Telefone / WhatsApp</label>
-          <input type="tel" id="inputUserPhone" class="edit-input" placeholder="(00) 00000-0000" maxlength="15">
-        </div>
-      </div>
-      <div class="modal-footer">
-        <button class="modal-btn" id="confirmUserData">Prosseguir</button>
-      </div>
     </div>
   </div>
 
 </div>
-
 
 <script>
 const msgsEl         = document.getElementById('msgs');
@@ -1141,55 +1112,6 @@ closeSellerModalEl.onclick = closeSellerModal;
 closeSellerModalBtnEl.onclick = closeSellerModal;
 headerSellerTriggerEl.onclick = openSellerModal;
 typingAvatarTriggerEl.onclick = openSellerModal;
-
-// Lógica do Modal de Dados
-const userDataModalOverlayEl = document.getElementById('userDataModalOverlay');
-const confirmUserDataEl = document.getElementById('confirmUserData');
-const inputUserCPF = document.getElementById('inputUserCPF');
-const inputUserPhone = document.getElementById('inputUserPhone');
-
-if (inputUserCPF) {
-  inputUserCPF.oninput = (e) => {
-    let v = e.target.value.replace(/\D/g,"");
-    v = v.replace(/(\d{3})(\d)/,"$1.$2");
-    v = v.replace(/(\d{3})(\d)/,"$1.$2");
-    v = v.replace(/(\d{3})(\d{1,2})$/,"$1-$2");
-    e.target.value = v;
-  };
-}
-
-if (inputUserPhone) {
-  inputUserPhone.oninput = (e) => {
-    let v = e.target.value.replace(/\D/g,"");
-    v = v.replace(/^(\d{2})(\d)/g,"($1) $2");
-    v = v.replace(/(\d)(\d{4})$/,"$1-$2");
-    e.target.value = v;
-  };
-}
-
-function openUserDataModal() {
-  return new Promise(resolve => {
-    if (!userDataModalOverlayEl) return resolve(true);
-    userDataModalOverlayEl.classList.add('on');
-    confirmUserDataEl.onclick = () => {
-      const nome = document.getElementById('inputUserName').value.trim();
-      const cpf = inputUserCPF.value.trim();
-      const phone = inputUserPhone.value.trim();
-      if(nome.length < 3 || cpf.length < 14 || phone.length < 14) {
-        alert("Por favor, preencha todos os campos corretamente.");
-        return;
-      }
-      ORDER.nome = nome;
-      userDataModalOverlayEl.classList.remove('on');
-      resolve(true);
-    };
-    document.getElementById('closeUserDataModal').onclick = () => {
-      userDataModalOverlayEl.classList.remove('on');
-      resolve(false);
-    };
-  });
-}
-
 sellerModalOverlayEl.onclick = (e) => { if(e.target===sellerModalOverlayEl) closeSellerModal(); };
 
 const AVATAR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp";
@@ -1719,136 +1641,79 @@ function showOrderConfirmation() {
 
   currentConfirmationBlock.querySelector('#btnChange').onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
 
-    if (!confirmationResolve) {
+  if (!confirmationResolve) {
     return new Promise(resolve => { confirmationResolve=resolve; });
   }
 }
 
-function showPaymentOptions() {
-  const pricePix = ORDER.productPrice;
-  const priceDelivery = ORDER.productPrice * 1.30;
-  const fmt = (v) => v.toFixed(2).replace('.', ',');
 
+function showPaymentOptions() {
   const card = document.createElement('div');
   card.className = 'steps-card payment-selection-block'; 
-  card.style.cssText = 'width:100%;max-width:340px;padding:20px;border-radius:24px;border:1px solid var(--border-2);box-shadow:0 12px 30px rgba(0,0,0,0.08);background:#fff;';
-  
+  card.style.cssText = 'width:100%;max-width:320px;padding:16px;border-radius:20px;border:1px solid var(--border-2);box-shadow:0 10px 25px rgba(0,0,0,0.05);background:#fff;';
   card.innerHTML = `
-    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
-      <div style="width:38px;height:38px;border-radius:12px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 4px 12px var(--brand-glow);">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+    <div style="display:flex;align-items:center;gap:10px;margin-bottom:16px;">
+      <div style="width:32px;height:32px;border-radius:10px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 2px 8px var(--brand-glow);">
+        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
       </div>
       <div>
-        <div style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Forma de Pagamento</div>
-        <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.6px;">Selecione uma opção abaixo</div>
+        <div style="font-size:13px;font-weight:800;color:var(--text);letter-spacing:-0.2px;">Forma de Pagamento</div>
+        <div style="font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;letter-spacing:0.4px;">Como você prefere pagar?</div>
       </div>
     </div>
 
-    <div style="display:flex;flex-direction:column;gap:12px;">
-      <div class="payment-option-card" id="payNowCard" style="margin:0; width:100%; padding:18px; border-radius:20px; position:relative; border: 1.5px solid var(--border-2);">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:46px; height:46px; border-radius:12px; background:#F0FDF4; color:#10B981; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
+    <div style="display:flex;flex-direction:column;gap:10px;" class="options-container">
+      <div class="payment-option-card" id="payNowCard" style="margin:0; width:100%;">
+        <div class="payment-option-card-header" style="margin-bottom:0;">
+          <div class="payment-option-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2" ry="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
           </div>
           <div style="flex:1;">
-            <div style="font-size:13px; font-weight:800; color:var(--text);">Pagar Agora (Pix)</div>
-            <div style="font-size:11px; color:var(--green-dk); font-weight:600;">Desconto de 30% aplicado</div>
+            <div class="payment-option-card-title">Pagar Agora (Pix)</div>
+            <div class="payment-option-card-desc">Pagamento instantâneo seguro</div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:15px; font-weight:900; color:var(--brand); letter-spacing:-0.5px;">R$ ${fmt(pricePix)}</div>
-          </div>
+          <div class="check-icon" style="display:none; color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
-        <div class="check-icon" style="position:absolute; top:10px; right:10px; display:none; color:var(--green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
 
-      <div class="payment-option-card" id="payOnDeliveryCard" style="margin:0; width:100%; padding:18px; border-radius:20px; position:relative; border: 1.5px solid var(--border-2);">
-        <div style="display:flex; align-items:center; gap:14px;">
-          <div style="width:46px; height:46px; border-radius:12px; background:var(--surface-2); color:var(--text-3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
-            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
+      <div class="payment-option-card" id="payOnDeliveryCard" style="margin:0; width:100%;">
+        <div class="payment-option-card-header" style="margin-bottom:0;">
+          <div class="payment-option-card-icon">
+            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 17H2V3h20v14zm0 0l-3.27 3.27a2 2 0 0 1-2.83 0L14 17m-4 0l-3.27 3.27a2 2 0 0 1-2.83 0L2 17"/></svg>
           </div>
           <div style="flex:1;">
-            <div style="font-size:13px; font-weight:800; color:var(--text);">Pagar na Entrega</div>
-            <div style="font-size:11px; color:var(--text-3); font-weight:500;">Cartão ou Dinheiro</div>
+            <div class="payment-option-card-title">Pagar na Entrega</div>
+            <div class="payment-option-card-desc">Dinheiro ou Cartão</div>
           </div>
-          <div style="text-align:right;">
-            <div style="font-size:15px; font-weight:900; color:var(--text-2); letter-spacing:-0.5px;">R$ ${fmt(priceDelivery)}</div>
-          </div>
+          <div class="check-icon" style="display:none; color:var(--green);"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
         </div>
-        <div class="check-icon" style="position:absolute; top:10px; right:10px; display:none; color:var(--green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
     </div>
   `;
   msgsEl.appendChild(card);
   scrollDown();
 
+  const payNowCard = card.querySelector('#payNowCard');
+  const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
+
   const finalizeSelection = (selectedCard, choice) => {
-    card.style.opacity = '0.95';
+    // Desabilita interações
+    card.style.opacity = '0.9';
     card.style.pointerEvents = 'none';
-    selectedCard.style.borderColor = 'var(--brand)';
-    selectedCard.style.background = 'var(--brand-lt)';
+    
+    // Destaque visual no selecionado
+    selectedCard.style.borderColor = 'var(--green)';
+    selectedCard.style.background = 'var(--green-lt)';
     selectedCard.querySelector('.check-icon').style.display = 'block';
+    
     if (confirmationResolve) confirmationResolve(choice);
   };
 
-  card.querySelector('#payNowCard').onclick = () => finalizeSelection(card.querySelector('#payNowCard'), 'pix');
-  card.querySelector('#payOnDeliveryCard').onclick = () => finalizeSelection(card.querySelector('#payOnDeliveryCard'), 'delivery');
+  payNowCard.onclick = () => finalizeSelection(payNowCard, 'pix');
+  payOnDeliveryCard.onclick = () => finalizeSelection(payOnDeliveryCard, 'delivery');
+
   saveChatHistory();
 }
-
-  if (window._currentFlowStep === 3) {
-    await pause(400);
-    action = await showOrderConfirmation();
-    if (action === 'correct') {
-      const spVal1 = addSpinner("Validando dados do pedido...");
-      await pause(3500); spVal1.remove();
-      addSys('Pedido validado com sucesso', 'ok');
-      await pause(800);
-
-      await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
-      await pause(300);
-
-      const paymentChoice = await new Promise(resolve => {
-        confirmationResolve = resolve;
-        showPaymentOptions();
-      });
-
-      // Abre modal de dados
-      const dadosPreenchidos = await openUserDataModal();
-      if(!dadosPreenchidos) { window._currentFlowStep = 3; saveChatHistory(); return; }
-
-      if (paymentChoice === 'pix') {
-        addMsg('Pagar agora via Pix', 'user');
-        await pause(800);
-        const spVal2 = addSpinner("Preparando chave de pagamento...");
-        await pause(3000); spVal2.remove();
-        addSys('Pagamento via Pix selecionado', 'ok');
-        await pause(1000);
-        window._currentFlowStep = 5; saveChatHistory();
-      } 
-      else if (paymentChoice === 'delivery') {
-        addMsg('Pagar na entrega', 'user');
-        await pause(800);
-        
-        const diaSemana = new Date().getDay(); 
-        const isFimDeSemana = (diaSemana === 0 || diaSemana === 6);
-        const msgEntrega = isFimDeSemana
-          ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃"
-          : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃";
-
-        const spVal3 = addSpinner("Registrando forma de entrega...");
-        await pause(3000); spVal3.remove();
-        
-        await agentSay(msgEntrega);
-        await pause(1000);
-        await agentSay("Deseja prosseguir com o pagamento via Pix para receber agora?");
-        window._currentFlowStep = 99; saveChatHistory(); return;
-      }
-    } else if (action === 'change') {
-      await agentSay(`Sem problemas! Pode me falar o que deseja alterar ou clique no ícone do carrinho no topo para ajustar seu pedido.`);
-      window._currentFlowStep = 99; saveChatHistory(); return;
-    }
-  }
-
 
 
 
@@ -1946,15 +1811,14 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
     await pause(400);
     action = await showOrderConfirmation();
     if (action === 'correct') {
-        if (window._currentFlowStep === 3) {
-    await pause(400);
-    action = await showOrderConfirmation();
-    if (action === 'correct') {
+      // 1. Primeira Validação (Após o resumo do pedido)
       const spVal1 = addSpinner("Validando dados do pedido...");
-      await pause(3500); spVal1.remove();
+      await pause(3500); 
+      spVal1.remove();
       addSys('Pedido validado com sucesso', 'ok');
       await pause(800);
 
+      // 2. Pergunta do agente e Cards de Pagamento
       await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
       await pause(300);
 
@@ -1963,47 +1827,43 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
         showPaymentOptions();
       });
 
-      // Abre modal de dados
-      const dadosPreenchidos = await openUserDataModal();
-      if(!dadosPreenchidos) { 
-        window._currentFlowStep = 3; 
-        saveChatHistory(); 
-        return; 
-      }
-
+      // 3. SE ESCOLHER PIX:
       if (paymentChoice === 'pix') {
-        addMsg('Pagar agora via Pix', 'user');
+        addMsg('Pagar agora via Pix', 'user'); // Mensagem do usuário
         await pause(800);
+        
+        // NOVO: Efeito de carregamento e etiqueta APÓS a escolha
         const spVal2 = addSpinner("Preparando chave de pagamento...");
-        await pause(3000); spVal2.remove();
+        await pause(3000);
+        spVal2.remove();
         addSys('Pagamento via Pix selecionado', 'ok');
         await pause(1000);
-        window._currentFlowStep = 5; saveChatHistory();
+        
+        window._currentFlowStep = 5; 
+        saveChatHistory();
+        // O código continuará para o bloco 'if (window._currentFlowStep === 5)' abaixo
       } 
+      // 4. SE ESCOLHER ENTREGA:
       else if (paymentChoice === 'delivery') {
-        addMsg('Pagar na entrega', 'user');
+        addMsg('Pagar na entrega', 'user'); // Mensagem do usuário
         await pause(800);
         
-        const diaSemana = new Date().getDay(); 
-        const isFimDeSemana = (diaSemana === 0 || diaSemana === 6);
-        const msgEntrega = isFimDeSemana
-          ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃"
-          : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃";
-
+        // NOVO: Efeito de carregamento e etiqueta APÓS a escolha
         const spVal3 = addSpinner("Registrando forma de entrega...");
-        await pause(3000); spVal3.remove();
-        
-        await agentSay(msgEntrega);
+        await pause(3000);
+        spVal3.remove();
+        addSys('Pagamento na entrega registrado', 'ok');
         await pause(1000);
-        await agentSay("Deseja prosseguir com o pagamento via Pix para receber agora?");
+
+        await agentSay(`Perfeito! O seu pedido já foi confirmado e o pagamento será feito no momento da entrega. O entregador chegará em breve.`);
         window._currentFlowStep = 99; saveChatHistory(); return;
       }
+
     } else if (action === 'change') {
       await agentSay(`Sem problemas! Pode me falar o que deseja alterar ou clique no ícone do carrinho no topo para ajustar seu pedido.`);
       window._currentFlowStep = 99; saveChatHistory(); return;
     }
   }
-
 
 
 
