@@ -1776,24 +1776,25 @@ function showPaymentOptions() {
 
     let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
-                function handlePaymentSelection(selectedCard, choice) {
-        // NOVO: Se o card já estiver selecionado, não faz nada (evita resetar o formulário ao clicar nos campos ou botão)
-        if (selectedCard.classList.contains('selected')) {
+                    function handlePaymentSelection(selectedCard, choice) {
+        // 1. TRAVA DE SEGURANÇA: Se o card já estiver aberto, não reinicia a função
+        // Isso evita que o formulário "resete" ao clicar nos campos ou no botão
+        if (selectedCard.classList.contains('selected') && selectedCard.querySelector('.payment-form-container')) {
             return; 
         }
 
-        // 1. Reset de estado dos outros cards
+        // 2. Reset de estado dos outros cards
         document.querySelectorAll('.payment-option-card').forEach(card => {
             if (card !== selectedCard) {
                 card.classList.remove('selected');
-                const form = card.querySelector('.payment-form-container');
-                if (form) form.style.display = 'none';
+                const f = card.querySelector('.payment-form-container');
+                if (f) f.style.display = 'none';
             }
         });
 
         selectedCard.classList.add('selected');
 
-        // 2. Criação do formulário
+        // 3. Criação/Exibição do formulário
         let formContainer = selectedCard.querySelector('.payment-form-container');
         if (!formContainer) {
             selectedCard.insertAdjacentHTML('beforeend', `
@@ -1807,12 +1808,12 @@ function showPaymentOptions() {
                     <div class="payment-form-group">
                         <input type="tel" id="userPhone" class="edit-input" placeholder="(00) 00000-0000" maxlength="15" required>
                     </div>
-                    <button class="modal-btn" id="confirmPaymentBtn" type="button">Confirmar Dados</button>
+                    <button class="modal-btn" id="confirmPaymentBtn" type="button" style="position:relative; z-index:100; -webkit-tap-highlight-color:transparent;">Confirmar Dados</button>
                 </div>
             `);
             formContainer = selectedCard.querySelector('.payment-form-container');
 
-            // Máscaras
+            // Máscaras automáticas
             const cpfInput = formContainer.querySelector('#userCpf');
             const phoneInput = formContainer.querySelector('#userPhone');
             cpfInput.oninput = (e) => {
@@ -1827,36 +1828,47 @@ function showPaymentOptions() {
             };
         }
 
-        // 3. Configuração do Botão de Confirmação
-        const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-        
-        // Removemos o onmousedown anterior e usamos apenas o onclick com proteção dupla
-        confirmBtn.onclick = (event) => {
-            event.preventDefault();
-            event.stopPropagation(); // ESSENCIAL: Impede que o clique chegue no card pai
-            
-            const userName = formContainer.querySelector('#userName').value.trim();
-            const userCpf = formContainer.querySelector('#userCpf').value.trim();
-            const userPhone = formContainer.querySelector('#userPhone').value.trim();
+        formContainer.style.display = 'block';
 
-            if (userName && userCpf && userPhone) {
-                window.ORDER.customerName = userName;
-                window.ORDER.customerCpf = userCpf;
-                window.ORDER.customerPhone = userPhone;
-                
+        // 4. LÓGICA DO BOTÃO (VERSÃO BLINDADA)
+        const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
+
+        const processConfirm = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+
+            const nameVal = formContainer.querySelector('#userName').value.trim();
+            const cpfVal = formContainer.querySelector('#userCpf').value.trim();
+            const phoneVal = formContainer.querySelector('#userPhone').value.trim();
+
+            if (nameVal && cpfVal && phoneVal) {
+                // Feedback visual imediato
+                confirmBtn.innerText = "Processando...";
+                confirmBtn.style.opacity = "0.7";
+                confirmBtn.disabled = true;
+
+                // Salva os dados
+                if (!window.ORDER) window.ORDER = {};
+                window.ORDER.customerName = nameVal;
+                window.ORDER.customerCpf = cpfVal;
+                window.ORDER.customerPhone = phoneVal;
+
+                // Esconde teclado e finaliza
                 formContainer.querySelectorAll('input').forEach(i => i.blur());
-                
-                // Pequeno delay para o feedback visual de clique
                 setTimeout(() => {
                     finalizeSelection(selectedCard, choice);
-                }, 250);
+                }, 300);
             } else {
                 alert('Por favor, preencha todos os campos corretamente.');
             }
         };
 
-        // 4. Visibilidade e Barra de Chat
-        formContainer.style.display = 'block';
+        // Usamos pointerdown para capturar o toque ANTES da página se mover com o fechamento do teclado
+        confirmBtn.onpointerdown = processConfirm;
+        // Mantemos o onclick como fallback de segurança
+        confirmBtn.onclick = processConfirm;
+
+        // 5. Visibilidade da Barra de Chat (sua lógica anterior mantida)
         const footer = document.querySelector('.footer');
         const inputs = formContainer.querySelectorAll('input');
         const screenHeightBase = window.innerHeight;
@@ -1878,11 +1890,12 @@ function showPaymentOptions() {
             input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
         });
 
-        // 5. Scroll para o card
+        // 6. Scroll suave
         setTimeout(() => {
             selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 100);
     }
+
 
 
 
