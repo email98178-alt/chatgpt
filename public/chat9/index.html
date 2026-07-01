@@ -1833,7 +1833,14 @@ function showPaymentOptions() {
         // 4. LÓGICA DO BOTÃO (VERSÃO BLINDADA)
         const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
 
-                        const processConfirm = (e) => {
+                                const processConfirm = (e) => {
+            // 1. Bloqueio imediato do teclado
+            // Forçamos todos os inputs a perderem o foco antes de qualquer outra lógica
+            formContainer.querySelectorAll('input').forEach(i => {
+                i.blur();
+                i.readOnly = true; // Trava o campo para garantir que o teclado não volte
+            });
+
             e.preventDefault();
             e.stopPropagation();
 
@@ -1842,7 +1849,7 @@ function showPaymentOptions() {
             const phoneVal = formContainer.querySelector('#userPhone').value.trim();
 
             if (nameVal && cpfVal && phoneVal) {
-                // 1. ESTADO: Confirmado (Instantâneo como no resumo do pedido)
+                // 2. ESTADO: Confirmado
                 confirmBtn.disabled = true;
                 confirmBtn.style.background = "var(--green)";
                 confirmBtn.style.color = "#fff";
@@ -1855,16 +1862,18 @@ function showPaymentOptions() {
                 window.ORDER.customerCpf = cpfVal;
                 window.ORDER.customerPhone = phoneVal;
 
-                // 2. FINALIZAÇÃO: Pequeno delay apenas para o usuário ver a mudança e segue o processo
+                // 3. FINALIZAÇÃO
                 setTimeout(() => {
-                    formContainer.querySelectorAll('input').forEach(i => i.blur());
                     finalizeSelection(selectedCard, choice);
                 }, 400); 
 
             } else {
+                // Se der erro, liberamos os campos novamente
+                formContainer.querySelectorAll('input').forEach(i => i.readOnly = false);
                 alert('Por favor, preencha todos os campos corretamente.');
             }
         };
+
 
 
 
