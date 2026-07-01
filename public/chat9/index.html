@@ -1824,24 +1824,37 @@ function showPaymentOptions() {
       };
     }
 
-    // Exibe o formulário do card selecionado
-    formContainer.style.display = 'block';
-    activeFormContainer = formContainer; // Atualiza o formulário ativo
-
-    // Rolagem automática aprimorada
-    // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
-    // e a altura do formulário foi calculada antes de rolar.
-    setTimeout(() => {
-      // Rola a área de mensagens (msgsEl) para que o card selecionado fique visível
-      // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
-      selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-      // Foca no primeiro campo de input automaticamente
-      const firstInput = formContainer.querySelector('#userName');
-      if (firstInput) {
-        firstInput.focus();
-      }
-    }, 50);
+          selectedCard.insertAdjacentHTML('beforeend', `
+        <div class="payment-form-container">
+          <div class="payment-form-group">
+            <input type="text" id="userName" class="edit-input" 
+              placeholder="Seu Nome Completo" required
+              autocomplete="new-password" 
+              autocorrect="off" 
+              autocapitalize="none" 
+              spellcheck="false">
+          </div>
+          <div class="payment-form-group">
+            <input type="text" id="userCpf" class="edit-input" 
+              placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required
+              autocomplete="one-time-code" 
+              autocorrect="off" 
+              autocapitalize="none" 
+              spellcheck="false"
+              inputmode="numeric">
+          </div>
+          <div class="payment-form-group">
+            <input type="text" id="userPhone" class="edit-input" 
+              placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required
+              autocomplete="one-time-code" 
+              autocorrect="off" 
+              autocapitalize="none" 
+              spellcheck="false"
+              inputmode="tel">
+          </div>
+          <button class="modal-btn" id="confirmPaymentBtn">Prosseguir com o Pagamento</button>
+        </div>
+      `);
   }
 
   saveChatHistory();
