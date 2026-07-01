@@ -531,55 +531,14 @@ html,body{
 .od-value{font-size:13px;color:var(--text-2);line-height:1.5;}
 
 .modal-footer{margin-top:16px;}
-/* Estilos para o formulário de pagamento */
-.payment-form-container {
-  /* Estilos base já definidos inline, mas podem ser movidos para cá */
+.modal-btn{
+  width:100%;padding:13px;border-radius:14px;
+  background:var(--brand);color:#fff;border:none;
+  font-weight:700;font-size:14px;cursor:pointer;
+  box-shadow:0 4px 14px rgba(15,91,168,.25);
+  transition:all .2s ease;
 }
-
-.edit-input {
-  width: 100%;
-  padding: 12px 14px; /* Aumenta o padding para melhor toque */
-  border: 1.5px solid var(--border); /* Borda padrão */
-  border-radius: 12px; /* Arredondamento suave */
-  font-family: 'DM Sans', sans-serif; /* Garante a fonte consistente */
-  font-size: 14px; /* Tamanho de fonte ligeiramente maior */
-  color: var(--text); /* Cor do texto */
-  background: var(--surface-2); /* Fundo suave */
-  outline: none;
-  transition: all 0.2s ease;
-  box-shadow: inset 0 1px 3px rgba(0,0,0,0.03); /* Sombra interna sutil */
-}
-
-.edit-input::placeholder {
-  color: var(--text-3); /* Cor do placeholder */
-  font-weight: 400;
-}
-
-.edit-input:focus {
-  border-color: var(--brand-mid); /* Borda azul ao focar */
-  background: var(--surface); /* Fundo branco ao focar */
-  box-shadow: 0 0 0 3px var(--brand-glow), inset 0 1px 3px rgba(0,0,0,0.05); /* Sombra de foco aprimorada */
-}
-
-.modal-btn {
-  width: 100%;
-  padding: 15px; /* Aumenta o padding para o botão */
-  border-radius: 14px;
-  background: var(--brand); /* Cor principal da marca */
-  color: #fff;
-  border: none;
-  font-weight: 700;
-  font-size: 15px; /* Tamanho de fonte ligeiramente maior */
-  cursor: pointer;
-  box-shadow: 0 4px 16px rgba(15,91,168,0.3); /* Sombra mais proeminente */
-  transition: all 0.2s ease;
-  font-family: 'DM Sans', sans-serif; /* Garante a fonte consistente */
-}
-
-.modal-btn:hover {
-  background: var(--brand-dk); /* Cor mais escura ao passar o mouse */
-  transform: translateY(-1px); /* Efeito sutil de 
-
+.modal-btn:hover{background:var(--brand-mid);}
 
 .qty-control{display:flex;align-items:center;gap:12px;background:var(--surface);border-radius:8px;padding:4px 8px;border:1px solid var(--border);}
 .qty-btn{width:28px;height:28px;border-radius:6px;border:none;background:var(--surface-2);color:var(--text);font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .2s;}
@@ -1767,7 +1726,7 @@ function showPaymentOptions() {
 
 
 
-      let activeFormContainer = null; // Variável para rastrear o formulário ativo
+    let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
   function handlePaymentSelection(selectedCard, choice) {
     // Remove a classe 'selected' de todos os cards e esconde todos os formulários
@@ -1785,12 +1744,11 @@ function showPaymentOptions() {
     if (!formContainer) {
       // Se o formulário não existe, cria e adiciona ao card
       selectedCard.insertAdjacentHTML('beforeend', `
-        <div class="payment-form-container" style="padding-top: 20px; border-top: 1px solid var(--border-2); margin-top: 20px;">
-          <div style="font-size: 13px; font-weight: 700; color: var(--text); margin-bottom: 15px;">Dados para o Pedido:</div>
-          <div style="margin-bottom: 12px;"><input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required></div>
-          <div style="margin-bottom: 12px;"><input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required></div>
-          <div style="margin-bottom: 18px;"><input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required></div>
-          <button class="modal-btn" id="confirmPaymentBtn" style="width:100%; padding:14px; border-radius:14px; font-size:15px; font-weight:700;">Prosseguir com o Pagamento</button>
+        <div class="payment-form-container" style="padding-top: 15px; border-top: 1px solid var(--border-2); margin-top: 15px;">
+          <div style="margin-bottom: 10px;"><input type="text" id="userName" class="edit-input" placeholder="Seu Nome Completo" required></div>
+          <div style="margin-bottom: 10px;"><input type="text" id="userCpf" class="edit-input" placeholder="CPF (apenas números)" pattern="[0-9]{11}" maxlength="11" required></div>
+          <div style="margin-bottom: 15px;"><input type="text" id="userPhone" class="edit-input" placeholder="Telefone (DDD+Número)" pattern="[0-9]{10,11}" maxlength="11" required></div>
+          <button class="modal-btn" id="confirmPaymentBtn" style="width:100%; padding:12px; border-radius:12px; font-size:14px;">Prosseguir com o Pagamento</button>
         </div>
       `);
       formContainer = selectedCard.querySelector('.payment-form-container');
@@ -1817,16 +1775,8 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer; // Atualiza o formulário ativo
 
-    // Rola a tela para o card selecionado, com um pequeno offset para o formulário
-    selectedCard.scrollIntoView({ behavior: 'smooth', block: 'start' });
-    // Ajuste fino para o formulário ficar visível, se necessário
-    setTimeout(() => {
-      const formTop = formContainer.getBoundingClientRect().top;
-      const msgsEl = document.querySelector('.msgs'); // Supondo que .msgs é o container rolável
-      if (msgsEl) {
-        msgsEl.scrollBy({ top: formTop - msgsEl.getBoundingClientRect().top - 20, behavior: 'smooth' });
-      }
-    }, 300); // Pequeno atraso para a rolagem inicial do card
+    // Opcional: rolar para o formulário para garantir que esteja visível
+    formContainer.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
   }
 
   saveChatHistory();
@@ -1835,7 +1785,6 @@ function showPaymentOptions() {
 
 // ── DELIVERY STEPS / PIX ─────────────────────────────
 function showDeliverySteps(pixCode) {
-
 
 
   const card = document.createElement('div');
