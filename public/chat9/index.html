@@ -1849,25 +1849,48 @@ function showPaymentOptions() {
     formContainer.style.display = 'block';
     activeFormContainer = formContainer;
 
-                const footer = document.querySelector('.footer');
+                    const footer = document.querySelector('.footer');
     const inputs = formContainer.querySelectorAll('input');
 
-    // Oculta a barra de chat imediatamente quando qualquer campo de pagamento ganha foco
+    // Armazena a altura inicial para comparação (ajustado para lidar com redimensionamentos)
+    let lastViewportHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
+
+    const updateFooterVisibility = () => {
+      if (!window.visualViewport || !footer) return;
+
+      const currentHeight = window.visualViewport.height;
+      // Detecta teclado: se a altura atual for pelo menos 25% menor que a altura da janela
+      const isKeyboardActive = currentHeight < (window.innerHeight * 0.75);
+      const isPaymentInputFocused = Array.from(inputs).includes(document.activeElement);
+
+      // A barra só some se o teclado estiver ativo E um campo de pagamento estiver focado
+      if (isKeyboardActive && isPaymentInputFocused) {
+        footer.style.display = 'none';
+      } else {
+        // Caso contrário, garante que ela volte a aparecer
+        footer.style.display = 'flex';
+      }
+      
+      lastViewportHeight = currentHeight;
+    };
+
+    // Eventos do Visual Viewport (os mais precisos para teclado mobile)
+    if (window.visualViewport) {
+      window.visualViewport.addEventListener('resize', updateFooterVisibility);
+    }
+
+    // Garante a verificação quando o usuário troca de campo ou entra/sai deles
     inputs.forEach(input => {
       input.addEventListener('focus', () => {
-        if (footer) footer.style.display = 'none';
+        // Pequeno atraso para esperar a animação do teclado começar
+        setTimeout(updateFooterVisibility, 300);
       });
-      
-      // Mostra a barra novamente apenas quando o foco sai completamente dos campos do card
       input.addEventListener('blur', () => {
-        setTimeout(() => {
-          const isAnyInputFocused = Array.from(inputs).some(i => i === document.activeElement);
-          if (!isAnyInputFocused && footer) {
-            footer.style.display = 'flex';
-          }
-        }, 150); // Pequeno atraso para evitar que a barra "pisque" ao trocar de campo
+        // Pequeno atraso para verificar o estado após a saída do campo
+        setTimeout(updateFooterVisibility, 100);
       });
     });
+
 
 
 
