@@ -458,6 +458,11 @@ html,body{
   position:relative;z-index:20;
   flex-shrink:0;
 }
+
+  .footer.hide-for-payment-input {
+  display: none !important;
+}
+  
 .input-wrap{
   flex:1;background:var(--surface-2);
   border:1.5px solid var(--border-2);
@@ -1430,16 +1435,16 @@ if ('visualViewport' in window) {
     const fab = document.querySelector('.scroll-fab');
     const keyboardOpen = vv.height < window.innerHeight * 0.75;
     app.style.height = vv.height + 'px';
-        if (keyboardOpen) {
-      footer.style.paddingBottom = '8px';
-      fab.classList.add('keyboard-open');
-      footer.classList.add('keyboard-open'); // Esconde o footer
+            if (keyboardOpen) {
+      footer.style.paddingBottom = \'8px\';
+      fab.classList.add(\'keyboard-open\');
+      // Removido: footer.classList.add(\'keyboard-open\');
       requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
     } else {
-      app.style.height = '';
-      footer.style.paddingBottom = 'max(8px, env(safe-area-inset-bottom))';
-      fab.classList.remove('keyboard-open');
-      footer.classList.remove('keyboard-open'); // Mostra o footer novamente
+      app.style.height = \'\';
+      footer.style.paddingBottom = \'max(8px, env(safe-area-inset-bottom))\';
+      fab.classList.remove(\'keyboard-open\');
+      // Removido: footer.classList.remove(\'keyboard-open\');
     }
   }
   window.visualViewport.addEventListener('resize', handleViewport);
@@ -1802,21 +1807,23 @@ function showPaymentOptions() {
       formContainer = selectedCard.querySelector('.payment-form-container');
 
       const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-      confirmBtn.onclick = (event) => {
-        event.stopPropagation(); // Impede que o clique no botão propague para o card pai
-        const userName = formContainer.querySelector('#userName').value;
-        const userCpf = formContainer.querySelector('#userCpf').value;
-        const userPhone = formContainer.querySelector('#userPhone').value;
-
-        if (userName && userCpf && userPhone) {
-          window.ORDER.customerName = userName;
-          window.ORDER.customerCpf = userCpf;
-          window.ORDER.customerPhone = userPhone;
-          finalizeSelection(selectedCard, choice);
-        } else {
-          alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
-        }
-      };
+            // Adiciona listeners para ocultar/mostrar o footer ao focar/desfocar os campos de pagamento
+      const paymentInputs = formContainer.querySelectorAll(\'.edit-input\');
+      paymentInputs.forEach(input => {
+        input.addEventListener(\'focus\', () => {
+          document.querySelector(\'.footer\').classList.add(\'hide-for-payment-input\');
+        });
+        input.addEventListener(\'blur\', () => {
+          // Pequeno atraso para evitar que o footer apareça e suma rapidamente ao mudar de campo
+          setTimeout(() => {
+            // Verifica se nenhum outro campo de pagamento está focado antes de mostrar o footer
+            const anyPaymentInputFocused = Array.from(paymentInputs).some(i => i === document.activeElement);
+            if (!anyPaymentInputFocused) {
+              document.querySelector(\'.footer\').classList.remove(\'hide-for-payment-input\');
+            }
+          }, 50);
+        });
+      });
     }
 
     // Exibe o formulário do card selecionado
