@@ -1751,9 +1751,14 @@ function showPaymentOptions() {
   const payNowCard = card.querySelector('#payNowCard');
   const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
 
-  const finalizeSelection = (selectedCard, choice) => {
+    const finalizeSelection = (selectedCard, choice) => {
+    // Mostra a barra de digitação padrão do chat novamente
+    const footer = document.querySelector('.footer');
+    if (footer) footer.style.display = 'flex';
+
     card.style.opacity = '0.95';
     card.style.pointerEvents = 'none';
+
     selectedCard.style.borderColor = 'var(--brand)';
     selectedCard.style.background = 'var(--brand-lt)';
     selectedCard.querySelector('.check-icon').style.display = 'block';
@@ -1816,9 +1821,14 @@ function showPaymentOptions() {
       };
     }
 
-    // Exibe o formulário do card selecionado
+        // Exibe o formulário do card selecionado
     formContainer.style.display = 'block';
     activeFormContainer = formContainer; // Atualiza o formulário ativo
+    
+    // Esconde a barra de digitação padrão do chat
+    const footer = document.querySelector('.footer');
+    if (footer) footer.style.display = 'none';
+
 
     // Rolagem automática aprimorada
     // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
