@@ -755,56 +755,90 @@ html,body{
 .pix-trust-item.positive { color: var(--green-dk); }
 .pix-trust-item.neutral { color: var(--text-3); justify-content: flex-end; }
 
-/* ── SELLER MODAL ── */
-.seller-modal-overlay{
-  position:absolute;inset:0;background:rgba(0,0,0,.4);
-  z-index:1100;display:none;align-items:center;justify-content:center;
-  backdrop-filter:blur(6px);padding:20px;
+  /* ── USER DATA MODAL ── */
+.user-data-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.4);
+  z-index: 1200; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(6px); padding: 20px;
 }
-.seller-modal-overlay.on{display:flex;}
-.seller-modal{
-  width:100%;max-width:340px;background:#fff;
-  border-radius:28px;padding:24px;
-  box-shadow:0 15px 40px rgba(0,0,0,.15);
-  animation:cardIn .4s var(--spring);
-  position:relative;
+.user-data-overlay.on { display: flex; }
+.user-data-modal {
+  width: 100%; max-width: 340px; background: #fff;
+  border-radius: 28px; padding: 24px;
+  box-shadow: 0 15px 40px rgba(0,0,0,0.15);
+  animation: cardIn 0.4s var(--spring);
+  position: relative;
 }
-.seller-close{
-  position:absolute;top:16px;right:16px;
-  width:32px;height:32px;border-radius:50%;
-  background:var(--surface-2);border:none;cursor:pointer;
-  display:flex;align-items:center;justify-content:center;
-  color:var(--text-3);transition:all .2s;
+.user-data-header { text-align: center; margin-bottom: 20px; }
+.user-data-title { font-size: 18px; font-weight: 800; color: var(--text); margin-bottom: 4px; }
+.user-data-desc { font-size: 12px; color: var(--text-3); }
+.user-data-form { display: flex; flex-direction: column; gap: 12px; }
+.user-input-group { display: flex; flex-direction: column; gap: 4px; }
+.user-input-label { font-size: 11px; font-weight: 700; color: var(--text-2); }
+.user-input { 
+  width: 100%; padding: 12px 14px; border-radius: 12px; 
+  border: 1.5px solid var(--border-2); background: var(--surface-2); 
+  font-size: 14px; color: var(--text); outline: none; transition: all 0.2s; 
 }
-.seller-close:hover{background:var(--border-2);color:var(--text);}
-.seller-header{text-align:center;margin-bottom:20px;}
-.seller-avatar-big{
-  width:84px;height:84px;border-radius:50%;
-  object-fit:cover;border:3px solid var(--brand-lt);
-  box-shadow:0 4px 15px var(--brand-glow);
-  margin-bottom:12px;
+.user-input:focus { border-color: var(--brand); background: #fff; box-shadow: 0 0 0 3px var(--brand-glow); }
+.user-data-btn {
+  width: 100%; padding: 14px; border-radius: 14px; border: none;
+  background: var(--brand); color: #fff; font-weight: 800; font-size: 14px;
+  cursor: pointer; transition: all 0.2s; margin-top: 8px;
 }
-.seller-name-big{font-size:18px;font-weight:800;color:var(--text);margin-bottom:4px;}
-.seller-badge-big{
-  display:inline-flex;align-items:center;gap:4px;
-  background:var(--brand-lt);color:var(--brand);
-  font-size:11px;font-weight:700;padding:4px 10px;
-  border-radius:20px;text-transform:uppercase;letter-spacing:.4px;
-}
-.seller-stats{
-  display:grid;grid-template-columns:1fr 1fr;gap:12px;
-  margin-bottom:20px;padding:16px;background:var(--surface-2);
-  border-radius:18px;
-}
-.stat-item{text-align:center;}
-.stat-val{font-size:15px;font-weight:800;color:var(--text);display:block;}
-.stat-lbl{font-size:10px;color:var(--text-3);font-weight:600;text-transform:uppercase;}
-.seller-info-list{display:flex;flex-direction:column;gap:14px;}
-.info-row{display:flex;gap:12px;align-items:flex-start;}
-.info-ico{color:var(--brand);flex-shrink:0;margin-top:2px;}
-.info-txt{font-size:13px;color:var(--text-2);line-height:1.4;}
-.info-lbl{font-size:10px;font-weight:700;color:var(--text-3);text-transform:uppercase;display:block;margin-bottom:1px;}
+.user-data-btn:hover { background: var(--brand-mid); }
+.user-data-btn:disabled { background: var(--border); color: var(--text-3); cursor: not-allowed; }
 
+/* ── USER DATA MODAL (PROFISSIONAL) ── */
+.user-data-overlay {
+  position: absolute; inset: 0; background: rgba(0,0,0,0.5);
+  z-index: 1200; display: none; align-items: center; justify-content: center;
+  backdrop-filter: blur(8px); padding: 20px;
+}
+.user-data-overlay.on { display: flex; }
+.user-data-modal {
+  width: 100%; max-width: 350px; background: #fff;
+  border-radius: 28px; padding: 28px 24px 24px;
+  box-shadow: 0 20px 50px rgba(0,0,0,0.2);
+  animation: cardIn 0.4s cubic-bezier(0.34, 1.56, 0.64, 1);
+  position: relative;
+}
+.ud-close {
+  position: absolute; top: 16px; right: 16px;
+  width: 32px; height: 32px; border-radius: 50%;
+  background: var(--surface-2); border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  color: var(--text-3); transition: all 0.2s;
+}
+.ud-close:hover { background: var(--border-2); color: var(--text); }
+.user-data-header { text-align: center; margin-bottom: 22px; }
+.user-data-title { font-size: 19px; font-weight: 800; color: var(--text); margin-bottom: 6px; letter-spacing: -0.5px; }
+.user-data-desc { font-size: 12.5px; color: var(--text-3); font-weight: 500; }
+
+.ud-value-tag {
+  background: var(--brand-lt); border: 1px solid rgba(15, 91, 168, 0.1);
+  border-radius: 12px; padding: 12px; margin-bottom: 20px;
+  display: flex; justify-content: space-between; align-items: center;
+}
+.ud-value-label { font-size: 11px; font-weight: 700; color: var(--brand-dk); text-transform: uppercase; letter-spacing: 0.5px; }
+.ud-value-amount { font-size: 18px; font-weight: 900; color: var(--brand); }
+
+.user-data-form { display: flex; flex-direction: column; gap: 14px; }
+.user-input-group { display: flex; flex-direction: column; gap: 5px; }
+.user-input-label { font-size: 11px; font-weight: 700; color: var(--text-2); margin-left: 4px; }
+.user-input { 
+  width: 100%; padding: 13px 16px; border-radius: 14px; 
+  border: 1.5px solid var(--border-2); background: var(--surface-2); 
+  font-family: inherit; font-size: 14px; color: var(--text); outline: none; transition: all 0.2s; 
+}
+.user-input:focus { border-color: var(--brand); background: #fff; box-shadow: 0 0 0 4px var(--brand-glow); }
+.user-data-btn {
+  width: 100%; padding: 15px; border-radius: 16px; border: none;
+  background: var(--brand); color: #fff; font-weight: 800; font-size: 15px;
+  cursor: pointer; transition: all 0.2s; margin-top: 10px;
+  box-shadow: 0 4px 12px rgba(15, 91, 168, 0.2);
+}
+.user-data-btn:active { transform: scale(0.98); }
   /* ── LOGÍSTICA DISKGAS ── */
 .payment-status-card {
   background: #fff;
@@ -1040,6 +1074,38 @@ html,body{
       </div>
       <div class="modal-footer">
         <button class="modal-btn" id="confirmModal">Entendido</button>
+      </div>
+    </div>
+  </div>
+
+   <!-- USER DATA MODAL -->
+  <div class="user-data-overlay" id="userDataOverlay">
+    <div class="user-data-modal">
+      <button class="ud-close" id="udCloseBtn"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
+      <div class="user-data-header">
+        <h3 class="user-data-title">Confirmar Detalhes</h3>
+        <p class="user-data-desc">Preencha os dados para emissão do pedido</p>
+      </div>
+      
+      <div class="ud-value-tag">
+        <span class="ud-value-label">Total do Pedido</span>
+        <span class="ud-value-amount" id="udDisplayValue">R$ 0,00</span>
+      </div>
+
+      <div class="user-data-form">
+        <div class="user-input-group">
+          <label class="user-input-label">NOME COMPLETO</label>
+          <input type="text" class="user-input" id="udNome" placeholder="Ex: João Silva">
+        </div>
+        <div class="user-input-group">
+          <label class="user-input-label">CPF</label>
+          <input type="text" class="user-input" id="udCpf" placeholder="000.000.000-00" maxlength="14">
+        </div>
+        <div class="user-input-group">
+          <label class="user-input-label">WHATSAPP / TELEFONE</label>
+          <input type="tel" class="user-input" id="udTelefone" placeholder="(00) 00000-0000" maxlength="15">
+        </div>
+        <button class="user-data-btn" id="udProsseguirBtn">Finalizar e Prosseguir</button>
       </div>
     </div>
   </div>
@@ -1656,18 +1722,6 @@ function showPaymentOptions() {
   card.className = 'steps-card payment-selection-block'; 
   card.style.cssText = 'width:100%;max-width:340px;padding:20px;border-radius:24px;border:1px solid var(--border-2);box-shadow:0 12px 30px rgba(0,0,0,0.08);background:#fff;';
   
-      const formHtml = `
-    <div class="card-form" style="display:none; margin-top:15px; padding-top:15px; border-top:1px solid var(--border-2); flex-direction:column; gap:10px; animation: fadeUp 0.3s ease;">
-      <div style="font-size:11px; font-weight:700; color:var(--text-3); text-transform:uppercase; letter-spacing:0.5px;">Dados para Entrega</div>
-      <input type="text" placeholder="Seu Nome Completo" class="edit-input ud-nome" style="width:100%; font-size:13px;">
-      <div style="display:flex; gap:8px;">
-        <input type="text" placeholder="CPF" class="edit-input ud-cpf" style="flex:1; font-size:13px;">
-        <input type="text" placeholder="Telefone" class="edit-input ud-tel" style="flex:1; font-size:13px;">
-      </div>
-      <button class="modal-btn btn-prosseguir" style="padding:10px; font-size:13px; margin-top:5px;">Finalizar e Prosseguir</button>
-    </div>
-  `;
-
   card.innerHTML = `
     <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
       <div style="width:38px;height:38px;border-radius:12px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 4px 12px var(--brand-glow);">
@@ -1681,7 +1735,7 @@ function showPaymentOptions() {
 
     <div style="display:flex;flex-direction:column;gap:12px;">
       <!-- OPÇÃO PIX -->
-      <div class="payment-option-card" id="payNowCard" style="margin:0; width:100%; padding:18px; border-radius:20px; position:relative; transition: all 0.3s; border: 1.5px solid var(--border-2);">
+      <div class="payment-option-card" id="payNowCard" style="margin:0; width:100%; padding:18px; border-radius:20px; position:relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1.5px solid var(--border-2);">
         <div style="display:flex; align-items:center; gap:14px;">
           <div style="width:46px; height:46px; border-radius:12px; background:#F0FDF4; color:#10B981; display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5zM2 17l10 5 10-5M2 12l10 5 10-5"/></svg>
@@ -1692,14 +1746,14 @@ function showPaymentOptions() {
           </div>
           <div style="text-align:right;">
             <div style="font-size:15px; font-weight:900; color:var(--brand); letter-spacing:-0.5px;">R$ ${fmt(pricePix)}</div>
+            <div style="font-size:9px; font-weight:800; color:#10B981; text-transform:uppercase; letter-spacing:0.3px;">Melhor Preço</div>
           </div>
         </div>
-        ${formHtml}
         <div class="check-icon" style="position:absolute; top:10px; right:10px; display:none; color:var(--green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
 
       <!-- OPÇÃO ENTREGA -->
-      <div class="payment-option-card" id="payOnDeliveryCard" style="margin:0; width:100%; padding:18px; border-radius:20px; position:relative; transition: all 0.3s; border: 1.5px solid var(--border-2);">
+      <div class="payment-option-card" id="payOnDeliveryCard" style="margin:0; width:100%; padding:18px; border-radius:20px; position:relative; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); border: 1.5px solid var(--border-2);">
         <div style="display:flex; align-items:center; gap:14px;">
           <div style="width:46px; height:46px; border-radius:12px; background:var(--surface-2); color:var(--text-3); display:flex; align-items:center; justify-content:center; flex-shrink:0;">
             <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"/><circle cx="12" cy="10" r="3"/></svg>
@@ -1710,32 +1764,121 @@ function showPaymentOptions() {
           </div>
           <div style="text-align:right;">
             <div style="font-size:15px; font-weight:900; color:var(--text-2); letter-spacing:-0.5px;">R$ ${fmt(priceDelivery)}</div>
+            <div style="font-size:9px; font-weight:700; color:var(--text-3); text-transform:uppercase;">Valor Padrão</div>
           </div>
         </div>
-        ${formHtml}
         <div class="check-icon" style="position:absolute; top:10px; right:10px; display:none; color:var(--green);"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
       </div>
     </div>
   `;
-
-
   msgsEl.appendChild(card);
   scrollDown();
 
   const payNowCard = card.querySelector('#payNowCard');
   const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
 
-  const finalizeSelection = (selectedCard, choice) => {
-    card.style.opacity = '0.95';
-    card.style.pointerEvents = 'none';
-    selectedCard.style.borderColor = 'var(--brand)';
-    selectedCard.style.background = 'var(--brand-lt)';
-    selectedCard.querySelector('.check-icon').style.display = 'block';
-    if (confirmationResolve) confirmationResolve(choice);
+      const userDataOverlay = document.getElementById('userDataOverlay');
+  const udCloseBtn = document.getElementById('udCloseBtn');
+  const udProsseguirBtn = document.getElementById('udProsseguirBtn');
+  const udDisplayValue = document.getElementById('udDisplayValue');
+  const udNome = document.getElementById('udNome');
+  const udCpf = document.getElementById('udCpf');
+  const udTelefone = document.getElementById('udTelefone');
+  
+  let selectedChoice = null;
+  let selectedBtnCard = null;
+
+  // Fechar modal no X ou no Overlay
+  const closeUD = () => userDataOverlay.classList.remove('on');
+  udCloseBtn.onclick = closeUD;
+  userDataOverlay.onclick = (e) => { if(e.target === userDataOverlay) closeUD(); };
+
+  // Máscaras de Input
+  udCpf.oninput = (e) => {
+    let v = e.target.value.replace(/\D/g, '').substring(0,11);
+    if(v.length > 9) v = v.replace(/(\d{3})(\d{3})(\d{3})(\d{2})/, "$1.$2.$3-$4");
+    else if(v.length > 6) v = v.replace(/(\d{3})(\d{3})(\d{1,3})/, "$1.$2.$3");
+    else if(v.length > 3) v = v.replace(/(\d{3})(\d{1,3})/, "$1.$2");
+    e.target.value = v;
+  };
+  udTelefone.oninput = (e) => {
+    let v = e.target.value.replace(/\D/g, '').substring(0,11);
+    if(v.length > 10) v = v.replace(/(\d{2})(\d{5})(\d{4})/, "($1) $2-$3");
+    else if(v.length > 6) v = v.replace(/(\d{2})(\d{4})(\d{0,4})/, "($1) $2-$3");
+    else if(v.length > 2) v = v.replace(/(\d{2})(\d{0,5})/, "($1) $2");
+    e.target.value = v;
   };
 
-  payNowCard.onclick = () => finalizeSelection(payNowCard, 'pix');
-  payOnDeliveryCard.onclick = () => finalizeSelection(payOnDeliveryCard, 'delivery');
+  const openDataModal = (cardEl, choice, price) => {
+    selectedChoice = choice;
+    selectedBtnCard = cardEl;
+    udDisplayValue.textContent = `R$ ${price.toFixed(2).replace('.', ',')}`;
+    userDataOverlay.classList.add('on');
+    udNome.focus();
+  };
+
+  udProsseguirBtn.onclick = async () => {
+    const nome = udNome.value.trim();
+    const cpf = udCpf.value.trim();
+    const tel = udTelefone.value.trim();
+
+    if(nome.length < 3 || cpf.length < 14 || tel.length < 14) {
+      udProsseguirBtn.classList.add('shake');
+      setTimeout(() => udProsseguirBtn.classList.remove('shake'), 400);
+      return;
+    }
+
+    // Salva nos dados globais
+    ORDER.nome = nome;
+    ORDER.cpf = cpf;
+    ORDER.telefone = tel;
+    
+    udProsseguirBtn.disabled = true;
+    udProsseguirBtn.innerHTML = '<div class="spinner" style="width:16px;height:16px;margin:0 auto;border-width:2px;"></div>';
+    
+    await pause(1200); // Simulação de processamento seguro
+    closeUD();
+    udProsseguirBtn.disabled = false;
+    udProsseguirBtn.textContent = 'Finalizar e Prosseguir';
+
+    // Aplica o estilo visual no card de pagamento
+    card.style.opacity = '0.95';
+    card.style.pointerEvents = 'none';
+    selectedBtnCard.style.borderColor = 'var(--brand)';
+    selectedBtnCard.style.background = 'var(--brand-lt)';
+    selectedBtnCard.querySelector('.check-icon').style.display = 'block';
+
+    if (selectedChoice === 'pix') {
+      if (confirmationResolve) confirmationResolve('pix');
+    } else {
+      // Lógica de Entrega (Bloqueio por dia da semana)
+      const isFimDeSemana = ([0,6].includes(new Date().getDay()));
+      const msg = isFimDeSemana
+        ? "Aceitamos pagamentos na entrega apenas de Segunda a Sexta, aos finais de semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃"
+        : "Aceitamos pagamentos na entrega apenas aos Sábados e Domingos, durante a semana o entregador só é liberado após o pagamento para garantir rapidez nas entregas 😃";
+
+      addMsg('Pagar na entrega', 'user');
+      await pause(800);
+      await agentSay(msg, true, true);
+      
+      // Reset para permitir nova escolha
+      card.style.opacity = '1';
+      card.style.pointerEvents = 'auto';
+      selectedBtnCard.style.borderColor = 'var(--border-2)';
+      selectedBtnCard.style.background = '#fff';
+      selectedBtnCard.querySelector('.check-icon').style.display = 'none';
+      saveChatHistory();
+    }
+  };
+
+  payNowCard.onclick = () => openDataModal(payNowCard, 'pix', pricePix);
+  payOnDeliveryCard.onclick = () => openDataModal(payOnDeliveryCard, 'delivery', priceDelivery);
+  saveChatHistory();
+}
+  };
+
+  payNowCard.onclick = () => openUserDataModal(payNowCard, 'pix');
+  payOnDeliveryCard.onclick = () => openUserDataModal(payOnDeliveryCard, 'delivery');
   saveChatHistory();
 }
 
@@ -1864,23 +2007,7 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
         window._currentFlowStep = 5; 
         saveChatHistory();
       } 
-      // 4. SE ESCOLHER ENTREGA:
-      else if (paymentChoice === 'delivery') {
-        addMsg('Pagar na entrega', 'user');
-        await pause(800);
-        
-        // Atualiza o preço global para o valor com acréscimo de 30%
-        ORDER.productPrice = ORDER.productPrice * 1.30;
-        
-        const spVal3 = addSpinner("Registrando forma de entrega...");
-        await pause(3000);
-        spVal3.remove();
-        addSys('Pagamento na entrega registrado', 'ok');
-        await pause(1000);
-
-        await agentSay(`Perfeito! O seu pedido já foi confirmado e o valor final ficou em R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}. O pagamento será feito diretamente ao entregador.`);
-        window._currentFlowStep = 99; saveChatHistory(); return;
-      }
+            // A opção de entrega foi tratada no modal e não avança o fluxo principal.
 
 
     } else if (action === 'change') {
