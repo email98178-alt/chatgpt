@@ -973,10 +973,6 @@ html,body{
   white-space: nowrap;
 }
 
-  .hide-chat-input {
-  display: none !important;
-}
-
 
 </style>
 </head>
@@ -1050,7 +1046,7 @@ html,body{
   </button>
 
   <!-- FOOTER -->
-  <footer class="footer" id="chatFooter">
+  <footer class="footer">
     <div class="input-wrap" id="inputWrap">
       <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
     </div>
@@ -1125,7 +1121,6 @@ const LOCAL_STORAGE_KEY = 'diskgas_chat_history';
 const STATE_STORAGE_KEY = 'diskgas_chat_state';
 const inputEl        = document.getElementById('msgInput');
 const inputWrapEl    = document.getElementById('inputWrap');
-const chatFooter     = document.getElementById('chatFooter'); // Nova variável
 const sendBtnEl      = document.getElementById('sendBtn');
   sendBtnEl.disabled = !inputEl.value.trim();
 const typingEl       = document.getElementById('typingRow');
@@ -1160,18 +1155,7 @@ typingAvatarTriggerEl.onclick = openSellerModal;
 sellerModalOverlayEl.onclick = (e) => { if(e.target===sellerModalOverlayEl) closeSellerModal(); };
 
 const AVATAR = "https://files.manuscdn.com/user_upload_by_module/session_file/310519663194389473/cfvjFLWBVqaVcznD.webp";
-// Funções para controlar a visibilidade da barra de digitação original
-function showCustomKeyboard() {
-  if (chatFooter) {
-    chatFooter.classList.add('hide-chat-input');
-  }
-}
-
-function hideCustomKeyboard() {
-  if (chatFooter) {
-    chatFooter.classList.remove('hide-chat-input');
-  }
-}
+const ts = () => new Date().toLocaleTimeString('pt-BR',{hour:'2-digit',minute:'2-digit'});
 
 let lastSender = null;
 window._lojaAddress = null;
@@ -1767,10 +1751,8 @@ function showPaymentOptions() {
   const payNowCard = card.querySelector('#payNowCard');
   const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
 
-    const finalizeSelection = (selectedCard, choice) => {
-    hideCustomKeyboard(); // Restaura a barra de digitação original
+  const finalizeSelection = (selectedCard, choice) => {
     card.style.opacity = '0.95';
-
     card.style.pointerEvents = 'none';
     selectedCard.style.borderColor = 'var(--brand)';
     selectedCard.style.background = 'var(--brand-lt)';
@@ -1834,13 +1816,9 @@ function showPaymentOptions() {
       };
     }
 
-        // Exibe o formulário do card selecionado
+    // Exibe o formulário do card selecionado
     formContainer.style.display = 'block';
     activeFormContainer = formContainer; // Atualiza o formulário ativo
-    
-    // Oculta a barra de digitação original quando o formulário de pagamento (teclado) abre
-    showCustomKeyboard();
-
 
     // Rolagem automática aprimorada
     // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
@@ -1850,12 +1828,11 @@ function showPaymentOptions() {
       // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
       selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
       
-      // Removido o foco automático para evitar a ativação indesejada do teclado.
-// const firstInput = formContainer.querySelector('#userName');
-// if (firstInput) {
-//   firstInput.focus();
-// }
-
+      // Foca no primeiro campo de input automaticamente
+      const firstInput = formContainer.querySelector('#userName');
+      if (firstInput) {
+        firstInput.focus();
+      }
     }, 50);
   }
 
