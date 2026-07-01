@@ -1752,12 +1752,13 @@ function showPaymentOptions() {
   const payNowCard = card.querySelector('#payNowCard');
   const payOnDeliveryCard = card.querySelector('#payOnDeliveryCard');
 
-    const finalizeSelection = (selectedCard, choice) => {
-    // Mostra a barra de digitação padrão do chat novamente
+      const finalizeSelection = (selectedCard, choice) => {
+    // Garante que a barra esteja visível ao finalizar
     const footer = document.querySelector('.footer');
     if (footer) footer.style.display = 'flex';
 
     card.style.opacity = '0.95';
+
     card.style.pointerEvents = 'none';
 
     selectedCard.style.borderColor = 'var(--brand)';
@@ -1842,12 +1843,29 @@ function showPaymentOptions() {
     }
 
         // Exibe o formulário do card selecionado
+        // Exibe o formulário do card selecionado
     formContainer.style.display = 'block';
-    activeFormContainer = formContainer; // Atualiza o formulário ativo
-    
-    // Esconde a barra de digitação padrão do chat
+    activeFormContainer = formContainer;
+
+    // Gerencia a visibilidade da barra de chat baseada no foco dos inputs
     const footer = document.querySelector('.footer');
-    if (footer) footer.style.display = 'none';
+    const inputs = formContainer.querySelectorAll('input');
+
+    inputs.forEach(input => {
+      // Quando o usuário clica para digitar, esconde a barra do chat
+      input.addEventListener('focus', () => {
+        if (footer) footer.style.display = 'none';
+      });
+
+      // Quando o usuário sai do campo, a barra do chat volta a aparecer
+      input.addEventListener('blur', () => {
+        // Pequeno atraso para evitar que a barra apareça e suma rápido ao trocar de campo
+        setTimeout(() => {
+          if (footer) footer.style.display = 'flex';
+        }, 100);
+      });
+    });
+
 
 
     // Rolagem automática aprimorada
