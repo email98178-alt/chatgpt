@@ -1067,35 +1067,13 @@ html,body{
           <div class="info-txt"><span class="info-lbl">Tempo de Resposta</span>Geralmente responde em menos de 1 minuto.</div>
         </div>
       </div>
-            <!-- ... final do Seller Modal ... -->
       <div class="modal-footer" style="margin-top:24px;">
         <button class="modal-btn" id="closeSellerModalBtn">Voltar ao Chat</button>
       </div>
     </div>
-  </div> <!-- ESTE É O FECHAMENTO DO SELLER MODAL (Linha 1074 aprox.) -->
-
-  <!-- ADICIONE O NOVO MODAL AQUI: -->
-  <!-- DATA COLLECTION MODAL -->
-  <div class="modal-overlay" id="dataCollectionModalOverlay">
-    <div class="order-modal" style="max-width:380px;">
-      <div class="modal-handle"></div>
-      <div class="modal-h">
-        <h3 class="modal-title">Dados para o Pedido</h3>
-        <button class="close-modal" id="closeDataCollectionModal"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg></button>
-      </div>
-      <div style="margin-bottom: 15px;">
-        <p style="font-size:13px; color:var(--text-2); margin-bottom:10px;">Por favor, preencha seus dados para prosseguir com o pagamento e a entrega.</p>
-        <input type="text" id="dataCollectionName" class="edit-input" placeholder="Seu Nome Completo" style="margin-bottom:10px;">
-        <input type="text" id="dataCollectionCpf" class="edit-input" placeholder="CPF (apenas números)" style="margin-bottom:10px;">
-        <input type="text" id="dataCollectionPhone" class="edit-input" placeholder="Telefone com DDD (apenas números)" style="margin-bottom:15px;">
-      </div>
-      <div class="modal-footer">
-        <button class="modal-btn" id="dataCollectionProceedBtn">Prosseguir</button>
-      </div>
-    </div>
   </div>
 
-</div> <!-- ESTE FECHA A DIV APP (Linha 1076 aprox.) -->
+</div>
 
 <script>
 const msgsEl         = document.getElementById('msgs');
@@ -1120,14 +1098,6 @@ const orderItemsEl   = document.getElementById('orderItems');
 const orderAddressEl = document.getElementById('orderAddress');
 const orderTimeEl    = document.getElementById('orderTime');
 
-// Data Collection Modal Elements
-const dataCollectionModalOverlay = document.getElementById('dataCollectionModalOverlay');
-const closeDataCollectionModal = document.getElementById('closeDataCollectionModal');
-const dataCollectionName = document.getElementById('dataCollectionName');
-const dataCollectionCpf = document.getElementById('dataCollectionCpf');
-const dataCollectionPhone = document.getElementById('dataCollectionPhone');
-const dataCollectionProceedBtn = document.getElementById('dataCollectionProceedBtn');
-
 // Seller Modal Elements
 const sellerModalOverlayEl = document.getElementById('sellerModalOverlay');
 const closeSellerModalEl   = document.getElementById('closeSellerModal');
@@ -1140,9 +1110,6 @@ const closeSellerModal = () => sellerModalOverlayEl.classList.remove('on');
 
 closeSellerModalEl.onclick = closeSellerModal;
 closeSellerModalBtnEl.onclick = closeSellerModal;
-
-closeDataCollectionModal.onclick = () => dataCollectionModalOverlay.classList.remove('on');
-dataCollectionModalOverlay.onclick = (e) => { if(e.target===dataCollectionModalOverlay) dataCollectionModalOverlay.classList.remove('on'); };
 headerSellerTriggerEl.onclick = openSellerModal;
 typingAvatarTriggerEl.onclick = openSellerModal;
 sellerModalOverlayEl.onclick = (e) => { if(e.target===sellerModalOverlayEl) closeSellerModal(); };
@@ -1297,12 +1264,7 @@ function parseOrderData() {
 return { products:[], productName:'Botijão de Gás P13', productQty:1, productPrice:89.90, location:'sua região', address:'', deliveryTime: deliveryTime, nome:'', cep:'' };
   }
 }
-const ORDER = {
-  ...parseOrderData(),
-  nome: '',
-  cpf: '',
-  telefone: ''
-};
+const ORDER = parseOrderData();
 
 function updateModal(isEditing = false, customTitle = null) {
   if (isEditing) {
@@ -1495,21 +1457,14 @@ function saveChatHistory() {
   localStorage.setItem(LOCAL_STORAGE_KEY, msgsEl.innerHTML);
     const state = {
     pixCode: window._currentPixCode || null,
-        lojaAddress: window._lojaAddress,
-    orderConfirmationShown: window._orderConfirmationShown,
-    pixCode: window._currentPixCode,
+    lojaAddress: window._lojaAddress || null,
     lastSender: lastSender,
-    flowStep: window._currentFlowStep,
-    paymentConfirmed: window._paymentConfirmed,
-    contactMsgSent: window._contactMsgSent,
-    pixCopyClicked: window._pixCopyClicked,
-    pixCopyReminderSent: window._pixCopyReminderSent,
-    pixPaymentReminderSent: window._pixPaymentReminderSent,
-    // Novos campos para persistência
-    ORDER_nome: ORDER.nome,
-    ORDER_cpf: ORDER.cpf,
-    ORDER_telefone: ORDER.telefone
-
+    flowStep: window._currentFlowStep || 0,
+    paymentConfirmed: window._paymentConfirmed || false,
+    contactMsgSent: window._contactMsgSent || false,
+    pixCopyClicked: window._pixCopyClicked || false,
+        pixCopyReminderSent: window._pixCopyReminderSent || false,
+    pixPaymentReminderSent: window._pixPaymentReminderSent || false,
     orderConfirmationShown: window._orderConfirmationShown || false
   };
   localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
@@ -1765,76 +1720,10 @@ function showPaymentOptions() {
     if (confirmationResolve) confirmationResolve(choice);
   };
 
-    let selectedPaymentMethod = null;
-
-  payNowCard.onclick = () => {
-    selectedPaymentMethod = 'pix';
-    dataCollectionModalOverlay.classList.add('on');
-    dataCollectionName.value = ORDER.nome || '';
-    dataCollectionCpf.value = ORDER.cpf || '';
-    dataCollectionPhone.value = ORDER.telefone || '';
-  };
-
-  payOnDeliveryCard.onclick = () => {
-    selectedPaymentMethod = 'delivery';
-    dataCollectionModalOverlay.classList.add('on');
-    dataCollectionName.value = ORDER.nome || '';
-    dataCollectionCpf.value = ORDER.cpf || '';
-    dataCollectionPhone.value = ORDER.telefone || '';
-  };
-
-  dataCollectionProceedBtn.onclick = async () => {
-    const name = dataCollectionName.value.trim();
-    const cpf = dataCollectionCpf.value.trim();
-    const phone = dataCollectionPhone.value.trim();
-
-    if (!name || !cpf || !phone) {
-      alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
-      return;
-    }
-
-    // Salvar os dados no objeto ORDER
-    ORDER.nome = name;
-    ORDER.cpf = cpf;
-    ORDER.telefone = phone;
-
-    dataCollectionModalOverlay.classList.remove('on');
-    finalizeSelection(selectedPaymentMethod === 'pix' ? payNowCard : payOnDeliveryCard, selectedPaymentMethod);
-
-    if (selectedPaymentMethod === 'pix') {
-      // Lógica existente para PIX
-      const pixDefault = STATIC_PIX_CODES["default"];
-      if (pixDefault) {
-        await agentSay('Basta copiar o código pix abaixo e pagar pelo app do seu banco 😄', true, true);
-        await pause(1000);
-        showDeliverySteps(pixDefault);
-        await pause(800);
-        const primeiroNome = (ORDER && ORDER.nome) ? ORDER.nome.split(" ")[0] : "";
-        const saudacaoNome = primeiroNome ? ` ${primeiroNome}` : "";
-        await agentSay(`Estou acompanhando aqui${saudacaoNome}, após o pagamento o pedido é aprovado automaticamente. 😃`, true, true);
-        await pause(400);
-        addProfessionalStatusCard();
-      } else {
-        await agentSay('Não consegui localizar a chave Pix. Por favor, tente novamente.', true, true);
-      }
-    } else if (selectedPaymentMethod === 'delivery') {
-      // Lógica para Pagar na Entrega, usando a lógica de dia da semana
-      const today = new Date();
-      const dayOfWeek = today.getDay(); // 0 = Domingo, 1 = Segunda, ..., 6 = Sábado
-      let msgEntrega = '';
-
-      if (dayOfWeek === 0 || dayOfWeek === 6) { // Sábado ou Domingo
-        msgEntrega = 'Pagamentos na entrega são aceitos apenas aos fins de semana. 😄';
-      } else { // Dias de semana
-        msgEntrega = 'Pagamentos na entrega são aceitos apenas de segunda a sexta. 😄';
-      }
-      await agentSay(msgEntrega, true, true);
-    }
-    saveChatHistory();
-  };
+  payNowCard.onclick = () => finalizeSelection(payNowCard, 'pix');
+  payOnDeliveryCard.onclick = () => finalizeSelection(payOnDeliveryCard, 'delivery');
   saveChatHistory();
 }
-
 
 
 // ── DELIVERY STEPS / PIX ─────────────────────────────
@@ -2354,15 +2243,9 @@ function lockBackButton() {
   const savedState = localStorage.getItem(STATE_STORAGE_KEY);
     if (savedHTML && savedState) {
     const state = JSON.parse(savedState);
-                if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
+        if (state.lojaAddress) window._lojaAddress = state.lojaAddress;
     window._orderConfirmationShown = state.orderConfirmationShown || false;
     window._currentPixCode = state.pixCode; window._pixCopyTimer = null; window._pixPaymentTimer = null; window._pixCopyReminderSent = false; window._pixPaymentReminderSent = false;
-    lastSender = state.lastSender; window._currentFlowStep = state.flowStep || 0; window._paymentConfirmed = state.paymentConfirmed || false; window._contactMsgSent = state.contactMsgSent || false; window._pixCopyClicked = state.pixCopyClicked || false; window._pixCopyReminderSent = state.pixCopyReminderSent || false; window._pixPaymentReminderSent = state.pixPaymentReminderSent || false;
-    // Carregar novos campos
-    if (state.ORDER_nome) ORDER.nome = state.ORDER_nome;
-    if (state.ORDER_cpf) ORDER.cpf = state.ORDER_cpf;
-    if (state.ORDER_telefone) ORDER.telefone = state.ORDER_telefone;
-
     lastSender = state.lastSender; window._currentFlowStep = state.flowStep || 0; window._paymentConfirmed = state.paymentConfirmed || false; window._contactMsgSent = state.contactMsgSent || false; window._pixCopyClicked = state.pixCopyClicked || false; window._pixCopyReminderSent = state.pixCopyReminderSent || false; window._pixPaymentReminderSent = state.pixPaymentReminderSent || false;
     msgsEl.innerHTML = savedHTML;
     const pixCopyBtn = msgsEl.querySelector('#pixCopyBtn');
