@@ -1776,21 +1776,20 @@ function showPaymentOptions() {
 
     let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
-    function handlePaymentSelection(selectedCard, choice) {
-    // Remove a classe 'selected' de todos os cards e esconde todos os formulários
+        function handlePaymentSelection(selectedCard, choice) {
+    // 1. Reset de estado dos cards
     document.querySelectorAll('.payment-option-card').forEach(card => {
       card.classList.remove('selected');
       const form = card.querySelector('.payment-form-container');
       if (form) form.style.display = 'none';
     });
 
-    // Adiciona a classe 'selected' ao card clicado
     selectedCard.classList.add('selected');
-
     let formContainer = selectedCard.querySelector('.payment-form-container');
 
+    // 2. Criação do formulário se não existir
     if (!formContainer) {
-            selectedCard.insertAdjacentHTML('beforeend', `
+      selectedCard.insertAdjacentHTML('beforeend', `
         <div class="payment-form-container">
           <div class="payment-form-group">
             <input type="text" id="userName" class="edit-input" placeholder="Nome Completo" required>
@@ -1805,106 +1804,80 @@ function showPaymentOptions() {
         </div>
       `);
 
-      // Adicionar máscaras automáticas
+      // Máscaras automáticas
       const cpfInput = selectedCard.querySelector('#userCpf');
       const phoneInput = selectedCard.querySelector('#userPhone');
-
       cpfInput.oninput = (e) => {
         let v = e.target.value.replace(/\D/g, "");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d)/, "$1.$2");
-        v = v.replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
         e.target.value = v;
       };
-
       phoneInput.oninput = (e) => {
         let v = e.target.value.replace(/\D/g, "");
-        v = v.replace(/^(\d{2})(\d)/g, "($1) $2");
-        v = v.replace(/(\d{5})(\d)/, "$1-$2");
+        v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
         e.target.value = v;
       };
 
       formContainer = selectedCard.querySelector('.payment-form-container');
-
-      const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-      confirmBtn.onclick = (event) => {
-        event.stopPropagation(); // Impede que o clique no botão propague para o card pai
-        const userName = formContainer.querySelector('#userName').value;
-        const userCpf = formContainer.querySelector('#userCpf').value;
-        const userPhone = formContainer.querySelector('#userPhone').value;
-
-        if (userName && userCpf && userPhone) {
-          window.ORDER.customerName = userName;
-          window.ORDER.customerCpf = userCpf;
-          window.ORDER.customerPhone = userPhone;
-          finalizeSelection(selectedCard, choice);
-        } else {
-          alert('Por favor, preencha todos os campos: Nome, CPF e Telefone.');
-        }
-      };
     }
 
-        // Exibe o formulário do card selecionado
-        // Exibe o formulário do card selecionado
-    formContainer.style.display = 'block';
-    activeFormContainer = formContainer;
-
-                        const footer = document.querySelector('.footer');
-    const inputs = formContainer.querySelectorAll('input');
+    // 3. Lógica do Botão de Confirmação (CORRIGIDA)
+    const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
     
-    // Captura a altura da tela no momento em que o card foi aberto (sem teclado)
+    // Evita que o blur do input atrapalhe o clique no botão
+    confirmBtn.onmousedown = (e) => e.preventDefault();
+
+    confirmBtn.onclick = (event) => {
+      event.stopPropagation();
+      const userName = formContainer.querySelector('#userName').value.trim();
+      const userCpf = formContainer.querySelector('#userCpf').value.trim();
+      const userPhone = formContainer.querySelector('#userPhone').value.trim();
+
+      if (userName && userCpf && userPhone) {
+        // Salva os dados globalmente
+        window.ORDER.customerName = userName;
+        window.ORDER.customerCpf = userCpf;
+        window.ORDER.customerPhone = userPhone;
+        
+        // Esconde o teclado e finaliza
+        formContainer.querySelectorAll('input').forEach(i => i.blur());
+        setTimeout(() => {
+          finalizeSelection(selectedCard, choice);
+        }, 200);
+      } else {
+        alert('Por favor, preencha todos os campos corretamente.');
+      }
+    };
+
+    // 4. Exibição e Visibilidade da Barra de Chat
+    formContainer.style.display = 'block';
+    const footer = document.querySelector('.footer');
+    const inputs = formContainer.querySelectorAll('input');
     const screenHeightBase = window.innerHeight;
 
     const updateFooterVisibility = () => {
       if (!footer) return;
-
-      // Pegamos a altura atual (que diminui quando o teclado abre)
       const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-      
-      // O teclado é detectado se a altura atual for significativamente menor que a base (mais de 15% de diferença)
       const isKeyboardActive = currentHeight < (screenHeightBase * 0.85);
       const isInputFocused = Array.from(inputs).includes(document.activeElement);
-
-      if (isKeyboardActive && isInputFocused) {
-        footer.style.display = 'none';
-      } else {
-        footer.style.display = 'flex';
-      }
+      footer.style.display = (isKeyboardActive && isInputFocused) ? 'none' : 'flex';
     };
 
-    // Monitora redimensionamento e scroll (essencial para teclado mobile)
     if (window.visualViewport) {
       window.visualViewport.addEventListener('resize', updateFooterVisibility);
-      window.visualViewport.addEventListener('scroll', updateFooterVisibility);
     }
 
     inputs.forEach(input => {
-      // Ao focar, verificamos após um pequeno delay para o teclado subir
       input.addEventListener('focus', () => setTimeout(updateFooterVisibility, 300));
-      // Ao sair do campo
-      input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 100));
+      input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
     });
 
-
-
-
-
-    // Rolagem automática aprimorada
-    // Usamos um pequeno atraso (setTimeout) para garantir que o DOM foi atualizado
-    // e a altura do formulário foi calculada antes de rolar.
+    // 5. Scroll suave para o card
     setTimeout(() => {
-      // Rola a área de mensagens (msgsEl) para que o card selecionado fique visível
-      // Usamos block: 'center' para tentar centralizar o card na tela, proporcionando melhor UX
       selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      
-            // Foco automático removido para evitar abertura indesejada do teclado
-      // const firstInput = formContainer.querySelector('#userName');
-      // if (firstInput) {
-      //   firstInput.focus();
-      // }
-
-    }, 50);
+    }, 100);
   }
+
 
   saveChatHistory();
 }
