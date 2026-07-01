@@ -1833,7 +1833,7 @@ function showPaymentOptions() {
         // 4. LÓGICA DO BOTÃO (VERSÃO BLINDADA)
         const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
 
-                const processConfirm = (e) => {
+                        const processConfirm = (e) => {
             e.preventDefault();
             e.stopPropagation();
 
@@ -1842,39 +1842,30 @@ function showPaymentOptions() {
             const phoneVal = formContainer.querySelector('#userPhone').value.trim();
 
             if (nameVal && cpfVal && phoneVal) {
-                // 1. ESTADO: Processando (200ms)
+                // 1. ESTADO: Confirmado (Instantâneo como no resumo do pedido)
                 confirmBtn.disabled = true;
-                confirmBtn.innerText = "Processando...";
-                confirmBtn.style.opacity = "0.8";
+                confirmBtn.style.background = "var(--green)";
+                confirmBtn.style.color = "#fff";
+                confirmBtn.style.opacity = "1";
+                confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
 
-                // Salva os dados imediatamente
+                // Salva os dados
                 if (!window.ORDER) window.ORDER = {};
                 window.ORDER.customerName = nameVal;
-                window.ORDER.customerCpf = userCpf; // usando a variável local ou o valor do campo
-                window.ORDER.customerPhone = userPhone;
+                window.ORDER.customerCpf = cpfVal;
+                window.ORDER.customerPhone = phoneVal;
 
+                // 2. FINALIZAÇÃO: Pequeno delay apenas para o usuário ver a mudança e segue o processo
                 setTimeout(() => {
-                    // 2. ESTADO: Confirmado
-                    confirmBtn.innerText = "Confirmado";
-                    confirmBtn.style.background = "var(--green)"; // Muda para verde
-                    confirmBtn.style.color = "#fff";
-                    confirmBtn.style.opacity = "1";
-                    
-                    // Adiciona um ícone de check se desejar (opcional)
-                    confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
-
-                    // 3. FINALIZAÇÃO: Aguarda um pouco para o usuário ver o "Confirmado" e segue o processo
-                    setTimeout(() => {
-                        formContainer.querySelectorAll('input').forEach(i => i.blur());
-                        finalizeSelection(selectedCard, choice);
-                    }, 500); // 500ms de exibição do estado "Confirmado"
-
-                }, 200); // 200ms de "Processando..."
+                    formContainer.querySelectorAll('input').forEach(i => i.blur());
+                    finalizeSelection(selectedCard, choice);
+                }, 400); 
 
             } else {
                 alert('Por favor, preencha todos os campos corretamente.');
             }
         };
+
 
 
         // Usamos pointerdown para capturar o toque ANTES da página se mover com o fechamento do teclado
