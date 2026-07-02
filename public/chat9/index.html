@@ -1902,7 +1902,7 @@ function showPaymentOptions() {
 
             if (nameVal && cpfVal && phoneVal) {
                 // 2. ESTADO: Confirmado
-                                confirmBtn.disabled = true;
+                                                confirmBtn.disabled = true;
                 confirmBtn.style.transition = \'all 0.3s ease\';
                 confirmBtn.style.background = \'var(--brand-mid)\'; // Cor de processamento
                 confirmBtn.innerHTML = \`<span class="spinner-small"></span> Processando...\`; // Adiciona um spinner
@@ -1914,17 +1914,17 @@ function showPaymentOptions() {
                     confirmBtn.style.opacity = "1";
                     confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
 
-                    // Salva os dados
+                    // Salva os dados APENAS UMA VEZ
                     if (!window.ORDER) window.ORDER = {};
                     window.ORDER.customerName = nameVal;
                     window.ORDER.customerCpf = cpfVal;
                     window.ORDER.customerPhone = phoneVal;
 
-                    // 3. FINALIZAÇÃO
+                    // 3. FINALIZAÇÃO APENAS UMA VEZ
                     setTimeout(() => {
                         finalizeSelection(selectedCard, choice);
                     }, 400); 
-                }, 800); // Simula um pequeno atraso de processamento
+                }, 800); // Simula um pequeno atraso de processamento 
 
                 // Salva os dados
                 if (!window.ORDER) window.ORDER = {};
