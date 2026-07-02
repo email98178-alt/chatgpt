@@ -567,10 +567,25 @@ html,body{
 }
 
 .edit-input:focus {
-  border-color: var(--brand);
   background: #fff;
   transform: translateY(-1px); /* Efeito de elevação leve */
   box-shadow: 0 4px 12px var(--brand-glow);
+}
+
+.edit-input.error {
+  border-color: #EF4444 !important;
+  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+}
+
+.error-message {
+  color: #EF4444;
+  font-size: 11px;
+  margin-top: 4px;
+  display: none;
+}
+
+.payment-form-group.has-error .error-message {
+  display: block;
 }
 /* Estilo específico para o container do formulário de pagamento */
 .payment-form-container {
@@ -582,6 +597,7 @@ html,body{
 
 .payment-form-group {
   margin-bottom: 14px;
+  position: relative;
 }
 
 .payment-form-container .modal-btn {
