@@ -1785,11 +1785,20 @@ function showPaymentOptions() {
 
   const card = document.createElement('div');
   card.className = 'steps-card payment-selection-block'; 
-  card.style.cssText = 'width:100%;max-width:340px;padding:14px;border-radius:22px;border:1px solid var(--border-2);box-shadow:0 10px 25px rgba(0,0,0,0.06);background:#fff;';
+  card.style.cssText = 'width:100%;max-width:340px;padding:20px;border-radius:24px;border:1px solid var(--border-2);box-shadow:0 12px 30px rgba(0,0,0,0.08);background:#fff;';
   
-    card.innerHTML = `
-    <div style="display:flex;flex-direction:column;gap:10px;">
+  card.innerHTML = `
+    <div style="display:flex;align-items:center;gap:12px;margin-bottom:20px;">
+      <div style="width:38px;height:38px;border-radius:12px;background:var(--brand-lt);display:flex;align-items:center;justify-content:center;color:var(--brand);box-shadow: 0 4px 12px var(--brand-glow);">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="5" width="20" height="14" rx="2"/><line x1="2" y1="10" x2="22" y2="10"/></svg>
+      </div>
+      <div>
+        <div style="font-size:14px;font-weight:800;color:var(--text);letter-spacing:-0.3px;">Forma de Pagamento</div>
+        <div style="font-size:10px;color:var(--text-3);font-weight:700;text-transform:uppercase;letter-spacing:0.6px;">Selecione uma opção abaixo</div>
+      </div>
+    </div>
 
+    <div style="display:flex;flex-direction:column;gap:12px;">
       <!-- OPÇÃO PIX -->
       <div class="payment-option-card" id="payNowCard">
         <div class="check-badge"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
