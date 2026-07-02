@@ -1858,7 +1858,11 @@ function showPaymentOptions() {
     const badge = selectedCard.querySelector('.check-badge');
     if (badge) badge.style.opacity = '1';
     
-    if (confirmationResolve) confirmationResolve(choice);
+        if (confirmationResolve) {
+      confirmationResolve(choice);
+      // Limpa a variável para evitar chamadas duplicadas
+      confirmationResolve = null;
+    }
   };
 
       payNowCard.onclick = () => handlePaymentSelection(payNowCard, 'pix');
@@ -1941,35 +1945,53 @@ function showPaymentOptions() {
         // 4. LÓGICA DO BOTÃO (VERSÃO BLINDADA)
         const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
 
-                 const processConfirm = (e) => {
-            if (e) { e.preventDefault(); e.stopPropagation(); }
-            
+                                const processConfirm = (e) => {
+            // 1. Bloqueio imediato do teclado
+            // Forçamos todos os inputs a perderem o foco antes de qualquer outra lógica
+            formContainer.querySelectorAll('input').forEach(i => {
+                i.blur();
+                i.readOnly = true; // Trava o campo para garantir que o teclado não volte
+            });
+
+            e.preventDefault();
+            e.stopPropagation();
+
             const nameVal = formContainer.querySelector('#userName').value.trim();
             const cpfVal = formContainer.querySelector('#userCpf').value.trim();
             const phoneVal = formContainer.querySelector('#userPhone').value.trim();
 
             if (nameVal && cpfVal && phoneVal) {
-                // Bloqueio de inputs
-                formContainer.querySelectorAll('input').forEach(i => { i.blur(); i.readOnly = true; });
-                
-                // Estado visual de carregamento
+                // 2. ESTADO: Confirmado
                 confirmBtn.disabled = true;
                 confirmBtn.style.background = "var(--green)";
+                confirmBtn.style.color = "#fff";
+                confirmBtn.style.opacity = "1";
                 confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
 
-                // Salva os dados no objeto global
-                window.ORDER = window.ORDER || {};
+                // Salva os dados
+                if (!window.ORDER) window.ORDER = {};
                 window.ORDER.customerName = nameVal;
                 window.ORDER.customerCpf = cpfVal;
                 window.ORDER.customerPhone = phoneVal;
 
-                // Chama a finalização imediatamente para evitar atrasos no fluxo
-                finalizeSelection(selectedCard, choice);
+                                // 3. FINALIZAÇÃO
+                setTimeout(() => {
+                    // Marca o pagamento como confirmado no estado global
+                    window._paymentConfirmed = true;
+                    
+                    // Finaliza a seleção visual e resolve a promessa do fluxo principal
+                    finalizeSelection(selectedCard, choice);
+                    
+                    // Se o fluxo principal estiver aguardando, a resolução da promessa acima
+                    // fará com que ele continue automaticamente.
+                }, 400); 
+
             } else {
+                // Se der erro, liberamos os campos novamente
+                formContainer.querySelectorAll('input').forEach(i => i.readOnly = false);
                 alert('Por favor, preencha todos os campos corretamente.');
             }
         };
-
 
 
 
@@ -2109,29 +2131,9 @@ await agentSay(`Sou Thiago, vendedor autorizado Diskgas em ${ORDER.location} e R
   let action;
         if (window._currentFlowStep === 3) {
     await pause(400);
-        action = await showOrderConfirmation();
-    // Se a ação for 'correct' ou se o usuário já tiver pulado para a escolha de pagamento
-    if (action === 'correct' || action === 'pix' || action === 'delivery') {
-      let paymentChoice = (action === 'pix' || action === 'delivery') ? action : null;
-
-      if (!paymentChoice) {
-          // 1. Primeira Validação (Após o resumo do pedido)
-          const spVal1 = addSpinner("Validando dados do pedido...");
-          await pause(3500); 
-          spVal1.remove();
-          addSys('Pedido validado com sucesso', 'ok');
-          await pause(800);
-
-          // 2. Pergunta do agente e Cards de Pagamento
-          await agentSay("Certo, você prefere pagar agora via Pix ou na entrega?", true, true);
-          await pause(300);
-
-          paymentChoice = await new Promise(resolve => {
-            confirmationResolve = resolve;
-            showPaymentOptions();
-          });
-      }
-
+    action = await showOrderConfirmation();
+    if (action === 'correct') {
+      // 1. Primeira Validação (Após o resumo do pedido)
       const spVal1 = addSpinner("Validando dados do pedido...");
       await pause(3500); 
       spVal1.remove();
@@ -2582,11 +2584,37 @@ function lockBackButton() {
             btnCorrect.innerHTML = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px;"><polyline points="20 6 9 17 4 12"/></svg> Confirmado';
             block.querySelectorAll('button').forEach(b=>b.disabled=true);
             addMsg('Sim, prosseguir','user');
-            if(confirmationResolve) {
-      // Em vez de resolver diretamente, mostra as opções de pagamento
-      showPaymentOptions();
-      // Não resolve confirmationResolve aqui, será resolvido após a seleção da forma de pagamento
-    }
+                        // Em vez de resolver diretamente, mostra as opções de pagamento
+            // e cria uma nova promessa para aguardar a escolha
+            new Promise(resolve => {
+                confirmationResolve = resolve;
+                showPaymentOptions();
+            }).then(async (choice) => {
+                if (choice === 'pix') {
+                    addMsg('Pagar agora via Pix', 'user');
+                    await pause(800);
+                    const spVal2 = addSpinner("Preparando chave de pagamento...");
+                    await pause(3000);
+                    spVal2.remove();
+                    addSys('Pagamento via Pix selecionado', 'ok');
+                    await pause(1000);
+                    window._currentFlowStep = 5; 
+                    saveChatHistory();
+                    runConversation(5);
+                } else if (choice === 'delivery') {
+                    addMsg('Pagar na entrega', 'user');
+                    await pause(800);
+                    ORDER.productPrice = ORDER.productPrice * 1.30;
+                    const spVal3 = addSpinner("Registrando forma de entrega...");
+                    await pause(3000);
+                    spVal3.remove();
+                    addSys('Pagamento na entrega registrado', 'ok');
+                    await pause(1000);
+                    await agentSay(`Perfeito! O seu pedido já foi confirmado e o valor final ficou em R$ ${ORDER.productPrice.toFixed(2).replace('.',',')}. O pagamento será feito diretamente ao entregador.`);
+                    window._currentFlowStep = 99; 
+                    saveChatHistory();
+                }
+            });
         };
         btnChange.onclick = () => { updateModal(true); modalOverlayEl.classList.add('on'); };
     }
