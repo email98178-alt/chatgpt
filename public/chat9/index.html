@@ -1989,7 +1989,25 @@ function showPaymentOptions() {
             } else {
                 // Se der erro, liberamos os campos novamente
                 formContainer.querySelectorAll('input').forEach(i => i.readOnly = false);
-                alert('Por favor, preencha todos os campos corretamente.');
+            // Adiciona uma classe para indicar erro e foca no primeiro campo vazio
+            let firstEmptyInput = null;
+            formContainer.querySelectorAll('input').forEach(i => {
+                if (!i.value.trim()) {
+                    i.classList.add('error');
+                    if (!firstEmptyInput) firstEmptyInput = i;
+                } else {
+                    i.classList.remove('error');
+                }
+            });
+            if (firstEmptyInput) {
+                firstEmptyInput.focus();
+                // Exibe um feedback visual mais suave em vez de um alert bloqueante
+                // Você pode implementar um toast, um tooltip ou uma mensagem abaixo do campo
+                // Por exemplo, para um toast simples (requer implementação de CSS/JS para '.toast-message')
+                // showToast('Por favor, preencha todos os campos corretamente.', 'error');
+                // Ou apenas um console.log para depuração:
+                console.log('Por favor, preencha todos os campos corretamente.');
+            }
             }
         };
 
