@@ -465,6 +465,12 @@ html,body{
   transition: all 0.3s ease;
 }
 
+  .footer.hidden-by-keyboard {
+  transform: translateY(100%); /* Move o rodapé para fora da tela */
+  opacity: 0;
+  pointer-events: none; /* Impede interações quando oculto */
+}
+
 .input-wrap {
   flex: 1;
   background: #fff;
@@ -2136,12 +2142,19 @@ function showPaymentOptions() {
         const inputs = formContainer.querySelectorAll('input');
         const screenHeightBase = window.innerHeight;
 
-        const updateFooterVisibility = () => {
+                const updateFooterVisibility = () => {
             if (!footer) return;
             const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-            const isKeyboardActive = currentHeight < (screenHeightBase * 0.85);
-            const isInputFocused = Array.from(inputs).includes(document.activeElement);
-            footer.style.display = (isKeyboardActive && isInputFocused) ? 'none' : 'flex';
+            // Considera o teclado ativo se a altura visível for significativamente menor que a altura base
+            const isKeyboardActive = currentHeight < (screenHeightBase * 0.8);
+            const isInputFocused = Array.from(inputs).some(input => input === document.activeElement);
+
+            // Adiciona uma classe para controlar a visibilidade via CSS, permitindo transições mais suaves
+            if (isKeyboardActive && isInputFocused) {
+                footer.classList.add('hidden-by-keyboard');
+            } else {
+                footer.classList.remove('hidden-by-keyboard');
+            }
         };
 
         if (window.visualViewport) {
@@ -2149,10 +2162,14 @@ function showPaymentOptions() {
         }
 
         inputs.forEach(input => {
-            input.addEventListener('focus', () => setTimeout(updateFooterVisibility, 300));
+                    inputs.forEach(input => {
+            input.addEventListener('focus', (event) => {
+                // Rola o campo de entrada para a visualização, garantindo que esteja acima do teclado
+                event.target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                setTimeout(updateFooterVisibility, 300);
+            });
             input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
         });
-
         // 6. Scroll suave
         setTimeout(() => {
             selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
