@@ -785,7 +785,32 @@ html,body{
 .payment-option-card.selected {
   border-color: var(--brand);
   background: #fff;
-  box-shadow: 0 8px 20px var(--brand-glow);
+  box-shadow: 0 12px 32px rgba(15, 91, 168, 0.15);
+  transform: scale(1.02);
+  z-index: 10;
+}
+
+/* Nova classe para o container geral quando um card é selecionado */
+.payment-selection-block {
+  transition: all 0.5s cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+.payment-selection-block.has-selection {
+  margin: 20px auto !important;
+  transform: scale(1.03);
+  box-shadow: 0 20px 40px rgba(0, 0, 0, 0.12) !important;
+}
+
+/* Oculta os cards não selecionados suavemente */
+.payment-option-card.hidden-by-selection {
+  opacity: 0;
+  height: 0;
+  margin: 0;
+  padding: 0;
+  border: none;
+  overflow: hidden;
+  transform: scale(0.95);
+  pointer-events: none;
 }
 
 .payment-option-card .check-badge {
@@ -1984,22 +2009,29 @@ function showPaymentOptions() {
 
     let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
-                    function handlePaymentSelection(selectedCard, choice) {
+                                        function handlePaymentSelection(selectedCard, choice) {
         // 1. TRAVA DE SEGURANÇA: Se o card já estiver aberto, não reinicia a função
-        // Isso evita que o formulário "resete" ao clicar nos campos ou no botão
         if (selectedCard.classList.contains('selected') && selectedCard.querySelector('.payment-form-container')) {
             return; 
         }
 
-        // 2. Reset de estado dos outros cards
+        // Adiciona classe ao container pai para o efeito de expansão geral
+        const parentBlock = selectedCard.closest('.payment-selection-block');
+        if (parentBlock) {
+            parentBlock.classList.add('has-selection');
+        }
+
+        // 2. Reset de estado e ocultação dos outros cards
         document.querySelectorAll('.payment-option-card').forEach(card => {
             if (card !== selectedCard) {
                 card.classList.remove('selected');
+                card.classList.add('hidden-by-selection'); // Oculta os não selecionados
                 const f = card.querySelector('.payment-form-container');
                 if (f) f.style.display = 'none';
             }
         });
 
+        selectedCard.classList.remove('hidden-by-selection');
         selectedCard.classList.add('selected');
 
         // 3. Criação/Exibição do formulário
@@ -2151,10 +2183,11 @@ function showPaymentOptions() {
             input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
         });
 
-        // 6. Scroll suave
+                // 6. Scroll suave e centralização do bloco principal
         setTimeout(() => {
-            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+            const blockToScroll = selectedCard.closest('.payment-selection-block') || selectedCard;
+            blockToScroll.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 300); // Tempo ligeiramente maior para aguardar a animação do CSS terminar
     }
 
 
