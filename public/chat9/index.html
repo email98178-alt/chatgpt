@@ -106,17 +106,19 @@ const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDE
 
 html,body{
   height:100%;width:100%;
-  font-family:\'DM Sans\',sans-serif;
+  font-family:'DM Sans',sans-serif;
   background:#0d1117;
   display:flex;justify-content:center;align-items:flex-start;
-  overflow-y:auto; /* Permitir rolagem no body */
-  overscroll-behavior-y: contain; /* Melhor controle de rolagem */
+  overflow:hidden;
 }
 
 .app{
-  width:100%;max-width:430px;min-height:100%; /* Usar min-height para permitir expansão */
+  width:100%;max-width:430px;height:100dvh;
   display:flex;flex-direction:column;
-  height: 100%; /* Ajustar para 100% da altura do pai (body) */
+  height: 100dvh; /* Garante que use a altura dinâmica do dispositivo */
+  background:var(--bg);
+  position:relative;overflow:hidden;
+}
 
 /* ── HEADER ── */
 .header{
@@ -490,11 +492,6 @@ html,body{
   max-height:100px;line-height:1.5;
 }
 .input-el::placeholder{color:var(--text-3);}
-.edit-input:focus {
-  border-color: var(--brand-mid); /* Cor da borda ao focar */
-  box-shadow: 0 0 0 3px var(--brand-glow); /* Sombra suave ao focar */
-  outline: none; /* Remover outline padrão do navegador */
-}
 
 .send-btn {
   width: 42px;
@@ -689,17 +686,33 @@ html,body{
 
 .edit-input.error {
   border-color: #EF4444 !important;
-  box-shadow: 0 0 0 3px rgba(239, 68, 68, 0.2) !important;
+  background-color: #FEF2F2 !important;
+}
+
+.edit-input.success {
+  border-color: #10B981 !important;
+  background-color: #F0FDF4 !important;
 }
 
 .error-message {
   color: #EF4444;
-  font-size: 12px; /* Aumentar um pouco o tamanho da fonte */
-  font-weight: 600; /* Deixar mais negrito */
-  margin-top: 6px; /* Aumentar margem superior */
+  font-size: 11px;
+  font-weight: 600;
+  margin-top: 4px;
+  margin-left: 4px;
   display: none;
-  animation: fadeUp .3s ease; /* Adicionar uma animação suave */
+  animation: fadeUp 0.2s ease;
 }
+
+.payment-input-helper {
+  font-size: 10px;
+  color: var(--text-3);
+  margin-top: 4px;
+  margin-left: 4px;
+  display: block;
+}
+
+
 .payment-form-group.has-error .error-message {
   display: block;
 }
@@ -1996,34 +2009,81 @@ function showPaymentOptions() {
         let formContainer = selectedCard.querySelector('.payment-form-container');
         if (!formContainer) {
             selectedCard.insertAdjacentHTML('beforeend', `
-                                <div class="payment-form-container" onclick="event.stopPropagation()">
+                <div class="payment-form-container" style="display: block;">
                     <div class="payment-form-group">
-                        <label class="payment-input-label" for="userName">Seu Nome</label>
+                        <label class="payment-input-label">Nome Completo</label>
                         <div class="input-icon-wrapper">
-                            <input type="text" id="userName" class="edit-input edit-input-with-icon" placeholder="Nome Completo" required aria-required="true">
+                            <input type="text" id="userName" class="edit-input edit-input-with-icon" placeholder="Seu nome completo" required>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
                         </div>
                     </div>
                     <div class="payment-form-group">
-                        <label class="payment-input-label" for="userCpf">CPF</label>
+                        <label class="payment-input-label">CPF <small style="text-transform:none; font-weight:400">(Para Nota Fiscal)</small></label>
                         <div class="input-icon-wrapper">
-                            <input type="tel" id="userCpf" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required aria-required="true">
+                            <input type="tel" id="userCpf" inputmode="numeric" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         </div>
+                        <span class="error-message" id="cpfError">CPF inválido</span>
                     </div>
                     <div class="payment-form-group">
-                        <label class="payment-input-label" for="userPhone">WhatsApp</label>
+                        <label class="payment-input-label">WhatsApp / Celular</label>
                         <div class="input-icon-wrapper">
-                            <input type="tel" id="userPhone" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required aria-required="true">
+                            <input type="tel" id="userPhone" inputmode="numeric" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required>
                             <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                         </div>
                     </div>
                     <button class="modal-btn" id="confirmPaymentBtn" type="button">
-                        <span>Confirmar e Prosseguir</span>
-                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                        <span id="btnText">Confirmar Pedido</span>
+                        <svg id="btnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
                     </button>
                 </div>
             `);
+
+            const formContainer = selectedCard.querySelector('.payment-form-container');
+            const nameInput = formContainer.querySelector('#userName');
+            const cpfInput = formContainer.querySelector('#userCpf');
+            const phoneInput = formContainer.querySelector('#userPhone');
+            const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
+
+            // Foco automático no primeiro campo
+            setTimeout(() => nameInput.focus(), 500);
+
+            // Máscaras e Validações Visuais
+            cpfInput.oninput = (e) => {
+                let v = e.target.value.replace(/\D/g, "");
+                if (v.length > 11) v = v.slice(0, 11);
+                v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+                e.target.value = v;
+                
+                if (v.length === 14) {
+                    cpfInput.classList.add('success');
+                    cpfInput.classList.remove('error');
+                } else {
+                    cpfInput.classList.remove('success');
+                }
+            };
+
+            phoneInput.oninput = (e) => {
+                let v = e.target.value.replace(/\D/g, "");
+                if (v.length > 11) v = v.slice(0, 11);
+                v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+                e.target.value = v;
+
+                if (v.length >= 14) {
+                    phoneInput.classList.add('success');
+                    phoneInput.classList.remove('error');
+                } else {
+                    phoneInput.classList.remove('success');
+                }
+            };
+
+            nameInput.oninput = (e) => {
+                if (e.target.value.trim().length > 3) {
+                    nameInput.classList.add('success');
+                    nameInput.classList.remove('error');
+                }
+            };
+
             formContainer = selectedCard.querySelector('.payment-form-container');
 
             // Máscaras automáticas
@@ -2142,16 +2202,10 @@ function showPaymentOptions() {
             input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
         });
 
-        // 6. Scroll suave para o campo focado
-setTimeout(() => {
-    const activeElement = document.activeElement;
-    if (activeElement && activeElement.tagName === \'INPUT\') {
-        activeElement.scrollIntoView({ behavior: \'smooth\', block: \'nearest\' });
-    } else {
-        // Fallback para rolar o card se nenhum input estiver focado
-        selectedCard.scrollIntoView({ behavior: \'smooth\', block: \'start\' });
-    }
-}, 100);
+        // 6. Scroll suave
+        setTimeout(() => {
+            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 100);
     }
 
 
