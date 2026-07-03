@@ -448,6 +448,8 @@ html,body{
 }
 .fab-badge.on{display:flex;}
 
+/* ── FOOTER ── */
+/* ── FOOTER / INPUT ── */
 .footer {
   background: rgba(255, 255, 255, 0.85);
   backdrop-filter: blur(12px);
@@ -511,6 +513,97 @@ html,body{
 .send-btn:disabled{background:var(--border);color:var(--text-3);cursor:default;box-shadow:none;transform:scale(.9);opacity:.6;}
 .send-btn:not(:disabled):hover{background:var(--brand-dk);transform:scale(1.05);}
 .send-btn:not(:disabled):active{transform:scale(.95);}
+
+/* ── CUSTOM NUMERIC KEYBOARD ── */
+.custom-numeric-keyboard {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  width: 100%;
+  background: #f0f2f5; /* Cor de fundo do teclado */
+  border-top: 1px solid #d5d5d5;
+  padding: 10px;
+  box-shadow: 0 -5px 20px rgba(0, 0, 0, 0.1);
+  z-index: 10000; /* Acima de outros elementos */
+  display: none; /* Escondido por padrão */
+  flex-direction: column;
+  gap: 8px;
+  transform: translateY(100%);
+  transition: transform 0.3s ease-out;
+}
+
+.custom-numeric-keyboard.show {
+  transform: translateY(0);
+}
+
+.keyboard-row {
+  display: flex;
+  gap: 8px;
+  justify-content: stretch;
+}
+
+.custom-numeric-keyboard button {
+  flex: 1;
+  padding: 15px 0;
+  font-size: 22px;
+  font-weight: 600;
+  color: var(--text);
+  background: var(--surface);
+  border: 1px solid var(--border-2);
+  border-radius: 12px;
+  cursor: pointer;
+  transition: all 0.15s ease;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  -webkit-tap-highlight-color: transparent; /* Remove highlight on tap */
+}
+
+.custom-numeric-keyboard button:hover {
+  background: var(--surface-2);
+}
+
+.custom-numeric-keyboard button:active {
+  background: var(--brand-lt);
+  color: var(--brand);
+  transform: scale(0.95);
+  border-color: var(--brand);
+}
+
+.custom-numeric-keyboard button.key-action {
+  background: var(--border);
+  color: var(--text-2);
+  font-size: 18px;
+}
+
+.custom-numeric-keyboard button.key-action:active {
+  background: var(--border-2);
+  color: var(--text);
+}
+
+.custom-numeric-keyboard button.key-confirm {
+  background: var(--green);
+  color: #fff;
+  font-size: 18px;
+  font-weight: 700;
+  flex: 3; /* Ocupa mais espaço */
+}
+
+.custom-numeric-keyboard button.key-confirm:active {
+  background: var(--green-dk);
+  transform: scale(0.98);
+}
+
+/* Estilos para inputs que usarão o teclado personalizado */
+.edit-input.numeric-keyboard-active {
+  caret-color: transparent; /* Esconde o cursor nativo */
+}
+
+.edit-input.numeric-keyboard-active:focus {
+  background: #fff;
+  transform: translateY(-1px); /* Efeito de elevação leve */
+  box-shadow: 0 4px 12px var(--brand-glow);
+}
 
 /* ── MODALS ── */
 .modal-overlay{
@@ -589,11 +682,7 @@ html,body{
   font-weight: 400;
 }
 
-.edit-input:focus {
-  background: #fff;
-  transform: translateY(-1px); /* Efeito de elevação leve */
-  box-shadow: 0 4px 12px var(--brand-glow);
-}
+.edit-input:focus
 
 .edit-input.error {
   border-color: #EF4444 !important;
@@ -1162,16 +1251,7 @@ html,body{
   <!-- FOOTER -->
   <footer class="footer">
     <div class="input-wrap" id="inputWrap">
-<textarea 
-  class="input-el" 
-  id="inputEl" 
-  placeholder="Digite sua mensagem..." 
-  rows="1"
-  autocomplete="off"
-  autocorrect="off"
-  autocapitalize="sentences"
-  spellcheck="false"
-></textarea>
+      <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
     </div>
     <button class="send-btn" id="sendBtn" disabled aria-label="Enviar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
@@ -1938,15 +2018,13 @@ function showPaymentOptions() {
                     <div class="payment-form-group">
                         <label class="payment-input-label">CPF</label>
                         <div class="input-icon-wrapper">
-                            <input type="tel" id="userCpf" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+<input type="tel" id="userCpf" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required>                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
                         </div>
                     </div>
                     <div class="payment-form-group">
                         <label class="payment-input-label">WhatsApp</label>
                         <div class="input-icon-wrapper">
-                            <input type="tel" id="userPhone" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+<input type="tel" id="userPhone" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required>                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
                         </div>
                     </div>
                     <button class="modal-btn" id="confirmPaymentBtn" type="button">
@@ -2708,5 +2786,31 @@ function lockBackButton() {
   }, 2000);
 })();
 </script>
+<!-- Custom Numeric Keyboard HTML -->
+<div id="customNumericKeyboard" class="custom-numeric-keyboard">
+  <div class="keyboard-row">
+    <button data-key="1">1</button>
+    <button data-key="2">2</button>
+    <button data-key="3">3</button>
+  </div>
+  <div class="keyboard-row">
+    <button data-key="4">4</button>
+    <button data-key="5">5</button>
+    <button data-key="6">6</button>
+  </div>
+  <div class="keyboard-row">
+    <button data-key="7">7</button>
+    <button data-key="8">8</button>
+    <button data-key="9">9</button>
+  </div>
+  <div class="keyboard-row">
+    <button data-key=".">.</button>
+    <button data-key="0">0</button>
+    <button data-key="backspace" class="key-action"><svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 4H8l-7 8 7 8h13a2 2 0 0 0 2-2V6a2 2 0 0 0-2-2z"></path><line x1="18" y1="9" x2="12" y2="15"></line><line x1="12" y1="9" x2="18" y2="15"></line></svg></button>
+  </div>
+  <div class="keyboard-row">
+    <button data-key="confirm" class="key-confirm">OK</button>
+  </div>
+</div>
 </body>
 </html>
