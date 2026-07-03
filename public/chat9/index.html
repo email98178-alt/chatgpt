@@ -1162,7 +1162,16 @@ html,body{
   <!-- FOOTER -->
   <footer class="footer">
     <div class="input-wrap" id="inputWrap">
-      <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
+<textarea 
+  class="input-el" 
+  id="inputEl" 
+  placeholder="Digite sua mensagem..." 
+  rows="1"
+  autocomplete="off"
+  autocorrect="off"
+  autocapitalize="sentences"
+  spellcheck="false"
+></textarea>
     </div>
     <button class="send-btn" id="sendBtn" disabled aria-label="Enviar">
       <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polyline points="22 2 15 22 11 13 2 9 22 2"/></svg>
