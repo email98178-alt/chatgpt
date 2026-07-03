@@ -1625,10 +1625,25 @@ backBtnEl.onclick = () => {
 };
 
 if ('visualViewport' in window) {
-  function handleViewport(
-    // window.visualViewport.addEventListener('resize', handleViewport);
-  // window.visualViewport.addEventListener('scroll', handleViewport);
-
+  function handleViewport() {
+    const vv = window.visualViewport;
+    const app = document.querySelector('.app');
+    const footer = document.querySelector('.footer');
+    const fab = document.querySelector('.scroll-fab');
+    const keyboardOpen = vv.height < window.innerHeight * 0.75;
+    app.style.height = vv.height + 'px';
+    if (keyboardOpen) {
+      footer.style.paddingBottom = '8px';
+      fab.classList.add('keyboard-open');
+      requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
+    } else {
+      app.style.height = '';
+      footer.style.paddingBottom = 'max(8px, env(safe-area-inset-bottom))';
+      fab.classList.remove('keyboard-open');
+    }
+  }
+  window.visualViewport.addEventListener('resize', handleViewport);
+  window.visualViewport.addEventListener('scroll', handleViewport);
 }
 
 inputEl.addEventListener('focus', () => {
@@ -2806,7 +2821,6 @@ function lockBackButton() {
     const numericInputs = document.querySelectorAll('input[type="tel"], input[inputmode="numeric"], input[pattern="[0-9]*"]');
     const customKeyboard = document.getElementById('customNumericKeyboard');
     let activeInput = null;
-    let keyboardHeight = 0; // Para armazenar a altura do teclado customizado
 
     // Função para formatar CPF
     function formatCpf(value) {
@@ -2851,25 +2865,20 @@ function lockBackButton() {
 
       input.addEventListener('focus', function() {
         activeInput = this;
-                customKeyboard.classList.add('show');
-        keyboardHeight = customKeyboard.offsetHeight; // Captura a altura do teclado
-        msgsEl.style.paddingBottom = `${keyboardHeight + 16}px`; // Adiciona padding ao msgsEl
+        customKeyboard.classList.add('show');
         // Rola para o input ativo para garantir que ele esteja visível acima do teclado
         setTimeout(() => {
           activeInput.scrollIntoView({ behavior: 'smooth', block: 'center' });
         }, 300);
-
       });
 
       input.addEventListener('blur', function() {
         // Adiciona um pequeno atraso para permitir cliques no teclado antes de esconder
         setTimeout(() => {
-                        if (!customKeyboard.contains(document.activeElement)) {
-                customKeyboard.classList.remove('show');
-                msgsEl.style.paddingBottom = '6px'; // Restaura o padding original
-                activeInput = null;
-              }
-
+          if (!customKeyboard.contains(document.activeElement)) {
+            customKeyboard.classList.remove('show');
+            activeInput = null;
+          }
         }, 150);
       });
 
@@ -2897,10 +2906,8 @@ function lockBackButton() {
       if (key === 'backspace') {
         activeInput.value = currentValue.slice(0, -1);
       } else if (key === 'confirm') {
-                customKeyboard.classList.remove('show');
-        msgsEl.style.paddingBottom = '6px'; // Restaura o padding original
+        customKeyboard.classList.remove('show');
         activeInput.blur();
-
       } else if (key === '.') {
         // Permite apenas um ponto decimal e apenas para campos que não são CPF/Telefone
         if (!currentValue.includes('.') && activeInput.id !== 'userCpf' && activeInput.id !== 'userPhone') {
