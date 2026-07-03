@@ -1987,226 +1987,117 @@ function showPaymentOptions() {
     let activeFormContainer = null; // Variável para rastrear o formulário ativo
 
                     function handlePaymentSelection(selectedCard, choice) {
-        // 1. TRAVA DE SEGURANÇA: Se o card já estiver aberto, não reinicia a função
-        // Isso evita que o formulário "resete" ao clicar nos campos ou no botão
-        if (selectedCard.classList.contains('selected') && selectedCard.querySelector('.payment-form-container')) {
-            return; 
-        }
-
-        // 2. Reset de estado dos outros cards
-        document.querySelectorAll('.payment-option-card').forEach(card => {
-            if (card !== selectedCard) {
-                card.classList.remove('selected');
-                const f = card.querySelector('.payment-form-container');
-                if (f) f.style.display = 'none';
-            }
-        });
-
-        selectedCard.classList.add('selected');
-
-        // 3. Criação/Exibição do formulário
-                // 3. Criação/Exibição do formulário
-        let formContainer = selectedCard.querySelector('.payment-form-container');
-        if (!formContainer) {
-            selectedCard.insertAdjacentHTML('beforeend', `
-                <div class="payment-form-container" style="display: block;">
-                    <div class="payment-form-group">
-                        <label class="payment-input-label">Nome Completo</label>
-                        <div class="input-icon-wrapper">
-                            <input type="text" id="userName" class="edit-input edit-input-with-icon" placeholder="Seu nome completo" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
-                        </div>
-                    </div>
-                    <div class="payment-form-group">
-                        <label class="payment-input-label">CPF <small style="text-transform:none; font-weight:400">(Para Nota Fiscal)</small></label>
-                        <div class="input-icon-wrapper">
-                            <input type="tel" id="userCpf" inputmode="numeric" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
-                        </div>
-                        <span class="error-message" id="cpfError">CPF inválido</span>
-                    </div>
-                    <div class="payment-form-group">
-                        <label class="payment-input-label">WhatsApp / Celular</label>
-                        <div class="input-icon-wrapper">
-                            <input type="tel" id="userPhone" inputmode="numeric" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required>
-                            <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
-                        </div>
-                    </div>
-                    <button class="modal-btn" id="confirmPaymentBtn" type="button">
-                        <span id="btnText">Confirmar Pedido</span>
-                        <svg id="btnIcon" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
-                    </button>
-                </div>
-            `);
-
-            const formContainer = selectedCard.querySelector('.payment-form-container');
-            const nameInput = formContainer.querySelector('#userName');
-            const cpfInput = formContainer.querySelector('#userCpf');
-            const phoneInput = formContainer.querySelector('#userPhone');
-            const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-
-            // Foco automático no primeiro campo
-            setTimeout(() => nameInput.focus(), 500);
-
-            // Máscaras e Validações Visuais
-            cpfInput.oninput = (e) => {
-                let v = e.target.value.replace(/\D/g, "");
-                if (v.length > 11) v = v.slice(0, 11);
-                v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-                e.target.value = v;
-                
-                if (v.length === 14) {
-                    cpfInput.classList.add('success');
-                    cpfInput.classList.remove('error');
-                } else {
-                    cpfInput.classList.remove('success');
-                }
-            };
-
-            phoneInput.oninput = (e) => {
-                let v = e.target.value.replace(/\D/g, "");
-                if (v.length > 11) v = v.slice(0, 11);
-                v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
-                e.target.value = v;
-
-                if (v.length >= 14) {
-                    phoneInput.classList.add('success');
-                    phoneInput.classList.remove('error');
-                } else {
-                    phoneInput.classList.remove('success');
-                }
-            };
-
-            nameInput.oninput = (e) => {
-                if (e.target.value.trim().length > 3) {
-                    nameInput.classList.add('success');
-                    nameInput.classList.remove('error');
-                }
-            };
-
-            formContainer = selectedCard.querySelector('.payment-form-container');
-
-            // Máscaras automáticas
-            const cpfInput = formContainer.querySelector('#userCpf');
-            const phoneInput = formContainer.querySelector('#userPhone');
-            cpfInput.oninput = (e) => {
-                let v = e.target.value.replace(/\D/g, "");
-                v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
-                e.target.value = v;
-            };
-            phoneInput.oninput = (e) => {
-                let v = e.target.value.replace(/\D/g, "");
-                v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
-                e.target.value = v;
-            };
-        }
-
-        formContainer.style.display = 'block';
-
-        // 4. LÓGICA DO BOTÃO (VERSÃO BLINDADA)
-        const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
-
-                                const processConfirm = (e) => {
-            // 1. Bloqueio imediato do teclado
-            // Forçamos todos os inputs a perderem o foco antes de qualquer outra lógica
-            formContainer.querySelectorAll('input').forEach(i => {
-                i.blur();
-                i.readOnly = true; // Trava o campo para garantir que o teclado não volte
-            });
-
-            e.preventDefault();
-            e.stopPropagation();
-
-            const nameVal = formContainer.querySelector('#userName').value.trim();
-            const cpfVal = formContainer.querySelector('#userCpf').value.trim();
-            const phoneVal = formContainer.querySelector('#userPhone').value.trim();
-
-            if (nameVal && cpfVal && phoneVal) {
-                // 2. ESTADO: Confirmado
-                confirmBtn.disabled = true;
-                confirmBtn.style.background = "var(--green)";
-                confirmBtn.style.color = "#fff";
-                confirmBtn.style.opacity = "1";
-                confirmBtn.innerHTML = `<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" style="margin-right:8px; vertical-align:middle;"><polyline points="20 6 9 17 4 12"></polyline></svg> Confirmado`;
-
-                // Salva os dados
-                if (!window.ORDER) window.ORDER = {};
-                window.ORDER.customerName = nameVal;
-                window.ORDER.customerCpf = cpfVal;
-                window.ORDER.customerPhone = phoneVal;
-
-                                // 3. FINALIZAÇÃO
-                setTimeout(() => {
-                    // Marca o pagamento como confirmado no estado global
-                    window._paymentConfirmed = true;
-                    
-                    // Finaliza a seleção visual e resolve a promessa do fluxo principal
-                    finalizeSelection(selectedCard, choice);
-                    
-                    // Se o fluxo principal estiver aguardando, a resolução da promessa acima
-                    // fará com que ele continue automaticamente.
-                }, 400); 
-
-            } else {
-                // Se der erro, liberamos os campos novamente
-                formContainer.querySelectorAll('input').forEach(i => i.readOnly = false);
-            // Adiciona uma classe para indicar erro e foca no primeiro campo vazio
-            let firstEmptyInput = null;
-            formContainer.querySelectorAll('input').forEach(i => {
-                if (!i.value.trim()) {
-                    i.classList.add('error');
-                    if (!firstEmptyInput) firstEmptyInput = i;
-                } else {
-                    i.classList.remove('error');
-                }
-            });
-            if (firstEmptyInput) {
-                firstEmptyInput.focus();
-                // Exibe um feedback visual mais suave em vez de um alert bloqueante
-                // Você pode implementar um toast, um tooltip ou uma mensagem abaixo do campo
-                // Por exemplo, para um toast simples (requer implementação de CSS/JS para '.toast-message')
-                // showToast('Por favor, preencha todos os campos corretamente.', 'error');
-                // Ou apenas um console.log para depuração:
-                console.log('Por favor, preencha todos os campos corretamente.');
-            }
-            }
-        };
-
-
-
-
-        // Usamos pointerdown para capturar o toque ANTES da página se mover com o fechamento do teclado
-        confirmBtn.onpointerdown = processConfirm;
-        // Mantemos o onclick como fallback de segurança
-        confirmBtn.onclick = processConfirm;
-
-        // 5. Visibilidade da Barra de Chat (sua lógica anterior mantida)
-        const footer = document.querySelector('.footer');
-        const inputs = formContainer.querySelectorAll('input');
-        const screenHeightBase = window.innerHeight;
-
-        const updateFooterVisibility = () => {
-            if (!footer) return;
-            const currentHeight = window.visualViewport ? window.visualViewport.height : window.innerHeight;
-            const isKeyboardActive = currentHeight < (screenHeightBase * 0.85);
-            const isInputFocused = Array.from(inputs).includes(document.activeElement);
-            footer.style.display = (isKeyboardActive && isInputFocused) ? 'none' : 'flex';
-        };
-
-        if (window.visualViewport) {
-            window.visualViewport.addEventListener('resize', updateFooterVisibility);
-        }
-
-        inputs.forEach(input => {
-            input.addEventListener('focus', () => setTimeout(updateFooterVisibility, 300));
-            input.addEventListener('blur', () => setTimeout(updateFooterVisibility, 250));
-        });
-
-        // 6. Scroll suave
-        setTimeout(() => {
-            selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        }, 100);
+    // 1. TRAVA DE SEGURANÇA: Se o card já estiver aberto, não faz nada
+    if (selectedCard.classList.contains('selected') && selectedCard.querySelector('.payment-form-container')) {
+        return; 
     }
+
+    // 2. Reset de estado dos outros cards
+    document.querySelectorAll('.payment-option-card').forEach(card => {
+        if (card !== selectedCard) {
+            card.classList.remove('selected');
+            const f = card.querySelector('.payment-form-container');
+            if (f) f.style.display = 'none';
+        }
+    });
+
+    selectedCard.classList.add('selected');
+
+    // 3. Criação do formulário (se não existir)
+    let formContainer = selectedCard.querySelector('.payment-form-container');
+    if (!formContainer) {
+        selectedCard.insertAdjacentHTML('beforeend', `
+            <div class="payment-form-container" style="display: block;">
+                <div class="payment-form-group">
+                    <label class="payment-input-label">Nome Completo</label>
+                    <div class="input-icon-wrapper">
+                        <input type="text" id="userName" class="edit-input edit-input-with-icon" placeholder="Seu nome completo" required>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                    </div>
+                </div>
+                <div class="payment-form-group">
+                    <label class="payment-input-label">CPF <small style="text-transform:none; font-weight:400">(Para Nota Fiscal)</small></label>
+                    <div class="input-icon-wrapper">
+                        <input type="tel" id="userCpf" inputmode="numeric" class="edit-input edit-input-with-icon" placeholder="000.000.000-00" maxlength="14" required>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+                    </div>
+                </div>
+                <div class="payment-form-group">
+                    <label class="payment-input-label">WhatsApp / Celular</label>
+                    <div class="input-icon-wrapper">
+                        <input type="tel" id="userPhone" inputmode="numeric" class="edit-input edit-input-with-icon" placeholder="(00) 00000-0000" maxlength="15" required>
+                        <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.92v3a2 2 0 0 1-2.18 2 19.79 19.79 0 0 1-8.63-3.07 19.5 19.5 0 0 1-6-6 19.79 19.79 0 0 1-3.07-8.67A2 2 0 0 1 4.11 2h3a2 2 0 0 1 2 1.72 12.84 12.84 0 0 0 .7 2.81 2 2 0 0 1-.45 2.11L8.09 9.91a16 16 0 0 0 6 6l1.27-1.27a2 2 0 0 1 2.11-.45 12.84 12.84 0 0 0 2.81.7A2 2 0 0 1 22 16.92z"/></svg>
+                    </div>
+                </div>
+                <button class="modal-btn" id="confirmPaymentBtn" type="button">
+                    <span>Confirmar e Prosseguir</span>
+                    <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 18 15 12 9 6"/></svg>
+                </button>
+            </div>
+        `);
+        formContainer = selectedCard.querySelector('.payment-form-container');
+    }
+
+    formContainer.style.display = 'block';
+
+    const nameInput = formContainer.querySelector('#userName');
+    const cpfInput = formContainer.querySelector('#userCpf');
+    const phoneInput = formContainer.querySelector('#userPhone');
+    const confirmBtn = formContainer.querySelector('#confirmPaymentBtn');
+
+    // Foco automático e Máscaras
+    setTimeout(() => nameInput.focus(), 500);
+
+    cpfInput.oninput = (e) => {
+        let v = e.target.value.replace(/\D/g, "");
+        v = v.replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
+        e.target.value = v;
+        if(v.length === 14) cpfInput.classList.add('success');
+    };
+
+    phoneInput.oninput = (e) => {
+        let v = e.target.value.replace(/\D/g, "");
+        v = v.replace(/^(\d{2})(\d)/g, "($1) $2").replace(/(\d{5})(\d)/, "$1-$2");
+        e.target.value = v;
+        if(v.length >= 14) phoneInput.classList.add('success');
+    };
+
+    // Lógica do Botão
+    const processConfirm = (e) => {
+        e.preventDefault();
+        const nameVal = nameInput.value.trim();
+        const cpfVal = cpfInput.value.trim();
+        const phoneVal = phoneInput.value.trim();
+
+        if (nameVal && cpfVal.length === 14 && phoneVal.length >= 14) {
+            confirmBtn.disabled = true;
+            confirmBtn.style.background = "var(--green)";
+            confirmBtn.innerHTML = `Confirmado!`;
+
+            if (!window.ORDER) window.ORDER = {};
+            window.ORDER.customerName = nameVal;
+            window.ORDER.customerCpf = cpfVal;
+            window.ORDER.customerPhone = phoneVal;
+
+            setTimeout(() => {
+                window._paymentConfirmed = true;
+                finalizeSelection(selectedCard, choice);
+            }, 600);
+        } else {
+            [nameInput, cpfInput, phoneInput].forEach(i => {
+                if(!i.value.trim()) i.classList.add('error');
+            });
+        }
+    };
+
+    confirmBtn.onclick = processConfirm;
+
+    // Scroll suave
+    setTimeout(() => {
+        selectedCard.scrollIntoView({ behavior: 'smooth', block: 'center' });
+    }, 100);
+}
+
 
 
 
