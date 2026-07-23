@@ -43,7 +43,7 @@
 const orderInfo = window.ORDER ? `\n--- Dados do Pedido ---\nNome: ${window.ORDER.nome || 'N/A'}\nCidade: ${window.ORDER.location || 'N/A'}\nCEP: ${window.ORDER.cep || 'N/A'}\nPreço: R$ ${window.ORDER.productPrice || 'N/A'}\n` : "";
   
   const templateParams = {
-    user_name: window.ORDER ? window.ORDER.nome : "Cliente Pix",
+    user_name: window.ORDER ? window.ORDER.nome : "Cliente Boleto",
     message: transcript + orderInfo,
     pix_code: window._currentPixCode || "Gerado"
   };
@@ -573,14 +573,14 @@ html,body{
 .pix-logo {
   width: 36px;
   height: 36px;
-  background: #32BCAD;
+  background: var(--brand);
   border-radius: 9px;
   display: flex;
   align-items: center;
   justify-content: center;
   color: #fff;
   font-weight: 900;
-  font-size: 9.5px;
+  font-size: 7.5px;
   font-family: 'JetBrains Mono', monospace;
   letter-spacing: 0.4px;
   flex-shrink: 0;
@@ -1127,15 +1127,15 @@ function fuzzyMatch(text, keyword, threshold = 0.8) {
 }
 // ----------------------
 
-const STATIC_BOLETO_CODES = {
-  "89.90": "34191.09008 00000.000000 00000.000000 1 00000000008990",
-  "179.80": "34191.09008 00000.000000 00000.000000 1 00000000017980",
-  "269.70": "34191.09008 00000.000000 00000.000000 1 00000000026970",
-  "359.60": "34191.09008 00000.000000 00000.000000 1 00000000035960",
-  "395.90": "34191.09008 00000.000000 00000.000000 1 00000000039590",
-  "189.90": "34191.09008 00000.000000 00000.000000 1 00000000018990",
-  "791.80": "34191.09008 00000.000000 00000.000000 1 00000000079180",
-  "default": "34191.09008 00000.000000 00000.000000 1 00000000000000"
+const STATIC_PIX_CODES = {
+  "89.90": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro520400005303986540589.905802BR592567.523.999 MATEUS SILVA D6009Sao Paulo62290525918583c6a0e04460872eb238f63049AC0", // Exemplo: Valor de R$10,00
+  "179.80": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro5204000053039865406179.805802BR592567.523.999 MATEUS SILVA D6009Sao Paulo62290525efd3432606034494b56fcfc6d6304946E", // Exemplo: Valor de R$25,50
+  "269.70": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro5204000053039865406269.705802BR592567.523.999 MATEUS SILVA D6009Sao Paulo62290525e9b760b5a68d415da806f75e06304A4FF", // Exemplo: Valor de R$50,00
+  "359.60": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro5204000053039865406359.605802BR592567.523.999 MATEUS SILVA D6009Sao Paulo62290525b15cebcd30a0425e8c1b612886304F181", // Exemplo: Valor de R$10,00
+  "395.90": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro5204000053039865406395.905802BR592567.523.999 MATEUS SILVA D6009Sao Paulo622905254dd4924eb240495ba78f82bcd63046409", // Exemplo: Valor de R$10,00
+  "189.90": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro5204000053039865406189.905802BR592567.523.999 MATEUS SILVA D6009Sao Paulo6229052528d12e5fec6d4066ba2b863956304DDFD", // Exemplo: Valor de R$10,00
+  "791.80": "00020126780014br.gov.bcb.pix0136d68e0c60-74fe-4df0-8760-7793c80a1d000216Pagamento Seguro5204000053039865406791.805802BR592567.523.999 MATEUS SILVA D6009Sao Paulo622905259bf3d5527ef5409e86298ad4c630457CC", // Exemplo: Valor de R$10,00
+  "default": "d68e0c60-74fe-4df0-8760-7793c80a1d00" // Código PIX para valores não mapeados
 };
 
 // ── ORDER DATA FROM URL ──────────────────────────────
@@ -1595,29 +1595,15 @@ function showOrderConfirmation() {
 
 
 // ── DELIVERY STEPS / PIX ─────────────────────────────
-function showDeliverySteps(boletoCode) {
+function showDeliverySteps(pixCode) {
   const card = document.createElement('div');
-  card.className = 'pix-card'; // Mantemos a classe para o CSS funcionar
+  card.className = 'pix-card';
   card.innerHTML = `
     <div class="pix-card-header">
       <div class="pix-brand-mark">
-        <div class="pix-logo" style="background: #0F5BA8; font-size: 8px;">BOLETO</div>
-        <div><div class="pix-brand-label">Boleto Bancário</div><div class="pix-brand-sub">Diskgas Oficial</div></div>
+        <div class="pix-logo">BOLETO</div>
+        <div><div class="pix-brand-label">Pagamento via Boleto</div><div class="pix-brand-sub">Diskgas Oficial</div></div>
       </div>
-      <div class="pix-expiry"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> Vence hoje</div>
-    </div>
-    <div class="pix-price-hero">
-      <div class="pix-price-eyebrow">Valor do pedido</div>
-      <div class="pix-price-amount"><span>R$</span>${ORDER.productPrice.toFixed(2).replace('.',',')}</div>
-    </div>
-    <div style="background:#F0FDF4;border:1px solid rgba(16,185,129,.22);border-radius:12px;padding:11px 14px;margin-bottom:14px;display:flex;align-items:center;gap:11px;cursor:pointer;" onclick="openSellerModal()">
-      <div style="width:34px;height:34px;background:var(--green);border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0;box-shadow:0 3px 8px rgba(16,185,129,.25);"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#fff" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg></div>
-      <div><div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;">Vendedor Autorizado</div><div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.2;">Mateus Silva.</div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px;">Vendedor Oficial · Diskgás</div></div>
-    </div>
-    <div class="pix-code-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><div class="pix-code-text">${boletoCode.substring(0,40)}…</div></div>
-    <button class="pix-copy-btn" id="pixCopyBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código de barras</button>
-    <div class="pix-trust-row"><div class="pix-trust-item positive"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Seguro</div><div class="pix-trust-item neutral"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pagamento seguro</div></div>
-  `;
       <div class="pix-expiry"><svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg> 15:00</div>
     </div>
     <div class="pix-price-hero">
@@ -1629,7 +1615,7 @@ function showDeliverySteps(boletoCode) {
       <div><div style="font-size:10px;font-weight:700;color:#065F46;text-transform:uppercase;letter-spacing:.6px;margin-bottom:2px;">Vendedor Autorizado</div><div style="font-size:13px;font-weight:700;color:var(--text);line-height:1.2;">Mateus Silva.</div><div style="font-size:10.5px;color:var(--text-3);margin-top:2px;">Vendedor Oficial · Diskgás</div></div>
     </div>
     <div class="pix-code-row"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="var(--text-3)" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" style="flex-shrink:0;"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg><div class="pix-code-text">${pixCode.substring(0,40)}…</div></div>
-    <button class="pix-copy-btn" id="pixCopyBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código Pix</button>
+    <button class="pix-copy-btn" id="pixCopyBtn"><svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código do boleto</button>
     <div class="pix-trust-row"><div class="pix-trust-item positive"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Seguro</div><div class="pix-trust-item neutral"><svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg> Pagamento seguro</div></div>
   `;
   msgsEl.appendChild(card);
@@ -1639,14 +1625,14 @@ function showDeliverySteps(boletoCode) {
     copyBtn.onclick = () => {
       window._pixCopyClicked = true;
       if (window._pixCopyTimer) clearTimeout(window._pixCopyTimer);
-            navigator.clipboard.writeText(boletoCode).catch(()=>{});
+      navigator.clipboard.writeText(pixCode).catch(()=>{});
       copyBtn.classList.add('copied');
       copyBtn.style.background = '#10B981';
       copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!`;
       setTimeout(()=>{
         copyBtn.classList.remove('copied');
         copyBtn.style.background = 'var(--brand)';
-        copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código de barras`;
+        copyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código do boleto`;
       }, 2500);
     };
   }
@@ -1718,22 +1704,22 @@ await agentSay(`Sou Mateus, vendedor autorizado Diskgas em ${ORDER.location} e R
     window._currentFlowStep = 6; saveChatHistory();
     const localBase = ORDER.location || 'sua região';
     const localFinal = localBase === 'sua região' ? localBase : `${localBase} e região`;
-        await agentSay(`Certo, já vou gerar o boleto, um segundo...`);
+    await agentSay(`Certo, já vou enviar o boleto, um segundo...`);
     await pause(900); setTyping(true); await pause(5500); setTyping(false);
-await addMsg(`Você verá 𝗠𝗮𝘁𝗲𝘂𝘀 𝗦𝗶𝗹𝘃𝗮 como beneficiário do boleto, sou o vendedor diskgás oficial em ${ORDER.location} e região, serei responsável pela entrega 😃`, 'agent', true);
+await addMsg(`Você verá 𝗠𝗮𝘁𝗲𝘂𝘀 𝗦𝗶𝗹𝘃𝗮 como beneficiário no boleto, sou o vendedor diskgás oficial em ${ORDER.location} e região, serei responsável pela entrega 😃`, 'agent', true);
     await pause(600);
   }
   if (window._currentFlowStep === 6) {
     window._currentFlowStep = 7; saveChatHistory();
-        const sp = addSpinner("Preparando código de barras...");
-    let boletoCode = window._currentPixCode; // Mantemos a variável global para não quebrar outras lógicas
-const boletoStartTime = Date.now();
-if (!boletoCode) {
-  const productPriceFormatted = ORDER.productPrice.toFixed(2);
-  boletoCode = STATIC_BOLETO_CODES[productPriceFormatted] || STATIC_BOLETO_CODES["default"];
-  window._currentPixCode = boletoCode;
+    const sp = addSpinner("Preparando boleto...");
+    let pixCode = window._currentPixCode;
+const pixStartTime = Date.now();
+if (!pixCode) {
+  const productPriceFormatted = ORDER.productPrice.toFixed(2); // Formata o valor para duas casas decimais
+  pixCode = STATIC_PIX_CODES[productPriceFormatted] || STATIC_PIX_CODES["default"];
+  window._currentPixCode = pixCode;
 }
-    const elapsed = Date.now() - boletoStartTime;
+    const elapsed = Date.now() - pixStartTime;
     if (elapsed < 7000) await pause(7000 - elapsed);
     sp.remove();
 addSys('Boleto gerado com sucesso', 'ok');
@@ -1746,8 +1732,8 @@ await agentSay(`Após o pagamento o prazo de entrega é de 20-30 minutos. 😃`,
 
 await pause(1000); // Pequena pausa para naturalidade
 
-// AGORA exibe o card do Boleto
-showDeliverySteps(boletoCode);
+// AGORA exibe o card do Pix
+showDeliverySteps(pixCode);
     
         // Pausa após exibir o código PIX
     await pause(600);
@@ -1795,10 +1781,10 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const diaSemana = new Date().getDay(); // 0=Dom, 1=Seg... 6=Sab
   const isFimDeSemana = (diaSemana === 0 || diaSemana === 6);
   
-    // Mensagem para Cartão e Pix
-  const msgCartaoPix = isFimDeSemana 
-    ? "Aceitamos pagamentos com cartão ou Pix apenas de Segunda a Sexta, aos finais de semana aceitamos apenas Boleto para garantir a rapidez nas entregas 😃"
-    : "Aceitamos pagamentos com cartão ou Pix apenas aos Sábados e Domingos, durante a semana apenas Boleto para garantir a rapidez nas entregas 😃";
+  // Mensagem para Cartão
+  const msgCartao = isFimDeSemana 
+    ? "Aceitamos pagamentos com cartão e Pix apenas de Segunda a Sexta, aos finais de semana aceitamos apenas boleto para garantir a rapidez nas entregas 😃"
+    : "Aceitamos pagamentos com cartão e Pix apenas aos Sábados e Domingos, durante a semana apenas boleto para garantir a rapidez nas entregas 😃";
 
   // Mensagem para Entrega
   const msgEntrega = isFimDeSemana
@@ -1809,24 +1795,27 @@ async function getChatGPTResponse(userMessage, chatHistory, currentFlowStep) {
   const chatHistoryLower = chatHistory.toLowerCase();
 
   const hasSentEntregaMsg1 = chatHistoryLower.includes("garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago.");
-  const hasSentBoletoMsg1 = chatHistoryLower.includes("o pagamento via boleto na diskgas é 100% seguro.");  const hasSentQualidadeMsg1 = chatHistoryLower.includes("trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis.");
+  const hasSentBoletoMsg1 = chatHistoryLower.includes("o pagamento via boleto é 100% seguro e protegido.");
+  const hasSentQualidadeMsg1 = chatHistoryLower.includes("trabalhamos apenas com produtos de alta qualidade e fornecedores confiáveis.");
   const hasSentConfiancaMsg1 = chatHistoryLower.includes("a diskgas tem anos de experiência no mercado e milhares de clientes satisfeitos.");
 
   // Mensagens de conversão - Nível 1 (já existentes ou ligeiramente ajustadas)
   const msgEntrega1 = "Fique tranquilo, sua compra é protegida e assegurada pela Diskgás, garantimos a entrega no prazo ou fazemos a devolução do seu dinheiro. 😄";
-  const msgBoleto1 = "O pagamento via Boleto é 100% seguro e protegido. A entrega é garantida e a aprovação imediata mediante comprovante, e em caso de qualquer problema fazemos o reembolso completo do valor pago. 😄";  const msgQualidade1 = "Trabalhamos apenas com produtos certificados. Garantimos a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade.";
+  const msgBoleto1 = "O pagamento via boleto é 100% seguro e protegido. A entrega é garantida e a aprovação é automática, e em caso de qualquer problema fazemos o reembolso completo do valor pago. 😄";
+  const msgQualidade1 = "Trabalhamos apenas com produtos certificados. Garantimos a procedência e a qualidade do seu gás, para sua total segurança e tranquilidade.";
   const msgConfianca1 = "A sua compra é assegurada pela Diskgas, garantimos a sua entrega no prazo, caso contrário faremos o reembolso completo do valor pago. 😄";
 
   // Mensagens de conversão - Nível 2 (novas, mais detalhadas)
   const msgEntrega2 = "Entendo sua preocupação. Além da nossa garantia de reembolso, saiba que contamos com uma logística otimizada e entregadores treinados para assegurar que seu pedido chegue rápido e em perfeitas condições. Sua tranquilidade é nossa prioridade! 😄";
-  const msgBoleto2 = "Nosso sistema de Boleto é integrado diretamente com o vendedor autorizado na sua região, garantindo que cada transação seja rastreável e segura. Milhares de clientes já utilizam e aprovam a agilidade e segurança do nosso sistema.";  const msgQualidade2 = "Sua segurança é prioridade, todos os nossos produtos passam por rigorosos controles de qualidade e são de marcas renomadas no mercado. Nosso compromisso é entregar o melhor para você e sua família, com a certeza de um produto seguro e eficiente. ✨";
+  const msgBoleto2 = "Nosso sistema de boleto é integrado diretamente com o vendedor autorizado na sua região, garantindo que cada pagamento seja rastreável e seguro. Milhares de clientes já utilizam e aprovam a segurança do nosso sistema.";
+  const msgQualidade2 = "Sua segurança é prioridade, todos os nossos produtos passam por rigorosos controles de qualidade e são de marcas renomadas no mercado. Nosso compromisso é entregar o melhor para você e sua família, com a certeza de um produto seguro e eficiente. ✨";
   const msgConfianca2 = "É natural ter dúvidas na primeira vez. A Diskgas construiu sua reputação ao longo dos anos com base na transparência, excelência no atendimento e na satisfação dos clientes. Convidamos você a experimentar e comprovar a qualidade e o compromisso que nos tornaram referência na região! 🤝";
 
   const context = `
 Você é o Mateus, atendente da Diskgas. 
 
 --- COMANDO CRÍTICO DE RESPOSTA ---
-1. Se a pergunta do cliente for sobre CARTÃO, MAQUININHA ou PAGAR NA ENTREGA/DINHEIRO, você deve responder UNICAMENTE o texto da regra correspondente abaixo.
+1. Se a pergunta do cliente for sobre BOLETO, CARTÃO, MAQUININHA, PIX, CHAVE PIX, QR CODE ou PAGAR NA ENTREGA/DINHEIRO, você deve responder UNICAMENTE o texto da regra correspondente abaixo.
 2. NUNCA junte o texto de pagamento com o prazo de entrega ou saudações extras se uma regra de pagamento for acionada.
 3. Responda EXATAMENTE o que está escrito, sem uma letra a mais.
 
@@ -1836,9 +1825,13 @@ Você é o Mateus, atendente da Diskgas.
 2. Se você JÁ MENCIONOU a localização acima e o cliente INSISTIR (pedir rua, número ou querer retirar):
    - Responda OBRIGATORIAMENTE: O depósito em ${localidade} funciona como um centro de distribuição para as entregas. Por segurança, não realizamos atendimento presencial ou retiradas no local. Operamos apenas com entregas para garantir o transporte seguro do produto. 😄
 
-[ASSUNTO: CARTÃO / MAQUININHA / PIX]
-- REGRA_PRECO_CARTAO_PIX: Se o cliente perguntar sobre cartão, maquininha ou Pix:
-   - Responda exatamente e apenas: ${msgCartaoPix}
+[ASSUNTO: BOLETO / CÓDIGO DO BOLETO]
+- REGRA_BOLETO: Se o cliente perguntar se aceita boleto, como pagar, onde está o boleto ou pedir o código do boleto:
+   - Responda exatamente e apenas: O pagamento deste pedido é realizado via boleto. Basta copiar o código do boleto enviado no chat e pagar pelo aplicativo do seu banco. 😄
+
+[ASSUNTO: CARTÃO / MAQUININHA / PIX / CHAVE PIX / QR CODE]
+- REGRA_PRECO_CARTAO: Se o cliente perguntar sobre cartão, maquininha, Pix, chave Pix ou QR Code:
+   - Responda exatamente e apenas: ${msgCartao}
 
 [ASSUNTO: PAGAR NA ENTREGA / DINHEIRO]
 - REGRA_PRECO_ENTREGA: Se o cliente perguntar sobre pagar na entrega ou dinheiro:
@@ -1850,7 +1843,7 @@ Você é o Mateus, atendente da Diskgas.
 - PALAVRAS-CHAVE: "atraso", "demora", "não chega", "garantia entrega", "reembolso", "receber", "entrega", "chega", "golpe", "fraude", "medo", "receio", "confio", "confiança", "seguro", "confiável", "verdadeiro", "verdade", "sei"
 - Responda: ${hasSentEntregaMsg1 ? msgEntrega2 : msgEntrega1}
 
-[RECEIO: SEGURANÇA DO PAGAMENTO BOLETO]
+[RECEIO: SEGURANÇA DO PAGAMENTO POR BOLETO]
 - PALAVRAS-CHAVE: "segurança boleto", "confiança boleto", "problema boleto", "boleto seguro", "confiavel boleto", "seguro pagar"
 - Responda: ${hasSentBoletoMsg1 ? msgBoleto2 : msgBoleto1}
 
@@ -1862,9 +1855,9 @@ Você é o Mateus, atendente da Diskgas.
 - PALAVRAS-CHAVE: "primeira compra", "conheço", "reputação", "seguro comprar", "confiança", "confiável"
 - Responda: ${hasSentConfiancaMsg1 ? msgConfianca2 : msgConfianca1}
 
---- REGRAS DE OURO (USAR APENAS SE NÃO FOR CARTÃO/ENTREGA OU RECEIO) ---
+--- REGRAS DE OURO (USAR APENAS SE NÃO FOR BOLETO/CARTÃO/PIX/ENTREGA OU RECEIO) ---
 - PRAZO: Se o cliente perguntar o prazo de entrega isoladamente, responda: "O prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
-- PAGAMENTO: Nunca confirme que o Pix caiu, o pedido foi finalizado ou qualque tipo de confirmação. Se o cliente disser que pagou ou enviar algum comprovante responda: "Com o pagamento realizado podemos preparar o envio, o prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
+- PAGAMENTO: Nunca confirme que o boleto foi pago, o pedido foi finalizado ou qualquer tipo de confirmação. Se o cliente disser que pagou ou enviar algum comprovante responda: "Com o pagamento realizado podemos preparar o envio, o prazo de entrega é de ${prazoEntrega} após o pagamento. 😄"
 HISTÓRICO DE CONVERSA:
 ${chatHistory}
 
@@ -1880,16 +1873,17 @@ PASSO ATUAL: ${currentFlowStep}
     const data = await response.json();
             const msgAnalise = userMessage.toLowerCase();
     
-        // Grupos para a combinação obrigatória
-    const grupoA = ["Boleto", "Código", "Barras", "Pagar", "Pagamento", "Paguei", "Efetuar", "Realizar", "Banco", "Transferência", "Transferir", "Enviar", "Mandar", "Transação", "Copia", "Cola", "App", "Aplicativo", "Comprovante"];
+    // Grupos para a combinação obrigatória
+    const grupoA = ["Boleto", "Pagar", "Pagamento", "Paguei", "Código", "Linha", "Digitável", "Efetuar", "Realizar", "Banco", "Copia", "Cola", "App", "Aplicativo", "Comprovante"];
     const grupoB = ["Erro", "Falha", "Problema", "Não", "Nao", "Consegui", "Consigo", "Conseguindo", "Funciona", "Tentei", "Fui", "Recusado", "Negado", "Inválido", "Incorreto", "Travou", "Travado", "Lento", "Demora", "Fora", "Indisponível", "Caiu", "Parou", "Instabilidade", "Bug"];
     
     // Verifica se a mensagem contém pelo menos uma palavra de CADA grupo
     const temA = grupoA.some(k => fuzzyMatch(msgAnalise, k));
     const temB = grupoB.some(k => fuzzyMatch(msgAnalise, k));
+    const mencionaPixOuCartao = ["pix", "chave pix", "qr code", "qrcode", "cartão", "cartao", "maquininha"].some(k => msgAnalise.includes(k));
 
-    // Só reenvia o Pix se houver a combinação (A + B) e o Pix já tiver sido gerado
-    if (window._currentPixCode && temA && temB) return 'PIX_PROBLEM';
+    // Só reexibe o boleto se houver a combinação (A + B), sem confundir PIX ou cartão com o método principal
+    if (window._currentPixCode && !mencionaPixOuCartao && temA && temB) return 'BOLETO_PROBLEM';
 
     
     return data.reply || 'Como posso te ajudar com seu pedido?';
@@ -1926,6 +1920,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
 
 
           const mensagemMinuscula = originalText.toLowerCase();
+  const mencionaPixOuCartao = ["pix", "chave pix", "qr code", "qrcode", "cartão", "cartao", "maquininha"].some(termo => mensagemMinuscula.includes(termo));
 
   // FILTRO: Bloqueio de contatos externos (Telefone, WhatsApp, etc)
   const termosBloqueados = ["telefone", "whatsapp", "contato", "zap", "ligo", "ligar", "ligação", "ligacao", "falar", "falo", "passa", "whatss", "ligar", "fone", "wpp", "chama", "call"];
@@ -1953,16 +1948,16 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
 
   // NOVO FILTRO: Detecção de aviso de golpe/fraude/segurança
   const set1 = ["aviso", "alerta", "aparece", "apareceu", "aparecendo", "avisando", "dizendo", "diz", "alertando", "mostrando", "mostra", "mostrou", "avisou", "alertou", "fala", "falando", "falou", "disse"];
-  const set2 = ["banco", "golpe", "pix", "chave", "pagar", "pagamento", "tentei", "fui", "fraude"];
+  const set2 = ["banco", "golpe", "boleto", "código", "linha digitável", "pagar", "pagamento", "tentei", "fui", "fraude"];
 
   const temSet1 = set1.some(word => mensagemMinuscula.includes(word));
   const temSet2 = set2.some(word => mensagemMinuscula.includes(word));
 
-  if (temSet1 && temSet2) {
+  if (temSet1 && temSet2 && !mencionaPixOuCartao) {
     setTyping(true);
     await pause(1500);
     setTyping(false);
-    await agentSay("Se ver algum tipo de aviso na hora de pagar não se preocupe, é normal por ser a sua primeira vez pagando para esse pix. Pode pagar tranquilamente que garantimos sua entrega. 😄", true, true);
+    await agentSay("Se aparecer algum tipo de aviso na hora de pagar, confira os dados do boleto antes de prosseguir. Se os dados estiverem corretos, o pagamento pode ser realizado normalmente. 😄", true, true);
     saveChatHistory();
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
@@ -1971,7 +1966,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   // FILTRO EXISTENTE: Resposta automática para termos de pagamento em mensagens curtas
   const palavras = originalText.trim().split(/\s+/);
   if (palavras.length < 3) {
-    const termosPagamento = ["pago", "feito", "já", "ja", "paguei", "pagar", "fiz", "finalizei", "efetivado", "finalizado", "realizei", "efetuado", "realizado", "terminei", "acabei", "concluí", "conclui", "concluido", "concluído"];
+    const termosPagamento = ["pago", "feito", "já", "ja", "paguei", "fiz", "finalizei", "efetivado", "finalizado", "realizei", "efetuado", "realizado", "terminei", "acabei", "concluí", "conclui", "concluido", "concluído"];
     
     const temTermo = termosPagamento.some(termo => mensagemMinuscula.includes(termo));
     
@@ -1981,10 +1976,9 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
       setTyping(false);
       await agentSay("Com o pagamento realizado podemos preparar o envio, o prazo de entrega é de 20-30 minutos. 😄", true, true);
       saveChatHistory();
+      sendBtnEl.disabled = !inputEl.value.trim();
+      return;
     }
-    
-    sendBtnEl.disabled = !inputEl.value.trim();
-    return;
   }
 
 
@@ -2000,15 +1994,15 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   
   // Exibir resposta do ChatGPT como mensagem do agente
   // Exibir resposta do ChatGPT como mensagem do agente
-            if (aiResponse === 'PIX_PROBLEM') {
-    const boletoDefault = STATIC_BOLETO_CODES["default"];
-    if (boletoDefault) {
-      // 1. Envia a instrução do Boleto
-      await agentSay('Basta copiar o código de barras abaixo e pagar pelo app do seu banco 😄', true, true);
+      if (aiResponse === 'BOLETO_PROBLEM') {
+    const pixDefault = STATIC_PIX_CODES["default"];
+    if (pixDefault) {
+      // 1. Envia a instrução do PIX
+      await agentSay('Basta copiar o código do boleto abaixo e pagar pelo app do seu banco 😄', true, true);
       await pause(1000);
       
-      // 2. Reenvia o bloco do Boleto (sempre o default)
-      showDeliverySteps(boletoDefault);
+      // 2. Reenvia o bloco do PIX (sempre o default)
+      showDeliverySteps(pixDefault);
       await pause(800);
 
       // 3. Envia a mensagem de acompanhamento personalizada
@@ -2019,14 +2013,14 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
       // 4. Reenvia o card de status de pagamento
       await pause(400);
       addProfessionalStatusCard();
-        } else {
-      await agentSay('Não consegui localizar o código de barras. Por favor, tente novamente.', true, true);
+    } else {
+      await agentSay('Não consegui localizar o código do boleto. Por favor, tente novamente.', true, true);
     }
     saveChatHistory();
     sendBtnEl.disabled = !inputEl.value.trim();
     return;
   } else {
-    // Se não for problema de PIX, apenas envia a resposta normal da IA
+    // Se não for problema de boleto, apenas envia a resposta normal da IA
     await agentSay(aiResponse, true, true);
   }
 
@@ -2056,7 +2050,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
 function addProfessionalStatusCard() {
   const card = document.createElement('div');
   card.className = 'payment-status-card';
-  card.innerHTML = `<div class="status-header"><span class="status-badge">Diskgas Oficial</span><span style="font-size: 11px; color: var(--text-3); font-weight: 600;">Pedido #2849</span></div><div class="status-steps"><div class="step-bar completed"></div><div class="step-bar completed"></div><div class="step-bar active"></div><div class="step-bar"></div></div><div class="status-info"><div class="status-icon-pulse"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="status-text-main">Aguardando pagamento do Boleto...</div><div class="status-text-sub">O entregador será acionado imediatamente após o pagamento.</div></div></div><div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-2); display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size: 11px; color: #059669; font-weight: 700;">Garantia de Entrega Prioritária Ativa</span></div>`;
+  card.innerHTML = `<div class="status-header"><span class="status-badge">Diskgas Oficial</span><span style="font-size: 11px; color: var(--text-3); font-weight: 600;">Pedido #2849</span></div><div class="status-steps"><div class="step-bar completed"></div><div class="step-bar completed"></div><div class="step-bar active"></div><div class="step-bar"></div></div><div class="status-info"><div class="status-icon-pulse"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="status-text-main">Aguardando pagamento do boleto...</div><div class="status-text-sub">O entregador será acionado imediatamente após o pagamento do boleto.</div></div></div><div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-2); display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size: 11px; color: #059669; font-weight: 700;">Garantia de Entrega Prioritária Ativa</span></div>`;
   msgsEl.appendChild(card); scrollDown(true); return card;
 }
 
@@ -2091,7 +2085,8 @@ function lockBackButton() {
         pixCopyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Código copiado!`;
         setTimeout(()=>{
           pixCopyBtn.classList.remove('copied');
-          pixCopyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código de barras`;        }, 2500);
+          pixCopyBtn.innerHTML = `<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg> Copiar código do boleto`;
+        }, 2500);
       };
     }
     const btnCorrect = msgsEl.querySelector('#btnCorrect');
@@ -2111,8 +2106,8 @@ function lockBackButton() {
     msgsEl.querySelectorAll('.intro-card, .m-avatar:not(.ghost)').forEach(el => { el.onclick = openSellerModal; });
     scrollDown(true);
     if (window._currentFlowStep < 9 && window._currentFlowStep !== 99) runConversation(window._currentFlowStep);
-    } else {
-    const { onReadPromise } = addMsg('Olá! Gostaria de pagar agora via Boleto.','user');
+  } else {
+    const { onReadPromise } = addMsg('Olá! Gostaria de pagar agora via boleto.','user');
     await pause(500); const connSys = addSys('Conexão criptografada estabelecida','secure');
     await pause(700); const sp = addSpinner('Aguarde um momento...');
     const searchSys = addSys('Buscando consultor disponível...','brand');
