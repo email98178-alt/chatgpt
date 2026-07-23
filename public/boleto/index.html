@@ -452,7 +452,7 @@ html,body{
   background:var(--surface);
   border-top:1px solid var(--border-2);
   padding:8px 14px max(8px, env(safe-area-inset-bottom));
-  display:flex;align-items:flex-end;gap:10px;
+  display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap;
   position:relative;z-index:20;
   flex-shrink:0;
 }
@@ -472,6 +472,54 @@ html,body{
   max-height:100px;line-height:1.5;
 }
 .input-el::placeholder{color:var(--text-3);}
+
+.attachment-btn{
+  width:32px;height:32px;border-radius:50%;border:none;
+  background:transparent;color:var(--text-3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;
+  flex-shrink:0;margin:2px 7px 2px -8px;
+  transition:all .2s ease;
+}
+.attachment-btn:hover{background:var(--brand-glow);color:var(--brand);}
+.attachment-btn:active{transform:scale(.92);}
+.attachment-input{display:none;}
+.attachment-preview{
+  width:100%;display:none;align-items:center;gap:10px;
+  padding:9px 10px;background:#F8FBFF;
+  border:1px solid var(--border-2);border-radius:14px;
+  box-shadow:0 2px 8px rgba(15,91,168,.06);
+  animation:msgIn .22s var(--ease);
+}
+.attachment-preview.on{display:flex;}
+.attachment-preview-thumb{
+  width:42px;height:42px;border-radius:10px;overflow:hidden;
+  background:var(--brand-glow);color:var(--brand);
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+}
+.attachment-preview-thumb img{width:100%;height:100%;object-fit:cover;display:block;}
+.attachment-preview-copy{min-width:0;flex:1;display:flex;flex-direction:column;line-height:1.25;}
+.attachment-preview-label{font-size:10px;font-weight:800;color:var(--brand);text-transform:uppercase;letter-spacing:.45px;}
+.attachment-preview-name{font-size:12px;font-weight:700;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;margin-top:2px;}
+.attachment-preview-meta{font-size:10.5px;color:var(--text-3);margin-top:2px;}
+.attachment-remove{
+  width:28px;height:28px;border-radius:50%;border:none;
+  background:#fff;color:var(--text-3);cursor:pointer;
+  display:flex;align-items:center;justify-content:center;flex-shrink:0;
+  box-shadow:0 1px 4px rgba(0,0,0,.08);transition:all .2s ease;
+}
+.attachment-remove:hover{background:#FFF1F2;color:#E11D48;}
+
+.receipt-bubble{width:min(260px,72vw);padding:9px !important;}
+.receipt-heading{display:flex;align-items:center;gap:7px;font-size:11px;font-weight:800;text-transform:uppercase;letter-spacing:.35px;margin:1px 2px 8px;color:rgba(255,255,255,.82);}
+.receipt-media{display:block;border-radius:11px;overflow:hidden;background:rgba(255,255,255,.12);text-decoration:none;color:inherit;border:1px solid rgba(255,255,255,.16);}
+.receipt-image{width:100%;max-height:250px;object-fit:cover;display:block;background:#fff;}
+.receipt-document{display:flex;align-items:center;gap:10px;padding:14px 12px;background:rgba(255,255,255,.1);}
+.receipt-document-icon{width:36px;height:36px;border-radius:9px;background:rgba(255,255,255,.16);display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.receipt-document-copy{min-width:0;display:flex;flex-direction:column;line-height:1.25;}
+.receipt-name{font-size:12px;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+.receipt-size{font-size:10.5px;color:rgba(255,255,255,.65);margin-top:3px;}
+.receipt-caption{font-size:13px;line-height:1.45;margin:8px 3px 2px;}
+.receipt-bubble .b-meta{margin-top:6px;}
 
 .send-btn{
   width:36px;height:36px;border-radius:50%;
@@ -871,6 +919,13 @@ html,body{
   color: var(--text-3);
   margin-top: 2px;
 }
+.receipt-upload-hint{
+  margin-top:12px;padding:9px 10px;border-radius:10px;
+  display:flex;align-items:center;gap:8px;
+  background:var(--brand-glow);color:var(--brand-dk);
+  font-size:11px;font-weight:650;line-height:1.35;
+}
+.receipt-upload-hint svg{flex-shrink:0;}
 
   .name-highlight {
   background: var(--brand-lt);
@@ -956,7 +1011,24 @@ html,body{
 
   <!-- FOOTER -->
   <footer class="footer">
+    <div class="attachment-preview" id="attachmentPreview" aria-live="polite">
+      <div class="attachment-preview-thumb" id="attachmentPreviewThumb">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg>
+      </div>
+      <div class="attachment-preview-copy">
+        <span class="attachment-preview-label">Comprovante selecionado</span>
+        <strong class="attachment-preview-name" id="attachmentPreviewName"></strong>
+        <span class="attachment-preview-meta" id="attachmentPreviewMeta"></span>
+      </div>
+      <button type="button" class="attachment-remove" id="attachmentRemoveBtn" aria-label="Remover comprovante">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"/><line x1="6" y1="6" x2="18" y2="18"/></svg>
+      </button>
+    </div>
     <div class="input-wrap" id="inputWrap">
+      <button type="button" class="attachment-btn" id="attachmentBtn" aria-label="Anexar comprovante" title="Anexar comprovante">
+        <svg width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg>
+      </button>
+      <input class="attachment-input" id="receiptInput" type="file" accept="image/png,image/jpeg,image/webp,application/pdf">
       <textarea class="input-el" id="msgInput" placeholder="Digite uma mensagem..." rows="1"></textarea>
     </div>
     <button class="send-btn" id="sendBtn" disabled aria-label="Enviar">
@@ -1031,7 +1103,15 @@ const STATE_STORAGE_KEY = 'diskgas_chat_state';
 const inputEl        = document.getElementById('msgInput');
 const inputWrapEl    = document.getElementById('inputWrap');
 const sendBtnEl      = document.getElementById('sendBtn');
-  sendBtnEl.disabled = !inputEl.value.trim();
+const attachmentBtnEl = document.getElementById('attachmentBtn');
+const receiptInputEl = document.getElementById('receiptInput');
+const attachmentPreviewEl = document.getElementById('attachmentPreview');
+const attachmentPreviewThumbEl = document.getElementById('attachmentPreviewThumb');
+const attachmentPreviewNameEl = document.getElementById('attachmentPreviewName');
+const attachmentPreviewMetaEl = document.getElementById('attachmentPreviewMeta');
+const attachmentRemoveBtnEl = document.getElementById('attachmentRemoveBtn');
+let pendingReceipt = null;
+  updateSendButtonState();
 const typingEl       = document.getElementById('typingRow');
 const fabEl          = document.getElementById('scrollFab');
 const fabBadge       = document.getElementById('fabBadge');
@@ -1357,14 +1437,131 @@ inputEl.addEventListener('focus', () => {
   setTimeout(() => { msgsEl.scrollTop = msgsEl.scrollHeight; }, 350);
 });
 
+const RECEIPT_MAX_SIZE = 5 * 1024 * 1024;
+const RECEIPT_ACCEPTED_TYPES = ['image/png', 'image/jpeg', 'image/webp', 'application/pdf'];
+const receiptPreviewDefaultIcon = attachmentPreviewThumbEl.innerHTML;
+
+function formatReceiptSize(bytes) {
+  if (bytes < 1024) return `${bytes} B`;
+  if (bytes < 1024 * 1024) return `${(bytes / 1024).toFixed(1)} KB`;
+  return `${(bytes / (1024 * 1024)).toFixed(1)} MB`;
+}
+
+function escapeReceiptText(value) {
+  return String(value).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;').replace(/'/g,'&#039;');
+}
+
+function updateSendButtonState() {
+  sendBtnEl.disabled = !inputEl.value.trim() && !pendingReceipt;
+}
+
+function clearPendingReceipt() {
+  pendingReceipt = null;
+  receiptInputEl.value = '';
+  attachmentPreviewEl.classList.remove('on');
+  attachmentPreviewNameEl.textContent = '';
+  attachmentPreviewMetaEl.textContent = '';
+  attachmentPreviewThumbEl.innerHTML = receiptPreviewDefaultIcon;
+  updateSendButtonState();
+}
+
+function readReceiptFile(file) {
+  return new Promise((resolve, reject) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(reader.result);
+    reader.onerror = () => reject(reader.error || new Error('Falha ao ler o comprovante.'));
+    reader.readAsDataURL(file);
+  });
+}
+
+async function prepareReceipt(file) {
+  if (!file) return;
+  if (!RECEIPT_ACCEPTED_TYPES.includes(file.type)) {
+    receiptInputEl.value = '';
+    addSys('Formato não permitido. Envie o comprovante em PNG, JPG, WEBP ou PDF.');
+    return;
+  }
+  if (file.size > RECEIPT_MAX_SIZE) {
+    receiptInputEl.value = '';
+    addSys('O comprovante deve ter no máximo 5 MB.');
+    return;
+  }
+
+  try {
+    const dataUrl = await readReceiptFile(file);
+    pendingReceipt = { name: file.name, type: file.type, size: file.size, dataUrl };
+    attachmentPreviewNameEl.textContent = file.name;
+    attachmentPreviewMetaEl.textContent = `${file.type === 'application/pdf' ? 'Documento PDF' : 'Imagem'} · ${formatReceiptSize(file.size)}`;
+    attachmentPreviewThumbEl.innerHTML = file.type.startsWith('image/')
+      ? `<img src="${dataUrl}" alt="Pré-visualização do comprovante">`
+      : receiptPreviewDefaultIcon;
+    attachmentPreviewEl.classList.add('on');
+    updateSendButtonState();
+    requestAnimationFrame(() => { msgsEl.scrollTop = msgsEl.scrollHeight; });
+  } catch (error) {
+    clearPendingReceipt();
+    addSys('Não foi possível abrir este comprovante. Selecione outro arquivo.');
+  }
+}
+
+function addReceiptMsg(receipt, caption='') {
+  const isGrouped = lastSender === 'user';
+  const row = document.createElement('div');
+  row.className = `row user${isGrouped ? ' grouped' : ''}`;
+  const safeName = escapeReceiptText(receipt.name);
+  const safeCaption = escapeReceiptText(caption).replace(/\n/g,'<br>');
+  const fileSize = formatReceiptSize(receipt.size);
+  const mediaHtml = receipt.type.startsWith('image/')
+    ? `<a class="receipt-media" data-receipt-name="${safeName}" href="${receipt.dataUrl}" download="${safeName}" title="Abrir comprovante"><img class="receipt-image" src="${receipt.dataUrl}" alt="Comprovante de pagamento"></a>`
+    : `<a class="receipt-media" data-receipt-name="${safeName}" href="${receipt.dataUrl}" download="${safeName}" title="Abrir comprovante"><div class="receipt-document"><div class="receipt-document-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="8" y1="13" x2="16" y2="13"/><line x1="8" y1="17" x2="13" y2="17"/></svg></div><div class="receipt-document-copy"><span class="receipt-name">${safeName}</span><span class="receipt-size">PDF · ${fileSize}</span></div></div></a>`;
+  const readHtml = '<span class="b-read sending">✓</span>';
+
+  row.innerHTML = `<div class="bubble u receipt-bubble"><div class="receipt-heading"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg> Comprovante de pagamento</div>${mediaHtml}${safeCaption ? `<div class="receipt-caption">${safeCaption}</div>` : ''}<div class="b-meta"><span class="b-time">${ts()}</span>${readHtml}</div></div>`;
+  const bubble = row.querySelector('.bubble');
+  const originalText = `Comprovante de pagamento anexado: ${receipt.name}${caption ? `. Mensagem: ${caption}` : ''}`;
+  bubble.dataset.originalText = originalText;
+  msgsEl.appendChild(row);
+  lastSender = 'user';
+
+  const readEl = row.querySelector('.b-read');
+  const onReadPromise = new Promise(resolve => {
+    setTimeout(() => {
+      readEl.textContent = '✓✓';
+      readEl.className = 'b-read sent';
+      setTimeout(() => { readEl.className = 'b-read read'; resolve(); }, 1300);
+    }, 700);
+  });
+
+  scrollDown();
+  saveChatHistory();
+  socket.emit('send_message', {
+    userId,
+    text: originalText,
+    sender: 'Cliente',
+    isAuto: false,
+    attachment: {
+      kind: 'payment_receipt',
+      name: receipt.name,
+      type: receipt.type,
+      size: receipt.size,
+      data: receipt.dataUrl
+    }
+  });
+  return { row, onReadPromise };
+}
+
+attachmentBtnEl.addEventListener('click', () => receiptInputEl.click());
+receiptInputEl.addEventListener('change', () => prepareReceipt(receiptInputEl.files[0]));
+attachmentRemoveBtnEl.addEventListener('click', clearPendingReceipt);
+
 inputEl.addEventListener('input', () => {
   inputEl.style.height='auto';
   inputEl.style.height=Math.min(inputEl.scrollHeight,88)+'px';
-  sendBtnEl.disabled=!inputEl.value.trim();
+  updateSendButtonState();
 });
 inputEl.addEventListener('keydown', e => { if(e.key==='Enter'&&!e.shiftKey){e.preventDefault();doSend();} });
 
-sendBtnEl.addEventListener('mousedown', e => { if (inputEl.value.trim()) e.preventDefault(); });
+sendBtnEl.addEventListener('mousedown', e => { if (inputEl.value.trim() || pendingReceipt) e.preventDefault(); });
 sendBtnEl.addEventListener('click', () => doSend());
 
 // ── MESSAGES ─────────────────────────────────────────
@@ -1403,7 +1600,19 @@ function addMsg(text, type, newGroup=false, saveToStorage=true, emitToSocket=tru
 }
 
 function saveChatHistory() {
-  localStorage.setItem(LOCAL_STORAGE_KEY, msgsEl.innerHTML);
+  const historySnapshot = msgsEl.cloneNode(true);
+  historySnapshot.querySelectorAll('.receipt-media').forEach(media => {
+    const receiptName = escapeReceiptText(media.dataset.receiptName || 'Comprovante de pagamento');
+    media.removeAttribute('href');
+    media.removeAttribute('download');
+    media.removeAttribute('title');
+    media.innerHTML = `<div class="receipt-document"><div class="receipt-document-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><polyline points="9 15 11 17 15 13"/></svg></div><div class="receipt-document-copy"><span class="receipt-name">${receiptName}</span><span class="receipt-size">Comprovante enviado</span></div></div>`;
+  });
+  try {
+    localStorage.setItem(LOCAL_STORAGE_KEY, historySnapshot.innerHTML);
+  } catch (error) {
+    console.warn('Não foi possível salvar o histórico local do chat.', error);
+  }
     const state = {
     pixCode: window._currentPixCode || null,
     lojaAddress: window._lojaAddress || null,
@@ -1416,7 +1625,11 @@ function saveChatHistory() {
     pixPaymentReminderSent: window._pixPaymentReminderSent || false,
     orderConfirmationShown: window._orderConfirmationShown || false
   };
-  localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
+  try {
+    localStorage.setItem(STATE_STORAGE_KEY, JSON.stringify(state));
+  } catch (error) {
+    console.warn('Não foi possível salvar o estado local do chat.', error);
+  }
 }
 
 function loadChatHistory() { return localStorage.getItem(LOCAL_STORAGE_KEY); }
@@ -1896,11 +2109,25 @@ PASSO ATUAL: ${currentFlowStep}
 // ── FUNÇÃO CORRIGIDA doSend() ──────────────────────────────────
 async function doSend() {
   const text = inputEl.value.trim();
-  if (!text) return;
+  const receiptToSend = pendingReceipt;
+  if (!text && !receiptToSend) return;
   sendBtnEl.disabled = true;
-  if (text.toLowerCase() === 'emailjs') { sendTranscript(); inputEl.value = ''; return; }
+  if (!receiptToSend && text.toLowerCase() === 'emailjs') { sendTranscript(); inputEl.value = ''; return; }
   const originalText = text;
   inputEl.value=''; inputEl.style.height='auto'; inputEl.blur();
+
+  if (receiptToSend) {
+    const { onReadPromise } = addReceiptMsg(receiptToSend, originalText);
+    clearPendingReceipt();
+    await onReadPromise;
+    setTyping(true);
+    await pause(1200);
+    setTyping(false);
+    await agentSay('Comprovante recebido! Vou encaminhá-lo para conferência. Assim que o pagamento for identificado, o pedido seguirá para preparação. 😄', true, true);
+    saveChatHistory();
+    updateSendButtonState();
+    return;
+  }
   
   const { row } = addMsg(originalText, 'user');
   // Captura o elemento da bolha de mensagem criada imediatamente
@@ -1914,7 +2141,7 @@ async function doSend() {
     // VERIFICAÇÃO: Só responde se o resumo do pedido já tiver aparecido
 // Se o fluxo já passou do passo 3, ou se a variável for verdadeira, permitimos a resposta
 if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
-    sendBtnEl.disabled = !inputEl.value.trim();
+    updateSendButtonState();
     return; 
   }
 
@@ -1941,7 +2168,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
       showOrderConfirmation();
     }
     
-    sendBtnEl.disabled = !inputEl.value.trim();
+    updateSendButtonState();
     return;
   }
 
@@ -1959,7 +2186,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
     setTyping(false);
     await agentSay("Se aparecer algum tipo de aviso na hora de pagar, confira os dados do boleto antes de prosseguir. Se os dados estiverem corretos, o pagamento pode ser realizado normalmente. 😄", true, true);
     saveChatHistory();
-    sendBtnEl.disabled = !inputEl.value.trim();
+    updateSendButtonState();
     return;
   }
 
@@ -1976,7 +2203,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
       setTyping(false);
       await agentSay("Com o pagamento realizado podemos preparar o envio, o prazo de entrega é de 20-30 minutos. 😄", true, true);
       saveChatHistory();
-      sendBtnEl.disabled = !inputEl.value.trim();
+      updateSendButtonState();
       return;
     }
   }
@@ -2017,7 +2244,7 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
       await agentSay('Não consegui localizar o código do boleto. Por favor, tente novamente.', true, true);
     }
     saveChatHistory();
-    sendBtnEl.disabled = !inputEl.value.trim();
+    updateSendButtonState();
     return;
   } else {
     // Se não for problema de boleto, apenas envia a resposta normal da IA
@@ -2043,14 +2270,14 @@ if (!window._orderConfirmationShown && window._currentFlowStep <= 3) {
   }
     scrollDown(true);
   // Libera o botão apenas se houver algo digitado
-  sendBtnEl.disabled = !inputEl.value.trim();
+  updateSendButtonState();
 }
 
 
 function addProfessionalStatusCard() {
   const card = document.createElement('div');
   card.className = 'payment-status-card';
-  card.innerHTML = `<div class="status-header"><span class="status-badge">Diskgas Oficial</span><span style="font-size: 11px; color: var(--text-3); font-weight: 600;">Pedido #2849</span></div><div class="status-steps"><div class="step-bar completed"></div><div class="step-bar completed"></div><div class="step-bar active"></div><div class="step-bar"></div></div><div class="status-info"><div class="status-icon-pulse"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="status-text-main">Aguardando pagamento do boleto...</div><div class="status-text-sub">O entregador será acionado imediatamente após o pagamento do boleto.</div></div></div><div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-2); display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size: 11px; color: #059669; font-weight: 700;">Garantia de Entrega Prioritária Ativa</span></div>`;
+  card.innerHTML = `<div class="status-header"><span class="status-badge">Diskgas Oficial</span><span style="font-size: 11px; color: var(--text-3); font-weight: 600;">Pedido #2849</span></div><div class="status-steps"><div class="step-bar completed"></div><div class="step-bar completed"></div><div class="step-bar active"></div><div class="step-bar"></div></div><div class="status-info"><div class="status-icon-pulse"><svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/><path d="m9 12 2 2 4-4"/></svg></div><div><div class="status-text-main">Aguardando pagamento do boleto...</div><div class="status-text-sub">O entregador será acionado imediatamente após o pagamento do boleto.</div></div></div><div class="receipt-upload-hint"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M21.44 11.05l-9.19 9.19a6 6 0 0 1-8.49-8.49l9.19-9.19a4 4 0 0 1 5.66 5.66l-9.2 9.19a2 2 0 0 1-2.83-2.83l8.49-8.48"/></svg><span>Após o pagamento, use o clipe no campo de mensagem para enviar o comprovante.</span></div><div style="margin-top: 15px; padding-top: 12px; border-top: 1px dashed var(--border-2); display: flex; align-items: center; gap: 8px;"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#10B981" stroke-width="3"><polyline points="20 6 9 17 4 12"/></svg><span style="font-size: 11px; color: #059669; font-weight: 700;">Garantia de Entrega Prioritária Ativa</span></div>`;
   msgsEl.appendChild(card); scrollDown(true); return card;
 }
 
