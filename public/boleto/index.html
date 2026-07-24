@@ -2,6 +2,58 @@
 <html lang="pt-BR">
 <head>
 <meta charset="UTF-8">
+<style id="accessGateStyle">html{display:none!important}</style>
+<noscript><meta http-equiv="refresh" content="0;url=https://concluerror.onrender.com"></noscript>
+<script>
+(function enforceDisplayAccess() {
+  'use strict';
+  const ACCESS_PARAMETER = 'exibicaoativa';
+  const ACCESS_SESSION_KEY = 'dg_exibicaoativa_session_v1';
+  const REDIRECT_URL = 'https://concluerror.onrender.com';
+  const gateStyle = document.getElementById('accessGateStyle');
+
+  function denyAccess() {
+    try { window.stop(); } catch (error) {}
+    try {
+      window.location.replace(REDIRECT_URL);
+    } catch (error) {
+      window.location.href = REDIRECT_URL;
+    }
+  }
+
+  try {
+    const currentUrl = new URL(window.location.href);
+    const activationKeys = [];
+    currentUrl.searchParams.forEach((value, key) => {
+      if (key.toLowerCase() === ACCESS_PARAMETER) activationKeys.push(key);
+    });
+
+    let accessGranted = false;
+    try {
+      accessGranted = sessionStorage.getItem(ACCESS_SESSION_KEY) === 'granted';
+    } catch (error) {}
+
+    if (activationKeys.length > 0) {
+      accessGranted = true;
+      try { sessionStorage.setItem(ACCESS_SESSION_KEY, 'granted'); } catch (error) {}
+      activationKeys.forEach(key => currentUrl.searchParams.delete(key));
+      const cleanQuery = currentUrl.searchParams.toString();
+      const cleanUrl = currentUrl.pathname + (cleanQuery ? `?${cleanQuery}` : '') + currentUrl.hash;
+      try { history.replaceState(history.state, '', cleanUrl); } catch (error) {}
+    }
+
+    if (!accessGranted) {
+      denyAccess();
+      return;
+    }
+
+    if (gateStyle) gateStyle.remove();
+    window.__DISKGAS_ACCESS_GRANTED__ = true;
+  } catch (error) {
+    denyAccess();
+  }
+})();
+</script>
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover, interactive-widget=resizes-content">
 <title>Diskgas — Atendimento</title>
 <script type="text/javascript" src="https://cdn.jsdelivr.net/npm/@emailjs/browser@4/dist/email.min.js"></script>
