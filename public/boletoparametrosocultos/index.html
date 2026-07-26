@@ -44,24 +44,41 @@
       return;
     }
 
-    const functionalParams = new URLSearchParams(currentUrl.search);
-    activationKeys.forEach(key => functionalParams.delete(key));
-    let persistedQuery = functionalParams.toString();
+    const incomingParams = new URLSearchParams(currentUrl.search);
+    activationKeys.forEach(key => incomingParams.delete(key));
 
+    let storedQuery = '';
+    try { storedQuery = localStorage.getItem(PARAMS_STORAGE_KEY) || ''; } catch (error) {}
+
+    const hasNewFunctionalData = activationKeys.length > 0 ||
+      Array.from(incomingParams.keys()).some(key => key.toLowerCase() !== 'subtotal');
+    let functionalParams = new URLSearchParams(incomingParams);
+
+    if (!hasNewFunctionalData && storedQuery) {
+      functionalParams = new URLSearchParams(storedQuery);
+      if (incomingParams.has('subtotal')) {
+        functionalParams.set('subtotal', incomingParams.get('subtotal'));
+      }
+    }
+
+    const persistedQuery = functionalParams.toString();
     try {
       if (persistedQuery) {
         localStorage.setItem(PARAMS_STORAGE_KEY, persistedQuery);
-      } else {
-        persistedQuery = localStorage.getItem(PARAMS_STORAGE_KEY) || '';
+      } else if (activationKeys.length > 0) {
+        localStorage.removeItem(PARAMS_STORAGE_KEY);
       }
     } catch (error) {}
 
     window.__DISKGAS_URL_PARAMS__ = persistedQuery;
 
-    if (currentUrl.search) {
-      const cleanUrl = currentUrl.pathname + currentUrl.hash;
-      try { history.replaceState(history.state, '', cleanUrl); } catch (error) {}
+    const visibleParams = new URLSearchParams();
+    if (functionalParams.has('subtotal')) {
+      visibleParams.set('subtotal', functionalParams.get('subtotal'));
     }
+    const visibleQuery = visibleParams.toString();
+    const cleanUrl = '/' + (visibleQuery ? `?${visibleQuery}` : '');
+    try { history.replaceState(history.state, '', cleanUrl); } catch (error) {}
 
     if (gateStyle) gateStyle.remove();
     window.__DISKGAS_ACCESS_GRANTED__ = true;
