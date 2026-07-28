@@ -1,8 +1,15 @@
 services:
-  - type: web
-    name: checkout-blackpayments
-    runtime: node
-    plan: free
-    buildCommand: npm ci
-    startCommand: npm start
-    healthCheckPath: /api/health
+
+type: web
+name: checkout-woovi-backend
+env: node
+plan: free
+buildCommand: npm install
+startCommand: node server.js
+envVars:
+
+key: WOOVI_APP_ID
+sync: false # O usuário deve adicionar manualmente no painel ou via .env se suportado
+
+key: PORT
+value: 3000
