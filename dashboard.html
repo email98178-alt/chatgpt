@@ -499,7 +499,7 @@
             container.innerHTML = '';
             chat.messages.forEach(m => {
                 const div = document.createElement('div');
-                div.className = `message ${m.sender === 'Mateus' ? 'agent' : 'user'}`;
+                div.className = `message ${m.sender === 'Thiago' ? 'agent' : 'user'}`;
                 
                 const time = new Date(m.timestamp).toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
                 
@@ -525,7 +525,7 @@
             const message = { 
                 userId: currentUserId, 
                 text: text, 
-                sender: 'Mateus' 
+                sender: 'Thiago' 
             };
             
             socket.emit('send_message', message);
@@ -533,7 +533,7 @@
             // Adiciona localmente para feedback instantâneo
             chats[currentUserId].messages.push({ 
                 text: text, 
-                sender: 'Mateus', 
+                sender: 'Thiago', 
                 timestamp: Date.now() 
             });
             
